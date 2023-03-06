@@ -5,8 +5,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
-const CastRoutes = require('./routes/cast');
-
+const CastRoutes = require('./routes/cast_route');
 const app = express();
 
 mongoose.connect('mongodb+srv://ccarnus:totodu30@cast.xwxgb0o.mongodb.net/?retryWrites=true&w=majority')
