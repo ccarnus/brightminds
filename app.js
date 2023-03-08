@@ -5,7 +5,8 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
-const CastRoutes = require('./routes/cast_route');
+const castRoutes = require('./routes/cast_route.js');
+const userRoutes = require('./routes/user_route.js');
 const app = express();
 
 mongoose.connect('mongodb+srv://ccarnus:totodu30@cast.xwxgb0o.mongodb.net/?retryWrites=true&w=majority')
@@ -26,6 +27,7 @@ app.use((req, res, next) => {
 
 app.use(bodyParser.json());
 
-app.use('/cast', CastRoutes);
+app.use('/cast', castRoutes);
+app.use('/user', userRoutes);
 
 module.exports = app;
