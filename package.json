@@ -1,16 +1,26 @@
 {
-  "name": "backend",
+  "name": "brightminds",
   "version": "1.0.0",
-  "description": "",
-  "main": "server.js",
+  "description": "Backend",
+  "main": "app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ccarnus/brightminds.git"
   },
   "author": "",
   "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ccarnus/brightminds/issues"
+  },
+  "homepage": "https://github.com/ccarnus/brightminds#readme",
   "dependencies": {
+    "bcrypt": "^5.1.0",
     "express": "^4.18.2",
-    "mongoose": "^7.0.0",
+    "mongoose": "^6.0.0",
     "mongoose-unique-validator": "^3.1.0"
   }
 }
