@@ -97,7 +97,7 @@ exports.getAllUser = (req, res, next) => {
 
 exports.getOneUser = (req, res, next) => {
     User.findOne({
-        user:req.params.user
+        email:req.params.id
     }).select('email position department').then(
         (user) => {
             res.status(200).json(user);
@@ -114,10 +114,10 @@ exports.updateOneUser = (req, res, next) => {
 }
 
 exports.deleteOneUser = (req, res, next) => {
-    User.deleteOne({email: req.params.email}).then(
+    User.deleteOne({email: req.params.id}).then(
         () => {
             res.status(200).json({
-                response: "User removed."
+                response: "user removed."
             });
         }
     ).catch((error) => {
