@@ -53,10 +53,14 @@ exports.login = (req, res, next) => {
                             response: 'incorrect password'
                         });
                     }
-                    const token = jwt.sign({userId: user._id});
+                    const token = jwt.sign(
+                        {userId: user._id},
+                        'RANDOM_TOKEN_SECRET',
+                        {expiresIn: '24h'});
                     res.status(200).json({
                         userId: user._id,
-                        email: user.email
+                        email: user.email,
+                        token: token
                     });
                 }
             ).catch((error) => {
@@ -65,9 +69,35 @@ exports.login = (req, res, next) => {
                 });
             })
         }
-    )
+    ).catch(
+        (error) => {
+            res.status(400).json({
+                error : error
+            });
+        }
+    );
 };
 
 exports.getAllEmails = (req, res, next) => {
 
 };
+
+exports.getAllUser = (req, res, next) => {
+    User.find().select('email').then(
+        (users) => {
+            res.status(200).json(
+                users
+            );
+        }
+    ).catch(
+        (error) => {
+            res.status(400).json({
+                error: error
+            });
+        }
+    );
+}
+
+exports.getUser = (req, res, next) => {
+
+}

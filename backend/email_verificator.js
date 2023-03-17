@@ -3,4 +3,4 @@ function verifyEmail(email) {
     return emailRegex.test(email);
   }
 
-module.exports.emailVerificator = verifyEmail;
+module.exports = verifyEmail;
