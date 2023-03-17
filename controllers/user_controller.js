@@ -78,12 +78,9 @@ exports.login = (req, res, next) => {
     );
 };
 
-exports.getAllEmails = (req, res, next) => {
-
-};
 
 exports.getAllUser = (req, res, next) => {
-    User.find().select('email').then(
+    User.find().select('email position department').then(
         (users) => {
             res.status(200).json(
                 users
@@ -98,6 +95,34 @@ exports.getAllUser = (req, res, next) => {
     );
 }
 
-exports.getUser = (req, res, next) => {
+exports.getOneUser = (req, res, next) => {
+    User.findOne({
+        user:req.params.user
+    }).select('email position department').then(
+        (user) => {
+            res.status(200).json(user);
+        }
+    ).catch((error) => {
+        res.status(400).json({
+            error: error
+        });
+    });
+}
 
+exports.updateOneUser = (req, res, next) => {
+
+}
+
+exports.deleteOneUser = (req, res, next) => {
+    User.deleteOne({email: req.params.email}).then(
+        () => {
+            res.status(200).json({
+                response: "User removed."
+            });
+        }
+    ).catch((error) => {
+        res.status(404).json({
+            error: error
+        });
+    });
 }
