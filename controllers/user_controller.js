@@ -15,7 +15,8 @@ exports.signup = (req, res, next) => {
                 email: req.body.email,
                 password: hash,
                 position: req.body.position,
-                department: req.body.department
+                department: req.body.department,
+                score: res.body.score
             });
             user.save().then(
                 () => {
@@ -80,7 +81,7 @@ exports.login = (req, res, next) => {
 
 
 exports.getAllUser = (req, res, next) => {
-    User.find().select('email position department').then(
+    User.find().select('_id email position department').then(
         (users) => {
             res.status(200).json(
                 users
@@ -97,8 +98,8 @@ exports.getAllUser = (req, res, next) => {
 
 exports.getOneUser = (req, res, next) => {
     User.findOne({
-        email:req.params.id
-    }).select('email position department').then(
+        _id:req.params.id
+    }).select('_id email position department score').then(
         (user) => {
             res.status(200).json(user);
         }
@@ -110,11 +111,31 @@ exports.getOneUser = (req, res, next) => {
 }
 
 exports.updateOneUser = (req, res, next) => {
-
+    const user = new User({
+        _id: req.params.id,
+        email: req.body.email,
+        password: req.body.password,
+        position: req.body.position,
+        department: req.body.department,
+        score: req.body.score
+    });
+    User.updateOne({_id:req.params.id}, user).then(
+        (user) => {
+            res.status(200).json({
+                response: 'User updated.'
+            });
+        }
+    ).catch(
+        (error) => {
+            res.status(400).json({
+                error : error
+            });
+        }
+    );
 }
 
 exports.deleteOneUser = (req, res, next) => {
-    User.deleteOne({email: req.params.id}).then(
+    User.deleteOne({_id: req.params.id}).then(
         () => {
             res.status(200).json({
                 response: "user removed."
@@ -125,4 +146,18 @@ exports.deleteOneUser = (req, res, next) => {
             error: error
         });
     });
+}
+
+exports.getAllByScore = (req, res, next) => {
+    User.find().then(
+        (users) => {
+            res.status(200).json({users});
+        }
+    ).catch(
+        (error) => {
+            res.status(400).json({
+                error: error
+            });
+        }
+    );
 }

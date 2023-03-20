@@ -1,6 +1,6 @@
 const Cast = require('../models/cast_model.js');
 
-exports.postOne = (req, res, next) => {
+exports.createCast = (req, res, next) => {
     const cast = new Cast({
         title: req.body.title,
         description: req.body.description,
@@ -8,7 +8,8 @@ exports.postOne = (req, res, next) => {
         type: req.body.type,
         brightmindid: req.body.brightmindid,
         casturl: req.body.casturl,
-        universitylogourl: req.body.universitylogourl
+        universitylogourl: req.body.universitylogourl,
+        caterogy: req.body.category
     });
     cast.save().then(
         () => {
@@ -22,7 +23,7 @@ exports.postOne = (req, res, next) => {
 }
 
 
-exports.getAll = (req, res, next) => {
+exports.getAllCast = (req, res, next) => {
     Cast.find().then(
         (casts) => {
             res.status(200).json(casts);
@@ -35,7 +36,7 @@ exports.getAll = (req, res, next) => {
 }
 
 
-exports.getOne = (req, res, next) => {
+exports.getOneCast = (req, res, next) => {
     Cast.findOne({
         _id:req.params.id
     }).then(
@@ -50,7 +51,7 @@ exports.getOne = (req, res, next) => {
 }
 
 
-exports.updateOne = (req, res, next) => {
+exports.updateOneCast = (req, res, next) => {
     const cast = new Cast({
         _id:req.params.id,
         title: req.body.title,
@@ -59,7 +60,8 @@ exports.updateOne = (req, res, next) => {
         type: req.body.type,
         brightmindid: req.body.brightmindid,
         casturl: req.body.casturl,
-        universitylogourl: req.body.universitylogourl
+        universitylogourl: req.body.universitylogourl,
+        category: req.body.category
     });
     Cast.updateOne({_id:req.params.id}, cast)
     .then(() => {
@@ -74,7 +76,7 @@ exports.updateOne = (req, res, next) => {
 }
 
 
-exports.deleteOne = (req, res, next) => {
+exports.deleteOneCast = (req, res, next) => {
     Cast.deleteOne({_id:req.params.id}).then(() => {
         res.status(200).json({
             response: 'Cast Deleted'
@@ -84,4 +86,26 @@ exports.deleteOne = (req, res, next) => {
             error: error
         });
     })
+}
+
+exports.getAllNewCast = (req, res, next) => {
+
+}
+
+exports.getAllNewCastByCategory = (req, res, next) => {
+
+}
+
+exports.getAllCastByCategory = (req, res, next) => {
+    Cast.find({category:{$exists:true, $eq: req.params.id}}).then(
+        (casts) => {
+            res.status(200).json(casts);
+        }
+    ).catch(
+        (error) => {
+            res.status(400).json({
+                error: error
+            });
+        }
+    );
 }
