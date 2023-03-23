@@ -8,6 +8,6 @@ router.get('/',userCtrl.getAllUser);
 router.get('/:id',userCtrl.getOneUser);
 router.delete('/:id', userCtrl.deleteOneUser);
 router.put('/:id', userCtrl.updateOneUser);
-router.get('/leaderboard/by/points',userCtrl.getAllByScore);
+router.get('/leaderboard/by/score',userCtrl.getAllByScore);
 
 module.exports = router;

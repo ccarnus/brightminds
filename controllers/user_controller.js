@@ -13,10 +13,11 @@ exports.signup = (req, res, next) => {
         (hash) => {
             const user = new User({
                 email: req.body.email,
-                password: hash,
-                position: req.body.position,
+                password: req.body.password,
+                username: req.body.username,
+                role: req.body.role,
                 department: req.body.department,
-                score: res.body.score
+                score: req.body.score
             });
             user.save().then(
                 () => {
@@ -81,7 +82,7 @@ exports.login = (req, res, next) => {
 
 
 exports.getAllUser = (req, res, next) => {
-    User.find().select('_id email position department').then(
+    User.find().select('_id email username role department score').then(
         (users) => {
             res.status(200).json(
                 users
@@ -99,7 +100,7 @@ exports.getAllUser = (req, res, next) => {
 exports.getOneUser = (req, res, next) => {
     User.findOne({
         _id:req.params.id
-    }).select('_id email position department score').then(
+    }).then(
         (user) => {
             res.status(200).json(user);
         }
@@ -114,8 +115,9 @@ exports.updateOneUser = (req, res, next) => {
     const user = new User({
         _id: req.params.id,
         email: req.body.email,
+        username: req.body.username,
         password: req.body.password,
-        position: req.body.position,
+        role: req.body.role,
         department: req.body.department,
         score: req.body.score
     });
@@ -149,7 +151,7 @@ exports.deleteOneUser = (req, res, next) => {
 }
 
 exports.getAllByScore = (req, res, next) => {
-    User.find().then(
+    User.find().select('_id email username role department score').sort({score: -1}).then(
         (users) => {
             res.status(200).json(users);
         }
