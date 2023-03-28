@@ -116,7 +116,6 @@ exports.updateOneUser = (req, res, next) => {
         _id: req.params.id,
         email: req.body.email,
         username: req.body.username,
-        password: req.body.password,
         role: req.body.role,
         department: req.body.department,
         score: req.body.score

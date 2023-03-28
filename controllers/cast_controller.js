@@ -1,25 +1,27 @@
 const Cast = require('../models/cast_model.js');
 
 exports.createCast = (req, res, next) => {
-    const cast = new Cast({
-        title: req.body.title,
-        description: req.body.description,
-        department: req.body.department,
-        type: req.body.type,
-        brightmindid: req.body.brightmindid,
-        casturl: req.body.casturl,
-        universitylogourl: req.body.universitylogourl,
-        caterogy: req.body.category
-    });
-    cast.save().then(
-        () => {
-            res.status(201).json({response:'Cast Created.'})
-        }
-    ).catch((error) => {
-        res.status(400).json({
-            error: error
+
+        const url = req.protocol + "://" + req.get('host');
+        req.body.cast = JSON.parse(req.body.cast);
+        const cast = new Cast({
+            title: req.body.cast.title,
+            description: req.body.cast.description,
+            department: req.body.cast.department,
+            type: req.body.cast.type,
+            brightmindid: req.body.cast.brightmindid,
+            casturl: url + '/backend/media/user_images/' + req.file.filename,
+            caterogy: req.body.cast.category
         });
-    });
+        cast.save().then(
+            () => {
+                res.status(201).json({response:'Cast Created.'})
+            }
+        ).catch((error) => {
+            res.status(400).json({
+                error: error
+            });
+        });
 }
 
 
