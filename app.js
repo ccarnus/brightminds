@@ -8,6 +8,7 @@ const mongoose = require('mongoose');
 const castRoutes = require('./routes/cast_route.js');
 const userRoutes = require('./routes/user_route.js');
 const app = express();
+const path = require('path');
 
 mongoose.connect('mongodb+srv://ccarnus:totodu30@cast.xwxgb0o.mongodb.net/?retryWrites=true&w=majority')
     .then(() => {
@@ -26,6 +27,8 @@ app.use((req, res, next) => {
 });
 
 app.use(bodyParser.json());
+
+//app.use('/backend/media/user_images', express.static(path.join(__dirname,'/backend/media/user_images')));
 
 app.use('/cast', castRoutes);
 app.use('/user', userRoutes);
