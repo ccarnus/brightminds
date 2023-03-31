@@ -28,7 +28,7 @@ app.use((req, res, next) => {
 
 app.use(bodyParser.json());
 
-//app.use('/backend/media/user_images', express.static(path.join(__dirname,'/backend/media/user_images')));
+app.use('/backend/media/user_images', express.static(path.join(__dirname,'/backend/media/user_images')));
 
 app.use('/cast', castRoutes);
 app.use('/user', userRoutes);

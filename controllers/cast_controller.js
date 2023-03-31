@@ -3,6 +3,7 @@ const Cast = require('../models/cast_model.js');
 exports.createCast = (req, res, next) => {
 
         const url = req.protocol + "://" + req.get('host');
+        console.log(req);
         req.body.cast = JSON.parse(req.body.cast);
         const cast = new Cast({
             title: req.body.cast.title,
@@ -54,6 +55,9 @@ exports.getOneCast = (req, res, next) => {
 
 
 exports.updateOneCast = (req, res, next) => {
+    if (req.file){
+
+    }
     const cast = new Cast({
         _id:req.params.id,
         title: req.body.title,
