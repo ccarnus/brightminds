@@ -2,12 +2,12 @@
 
 const castSchema = mongoose.Schema({
     title: {type:String, required:true},
-    description: {type:String, required:false},
+    description: {type:String, required:true},
     department: {type: String, requiered: true},
-    type: {type:String, required:false},
-    brightmindid: {type:Number, required:false},
+    type: {type:String, required:true},
+    brightmindid: {type:Number, required:true},
     casturl: {type:String, required:true},
-    universitylogourl: {type:String, requiered:false},
+    university: {type:String, requiered:true},
     category: {type:String, requiered:true}
 });
 

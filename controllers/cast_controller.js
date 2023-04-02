@@ -12,7 +12,8 @@ exports.createCast = (req, res, next) => {
             type: req.body.cast.type,
             brightmindid: req.body.cast.brightmindid,
             casturl: url + '/backend/media/user_images/' + req.file.filename,
-            caterogy: req.body.cast.category
+            caterogy: req.body.cast.category,
+            university: req.body.cast.university
         });
         cast.save().then(
             () => {
@@ -66,7 +67,7 @@ exports.updateOneCast = (req, res, next) => {
         type: req.body.type,
         brightmindid: req.body.brightmindid,
         casturl: req.body.casturl,
-        universitylogourl: req.body.universitylogourl,
+        university: req.body.universitylogourl,
         category: req.body.category
     });
     Cast.updateOne({_id:req.params.id}, cast)
