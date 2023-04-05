@@ -6,8 +6,9 @@ const userSchema = mongoose.Schema({
     'password': {type: String, required: true},
     "username": {type: String, required: true},
     'role': {type: String, required: true},
-    'department': {type: String, requiered: false},
-    'score': {type: Number, required: false}
+    'department': {type: String, requiered: true},
+    'score': {type: Number, required: true},
+    'profilePictureUrl': {type:String, required:true}
 });
 
 //We validate that the unique fields are unique before saving to the db
