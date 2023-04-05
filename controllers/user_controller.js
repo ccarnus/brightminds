@@ -4,15 +4,16 @@ const emailVerificator = require('../backend/email_verificator.js');
 const jwt = require('jsonwebtoken');
 
 exports.signup = (req, res, next) => {
-    if(!emailVerificator(req.body.email)) {
+    req.body.user = JSON.parse(req.body.user);
+    if(!emailVerificator(req.body.user.email)) {
         return res.status(400).json({
             error: "The email domain name id not a valid one."
         });
     }
-    bcrypt.hash(req.body.password, 10).then(
+    console.log(req.body);
+    bcrypt.hash(req.body.user.password, 10).then(
         (hash) => {
             const url = req.protocol + "://" + req.get('host');
-            req.body.user = JSON.parse(req.body.user);
             const user = new User({
                 email: req.body.user.email,
                 password: req.body.user.password,
@@ -20,7 +21,7 @@ exports.signup = (req, res, next) => {
                 role: req.body.user.role,
                 department: req.body.user.department,
                 score: req.body.user.score,
-                profilePictureUrl:
+                profilePictureUrl: url + '/backend/media/profile_pictures/' + req.file.filename,
             });
             user.save().then(
                 () => {
@@ -28,7 +29,7 @@ exports.signup = (req, res, next) => {
                 }
             ).catch(
                 (error) => {
-                    res.status(500).json({
+                    res.status(501).json({
                         error: error
                     });
                 }
@@ -36,7 +37,7 @@ exports.signup = (req, res, next) => {
         }
     ).catch(
         (error) => {
-            res.status(500).json({
+            res.status(501).json({
                 error: error
             });
         }
@@ -85,7 +86,7 @@ exports.login = (req, res, next) => {
 
 
 exports.getAllUser = (req, res, next) => {
-    User.find().select('_id email username role department score').then(
+    User.find().select('_id email username role department score profilePictureUrl').then(
         (users) => {
             res.status(200).json(
                 users

@@ -1,8 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const userCtrl = require('../controllers/user_controller.js');
-const multer = require('../backend/multer-config.js');
-const multer = require('../backend/multer-config.js');
+const multer = require('../backend/multer-config_user.js');
 
 router.post('/signup', multer, userCtrl.signup);
 router.post('/login', userCtrl.login);
