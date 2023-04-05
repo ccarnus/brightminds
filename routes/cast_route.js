@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const cast_controller = require('../controllers/cast_controller.js');
 const auth = require('../backend/auth.js');
-const multer = require('../backend/multer-config.js');
+const multer = require('../backend/multer-config_cast.js');
 
 router.post("/", multer, cast_controller.createCast);
 router.get("/", cast_controller.getAllCast);
