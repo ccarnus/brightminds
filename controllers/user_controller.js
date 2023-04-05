@@ -104,7 +104,7 @@ exports.getAllUser = (req, res, next) => {
 exports.getOneUser = (req, res, next) => {
     User.findOne({
         _id:req.params.id
-    }).then(
+    }).select('_id email username role department score profilePictureUrl').then(
         (user) => {
             res.status(200).json(user);
         }
@@ -154,7 +154,7 @@ exports.deleteOneUser = (req, res, next) => {
 }
 
 exports.getAllByScore = (req, res, next) => {
-    User.find().select('_id email username role department score').sort({score: -1}).then(
+    User.find().select('_id email username role department score profilePictureUrl').sort({score: -1}).then(
         (users) => {
             res.status(200).json(users);
         }
