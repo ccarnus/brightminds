@@ -11,13 +11,16 @@ exports.signup = (req, res, next) => {
     }
     bcrypt.hash(req.body.password, 10).then(
         (hash) => {
+            const url = req.protocol + "://" + req.get('host');
+            req.body.user = JSON.parse(req.body.user);
             const user = new User({
-                email: req.body.email,
-                password: req.body.password,
-                username: req.body.username,
-                role: req.body.role,
-                department: req.body.department,
-                score: req.body.score
+                email: req.body.user.email,
+                password: req.body.user.password,
+                username: req.body.user.username,
+                role: req.body.user.role,
+                department: req.body.user.department,
+                score: req.body.user.score,
+                profilePictureUrl:
             });
             user.save().then(
                 () => {
