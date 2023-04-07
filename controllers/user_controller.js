@@ -115,26 +115,30 @@ exports.getOneUser = (req, res, next) => {
 }
 
 exports.updateOneUser = (req, res, next) => {
+    let user = new User({_id: req.params._id});
     if (req.file) {
         const url = req.protocol + "://" + req.get('host');
         req.body.user = JSON.parse(req.body.user);
-        const user = new User({
+        user = {
+            _id: req.params.id,
             email: req.body.user.email,
             username: req.body.user.username,
             role: req.body.user.role,
             department: req.body.user.department,
             score: req.body.user.score,
             profilePictureUrl: url + '/backend/media/profile_pictures/' + req.file.filename,
-        });
+        };
+    } else {
+        user = {
+            _id: req.params.id,
+            email: req.body.email,
+            username: req.body.username,
+            role: req.body.role,
+            department: req.body.department,
+            score: req.body.score,
+            profilePictureUrl: req.body.profilePictureUrl
+        };
     }
-    const user = new User({
-        _id: req.params.id,
-        email: req.body.email,
-        username: req.body.username,
-        role: req.body.role,
-        department: req.body.department,
-        score: req.body.score
-    });
     User.updateOne({_id:req.params.id}, user).then(
         (user) => {
             res.status(200).json({
