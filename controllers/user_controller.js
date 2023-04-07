@@ -10,7 +10,6 @@ exports.signup = (req, res, next) => {
             error: "The email domain name id not a valid one."
         });
     }
-    console.log(req.body);
     bcrypt.hash(req.body.user.password, 10).then(
         (hash) => {
             const url = req.protocol + "://" + req.get('host');
@@ -116,6 +115,18 @@ exports.getOneUser = (req, res, next) => {
 }
 
 exports.updateOneUser = (req, res, next) => {
+    if (req.file) {
+        const url = req.protocol + "://" + req.get('host');
+        req.body.user = JSON.parse(req.body.user);
+        const user = new User({
+            email: req.body.user.email,
+            username: req.body.user.username,
+            role: req.body.user.role,
+            department: req.body.user.department,
+            score: req.body.user.score,
+            profilePictureUrl: url + '/backend/media/profile_pictures/' + req.file.filename,
+        });
+    }
     const user = new User({
         _id: req.params.id,
         email: req.body.email,
