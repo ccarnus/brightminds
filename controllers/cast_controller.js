@@ -56,20 +56,22 @@ exports.getOneCast = (req, res, next) => {
 
 
 exports.updateOneCast = (req, res, next) => {
+    let cast = new Cast({_id: req.params._id});
     if (req.file){
 
+    } else {
+        cast = {
+            _id:req.params.id,
+            title: req.body.title,
+            description: req.body.description,
+            department: req.body.department,
+            type: req.body.type,
+            brightmindid: req.body.brightmindid,
+            casturl: req.body.casturl,
+            university: req.body.universitylogourl,
+            category: req.body.category
+        };
     }
-    const cast = new Cast({
-        _id:req.params.id,
-        title: req.body.title,
-        description: req.body.description,
-        department: req.body.department,
-        type: req.body.type,
-        brightmindid: req.body.brightmindid,
-        casturl: req.body.casturl,
-        university: req.body.universitylogourl,
-        category: req.body.category
-    });
     Cast.updateOne({_id:req.params.id}, cast)
     .then(() => {
         res.status(201).json({
