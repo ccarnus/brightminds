@@ -156,7 +156,7 @@ exports.updateOneUser = (req, res, next) => {
 }
 
 exports.deleteOneUser = (req, res, next) => {
-    user.findOne({_id:req.params.id}).then(
+    User.findOne({_id:req.params.id}).then(
         (user) => {
             const filename = user.profilePictureUrl.split('/backend/media/profile_pictures/')[1];
             fs.unlink('backend/media/profile_pictures/' + filename, () => {
