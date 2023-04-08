@@ -58,7 +58,19 @@ exports.getOneCast = (req, res, next) => {
 exports.updateOneCast = (req, res, next) => {
     let cast = new Cast({_id: req.params._id});
     if (req.file){
-
+        const url = req.protocol + "://" + req.get('host');
+        req.body.cast = JSON.parse(req.body.cast);
+        cast = {
+            _id:req.params.id,
+            title: req.body.cast.title,
+            description: req.body.cast.description,
+            department: req.body.cast.department,
+            type: req.body.cast.type,
+            brightmindid: req.body.cast.brightmindid,
+            casturl: url + '/backend/media/user_images/' + req.file.filename,
+            caterogy: req.body.cast.category,
+            university: req.body.cast.university
+        };
     } else {
         cast = {
             _id:req.params.id,
