@@ -2,6 +2,7 @@ const User = require('../models/user_model.js');
 const bcrypt = require('bcrypt');
 const emailVerificator = require('../backend/email_verificator.js');
 const jwt = require('jsonwebtoken');
+const fs = require('fs');
 
 exports.signup = (req, res, next) => {
     req.body.user = JSON.parse(req.body.user);
@@ -155,17 +156,24 @@ exports.updateOneUser = (req, res, next) => {
 }
 
 exports.deleteOneUser = (req, res, next) => {
-    User.deleteOne({_id: req.params.id}).then(
-        () => {
-            res.status(200).json({
-                response: "user removed."
-            });
+    user.findOne({_id:req.params.id}).then(
+        (user) => {
+            const filename = user.profilePictureUrl.split('/backend/media/profile_pictures/')[1];
+            fs.unlink('backend/media/profile_pictures/' + filename, () => {
+                User.deleteOne({_id: req.params.id}).then(
+                    () => {
+                        res.status(200).json({
+                            response: "user removed."
+                        });
+                    }
+                ).catch((error) => {
+                    res.status(404).json({
+                        error: error
+                    });
+                });
+            })
         }
-    ).catch((error) => {
-        res.status(404).json({
-            error: error
-        });
-    });
+    )
 }
 
 exports.getAllByScore = (req, res, next) => {
