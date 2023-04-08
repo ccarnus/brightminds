@@ -1,4 +1,5 @@
 const Cast = require('../models/cast_model.js');
+const fs = require('fs');
 
 exports.createCast = (req, res, next) => {
 
@@ -11,7 +12,7 @@ exports.createCast = (req, res, next) => {
             department: req.body.cast.department,
             type: req.body.cast.type,
             brightmindid: req.body.cast.brightmindid,
-            casturl: url + '/backend/media/user_images/' + req.file.filename,
+            casturl: url + '/backend/media/cast_videos/' + req.file.filename,
             caterogy: req.body.cast.category,
             university: req.body.cast.university
         });
@@ -98,15 +99,22 @@ exports.updateOneCast = (req, res, next) => {
 
 
 exports.deleteOneCast = (req, res, next) => {
-    Cast.deleteOne({_id:req.params.id}).then(() => {
-        res.status(200).json({
-            response: 'Cast Deleted'
-        });
-    }).catch((error) => {
-        res.status(404).json({
-            error: error
-        });
-    })
+    Cast.findOne({_id:req.params.id}).then(
+        (cast) => {
+            const filename = cast.casturl.split('/media/cast_videos/')[1];
+            fs.unlink('backend/media/cast_videos/' + filename, () => {
+                Cast.deleteOne({_id:req.params.id}).then(() => {
+                    res.status(200).json({
+                        response: 'Cast Deleted'
+                    });
+                }).catch((error) => {
+                    res.status(404).json({
+                        error: error
+                    });
+                });
+            });
+        }
+    );
 }
 
 exports.getAllNewCast = (req, res, next) => {
