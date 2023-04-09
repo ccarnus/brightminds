@@ -4,7 +4,6 @@ const fs = require('fs');
 exports.createCast = (req, res, next) => {
 
         const url = req.protocol + "://" + req.get('host');
-        console.log(req);
         req.body.cast = JSON.parse(req.body.cast);
         const cast = new Cast({
             title: req.body.cast.title,
@@ -102,7 +101,8 @@ exports.deleteOneCast = (req, res, next) => {
     Cast.findOne({_id:req.params.id}).then(
         (cast) => {
             const filename = cast.casturl.split('/media/cast_videos/')[1];
-            fs.unlink('backend/media/cast_videos/' + filename, () => {
+            fs.unlink('./backend/media/cast_videos/' + filename, () => {
+                console.log('./backend/media/cast_videos/' + filename);
                 Cast.deleteOne({_id:req.params.id}).then(() => {
                     res.status(200).json({
                         response: 'Cast Deleted'
