@@ -10,5 +10,6 @@ router.get('/:id', cast_controller.getOneCast);
 router.put('/:id', multer, cast_controller.updateOneCast);
 router.delete('/:id',  cast_controller.deleteOneCast);
 router.get('/category/:id', cast_controller.getAllCastByCategory);
+router.get("/brightmindid/:id", cast_controller.getAllCastByBrightmindid);
 
 module.exports = router;
