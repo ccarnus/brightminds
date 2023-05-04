@@ -138,3 +138,17 @@ exports.getAllCastByCategory = (req, res, next) => {
         }
     );
 }
+
+exports.getAllCastByBrightmindid = (req, res, next) => {
+    Cast.find({brightmindid:{$exists:true, $eq: req.params.id}}).then(
+        (casts) => {
+            res.status(200).json(casts);
+        }
+    ).catch(
+        (error) => {
+            res.status(400).json({
+                error: error
+            });
+        }
+    );
+}
