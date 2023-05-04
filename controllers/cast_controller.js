@@ -12,7 +12,7 @@ exports.createCast = (req, res, next) => {
             type: req.body.cast.type,
             brightmindid: req.body.cast.brightmindid,
             casturl: url + '/backend/media/cast_videos/' + req.file.filename,
-            caterogy: req.body.cast.category,
+            category: req.body.cast.category,
             university: req.body.cast.university
         });
         cast.save().then(
