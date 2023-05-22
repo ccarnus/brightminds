@@ -30,7 +30,7 @@ jobs:
           source ~/.nvm/nvm.sh
           cd /home/ubuntu/brightminds
           git stash
-          git pull origin feature/github-action
+          git pull 
           npm install
           pm2 restart api
               
