@@ -13,7 +13,8 @@ exports.createCast = (req, res, next) => {
             brightmindid: req.body.cast.brightmindid,
             casturl: url + '/backend/media/cast_videos/' + req.file.filename,
             category: req.body.cast.category,
-            university: req.body.cast.university
+            university: req.body.cast.university,
+            likes: req.body.cast.likes
         });
         cast.save().then(
             () => {
@@ -69,7 +70,8 @@ exports.updateOneCast = (req, res, next) => {
             brightmindid: req.body.cast.brightmindid,
             casturl: url + '/backend/media/user_images/' + req.file.filename,
             caterogy: req.body.cast.category,
-            university: req.body.cast.university
+            university: req.body.cast.university,
+            likes: req.body.cast.likes
         };
     } else {
         cast = {
@@ -81,7 +83,8 @@ exports.updateOneCast = (req, res, next) => {
             brightmindid: req.body.brightmindid,
             casturl: req.body.casturl,
             university: req.body.universitylogourl,
-            category: req.body.category
+            category: req.body.category,
+            likes: req.body.cast.likes
         };
     }
     Cast.updateOne({_id:req.params.id}, cast)
