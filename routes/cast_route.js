@@ -12,5 +12,6 @@ router.delete('/:id',  cast_controller.deleteOneCast);
 router.get('/category/:id', cast_controller.getAllCastByCategory);
 router.get("/brightmindid/:id", cast_controller.getAllCastByBrightmindid);
 router.post("/comment/:id",cast_controller.updateCastAddComment);
+router.post("/like/:id",cast_controller.updateCastAddLike);
 
 module.exports = router;

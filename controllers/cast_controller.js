@@ -84,7 +84,7 @@ exports.updateOneCast = (req, res, next) => {
             casturl: req.body.casturl,
             university: req.body.universitylogourl,
             category: req.body.category,
-            likes: req.body.cast.likes
+            likes: req.body.likes
         };
     }
     Cast.updateOne({_id:req.params.id}, cast)
@@ -154,4 +154,22 @@ exports.getAllCastByBrightmindid = (req, res, next) => {
             });
         }
     );
+}
+
+exports.updateCastAddLike = (req, res, next) => {
+    const userID = req.body.email;
+    Cast.updateOne(
+        { _id: req.params.id },
+        { $inc: { "likes.count": 1 },
+          $push: {"likes.user": userID}}
+      )
+    .then(() => {
+        res.status(201).json({
+            response: "like added"
+        })})
+    .catch((error) => {
+        res.status(400).json({
+            error: error
+        });
+    });
 }
