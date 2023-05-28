@@ -155,3 +155,19 @@ exports.getAllCastByBrightmindid = (req, res, next) => {
         }
     );
 }
+
+exports.UpdateCastAddLike = (req, res, next) => {
+    Cast.updateOne(
+        { _id: req.params.id },
+        { $inc: { "likes.count": 1 } }
+      )
+    .then(() => {
+        res.status(201).json({
+            response: "like added"
+        })})
+    .catch((error) => {
+        res.status(400).json({
+            error: error
+        });
+    });
+}
