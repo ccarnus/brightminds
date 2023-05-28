@@ -156,10 +156,12 @@ exports.getAllCastByBrightmindid = (req, res, next) => {
     );
 }
 
-exports.UpdateCastAddLike = (req, res, next) => {
+exports.updateCastAddLike = (req, res, next) => {
+    const userID = req.body.email;
     Cast.updateOne(
         { _id: req.params.id },
-        { $inc: { "likes.count": 1 } }
+        { $inc: { "likes.count": 1 },
+          $push: {"likes.user": userID}}
       )
     .then(() => {
         res.status(201).json({
