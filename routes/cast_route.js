@@ -11,5 +11,6 @@ router.put('/:id', multer, cast_controller.updateOneCast);
 router.delete('/:id',  cast_controller.deleteOneCast);
 router.get('/category/:id', cast_controller.getAllCastByCategory);
 router.get("/brightmindid/:id", cast_controller.getAllCastByBrightmindid);
+router.post("/comment/:id",cast_controller.updateCastAddComment);
 
 module.exports = router;
