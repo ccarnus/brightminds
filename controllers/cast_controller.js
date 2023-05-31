@@ -180,13 +180,20 @@ exports.updateCastAddLike = (req, res, next) => {
 exports.updateCastAddComment = (req, res, next) => {
     const author = req.body.author;
     const content = req.body.content;
+
+    if (!author || !content) {
+        return res.status(400).json({
+            error: "Both 'author' and 'content' fields are required."
+        });
+    }
+
     Cast.updateOne(
         { _id: req.params.id },
         { $inc: { "comments.count": 1 }, $push: {"comments.comment.author": author,"comments.comment.content": content}}
       )
     .then(() => {
         res.status(201).json({
-            response: "like added"
+            response: "comment added"
         })})
     .catch((error) => {
         res.status(400).json({
