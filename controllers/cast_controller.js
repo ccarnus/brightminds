@@ -189,7 +189,15 @@ exports.updateCastAddComment = (req, res, next) => {
 
     Cast.updateOne(
         { _id: req.params.id },
-        { $inc: { "comments.count": 1 }, $push: {"comments.comment.author": author},$push: {"comments.comment.content": content}}
+        {
+            $inc: { "comments.count": 1 },
+            $push: {
+              "comments.comment": {
+                author: author,
+                content: content
+              }
+            }
+          }
       )
     .then(() => {
         res.status(201).json({
