@@ -14,7 +14,8 @@ exports.createCast = (req, res, next) => {
             casturl: url + '/backend/media/cast_videos/' + req.file.filename,
             category: req.body.cast.category,
             university: req.body.cast.university,
-            likes: req.body.cast.likes
+            likes: req.body.cast.likes,
+            comments: req.body.comments
         });
         cast.save().then(
             () => {
@@ -71,7 +72,8 @@ exports.updateOneCast = (req, res, next) => {
             casturl: url + '/backend/media/user_images/' + req.file.filename,
             caterogy: req.body.cast.category,
             university: req.body.cast.university,
-            likes: req.body.cast.likes
+            likes: req.body.cast.likes,
+            comments: req.body.cast.comments
         };
     } else {
         cast = {
@@ -84,7 +86,8 @@ exports.updateOneCast = (req, res, next) => {
             casturl: req.body.casturl,
             university: req.body.universitylogourl,
             category: req.body.category,
-            likes: req.body.likes
+            likes: req.body.likes,
+            comments: req.body.cast.comments
         };
     }
     Cast.updateOne({_id:req.params.id}, cast)
@@ -162,6 +165,24 @@ exports.updateCastAddLike = (req, res, next) => {
         { _id: req.params.id },
         { $inc: { "likes.count": 1 },
           $push: {"likes.user": userID}}
+      )
+    .then(() => {
+        res.status(201).json({
+            response: "like added"
+        })})
+    .catch((error) => {
+        res.status(400).json({
+            error: error
+        });
+    });
+}
+
+exports.updateCastAddComment = (req, res, next) => {
+    const author = req.body.author;
+    const content = req.body.content;
+    Cast.updateOne(
+        { _id: req.params.id },
+        { $inc: { "comments.count": 1 }, $push: {"comments.comment.author": author,"comments.comment.content": content}}
       )
     .then(() => {
         res.status(201).json({
