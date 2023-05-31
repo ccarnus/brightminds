@@ -14,6 +14,15 @@ const castSchema = mongoose.Schema({
         user: [
             {type:String, default:""}
         ]
+    },
+    comments: {
+        count: {type:Number, default:0},
+        comment: [
+            {
+                author: {type:String, default:""},
+                content: {type:String, default:"", maxlenght: 200}
+            }
+        ]
     }
 });
 
