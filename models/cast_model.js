@@ -20,7 +20,7 @@ const castSchema = mongoose.Schema({
         comment: [
             {
                 author: {type:String, default:""},
-                content: {type:String, default:"", maxlength: 200}
+                content: {type:String, default:""}
             }
         ]
     }
