@@ -15,7 +15,7 @@ exports.createCast = (req, res, next) => {
             category: req.body.cast.category,
             university: req.body.cast.university,
             likes: req.body.cast.likes,
-            comments: req.body.comments
+            comments: req.body.cast.comments
         });
         cast.save().then(
             () => {
