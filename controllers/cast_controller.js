@@ -30,7 +30,7 @@ exports.createCast = (req, res, next) => {
 
 
 exports.getAllCast = (req, res, next) => {
-    Cast.find().then(
+    Cast.find().sort({ _id: 1 }).then(
         (casts) => {
             res.status(200).json(casts);
         }
@@ -132,7 +132,7 @@ exports.getAllNewCastByCategory = (req, res, next) => {
 }
 
 exports.getAllCastByCategory = (req, res, next) => {
-    Cast.find({category:{$exists:true, $eq: req.params.id}}).then(
+    Cast.find({category:{$exists:true, $eq: req.params.id}}).sort({ _id: 1 }).then(
         (casts) => {
             res.status(200).json(casts);
         }
@@ -146,7 +146,7 @@ exports.getAllCastByCategory = (req, res, next) => {
 }
 
 exports.getAllCastByBrightmindid = (req, res, next) => {
-    Cast.find({brightmindid:{$exists:true, $eq: req.params.id}}).then(
+    Cast.find({brightmindid:{$exists:true, $eq: req.params.id}}).sort({ _id: 1 }).then(
         (casts) => {
             res.status(200).json(casts);
         }
