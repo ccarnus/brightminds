@@ -1,5 +1,6 @@
 const Cast = require('../models/cast_model.js');
 const fs = require('fs');
+const generateQuestion = require('../backend/generate_question');
 
 exports.createCast = (req, res, next) => {
 
@@ -17,6 +18,9 @@ exports.createCast = (req, res, next) => {
             likes: req.body.cast.likes,
             comments: req.body.cast.comments
         });
+        const question = generateQuestion(cast.description);
+        cast.question = question;
+
         cast.save().then(
             () => {
                 res.status(201).json({response:'Cast Created.'})
@@ -73,7 +77,8 @@ exports.updateOneCast = (req, res, next) => {
             caterogy: req.body.cast.category,
             university: req.body.cast.university,
             likes: req.body.cast.likes,
-            comments: req.body.cast.comments
+            comments: req.body.cast.comments,
+            question: req.body.cast.question
         };
     } else {
         cast = {
@@ -87,7 +92,8 @@ exports.updateOneCast = (req, res, next) => {
             university: req.body.universitylogourl,
             category: req.body.category,
             likes: req.body.likes,
-            comments: req.body.cast.comments
+            comments: req.body.cast.comments,
+            question: req.body.cast.question
         };
     }
     Cast.updateOne({_id:req.params.id}, cast)
