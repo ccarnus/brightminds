@@ -10,5 +10,6 @@ router.get('/:id',userCtrl.getOneUser);
 router.delete('/:id', userCtrl.deleteOneUser);
 router.put('/:id', multer, userCtrl.updateOneUser);
 router.get('/leaderboard/by/score',userCtrl.getAllByScore);
+router.post('/add/cast/:id',userCtrl.updateUserAddCastToList);
 
 module.exports = router;

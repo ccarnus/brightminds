@@ -84,9 +84,8 @@ exports.login = (req, res, next) => {
     );
 };
 
-
 exports.getAllUser = (req, res, next) => {
-    User.find().select('_id email username role department score profilePictureUrl').then(
+    User.find().select('_id email username role department score profilePictureUrl evaluation_list').then(
         (users) => {
             res.status(200).json(
                 users
@@ -104,7 +103,7 @@ exports.getAllUser = (req, res, next) => {
 exports.getOneUser = (req, res, next) => {
     User.findOne({
         _id:req.params.id
-    }).select('_id email username role department score profilePictureUrl').then(
+    }).select('_id email username role department score profilePictureUrl evaluation_list').then(
         (user) => {
             res.status(200).json(user);
         }
@@ -128,6 +127,7 @@ exports.updateOneUser = (req, res, next) => {
             department: req.body.user.department,
             score: req.body.user.score,
             profilePictureUrl: url + '/backend/media/profile_pictures/' + req.file.filename,
+            evaluation_list: req.body.user.evaluation_list
         };
     } else {
         user = {
@@ -137,7 +137,8 @@ exports.updateOneUser = (req, res, next) => {
             role: req.body.role,
             department: req.body.department,
             score: req.body.score,
-            profilePictureUrl: req.body.profilePictureUrl
+            profilePictureUrl: req.body.profilePictureUrl,
+            evaluation_list: req.body.evaluation_list
         };
     }
     User.updateOne({_id:req.params.id}, user).then(
@@ -177,7 +178,7 @@ exports.deleteOneUser = (req, res, next) => {
 }
 
 exports.getAllByScore = (req, res, next) => {
-    User.find().select('_id email username role department score profilePictureUrl').sort({score: 1}).then(
+    User.find().select('_id email username role department score profilePictureUrl evaluation_list').sort({score: 1}).then(
         (users) => {
             res.status(200).json(users);
         }
@@ -189,3 +190,31 @@ exports.getAllByScore = (req, res, next) => {
         }
     );
 }
+
+exports.updateUserAddCastToList = (req, res, next) => {
+    const userId = req.params.id;
+    const castId = req.body.cast_id;
+
+    User.findById(userId)
+        .then((user) => {
+            if (!user) {
+                return res.status(404).json({ message: 'User not found.' });
+            }
+
+            // Create the evaluation object
+            const evaluationObject = {
+                castid: castId,
+                watched: true,
+                answered: false
+            };
+            user.evaluation_list.push(evaluationObject);
+
+            return user.save();
+        })
+        .then(() => {
+            res.status(200).json({ message: 'Cast added to evaluation list.' });
+        })
+        .catch((error) => {
+            res.status(500).json({ error: 'An error occurred.' });
+        });
+};
