@@ -1,8 +1,10 @@
-// question_generator.js
-
-const generateQuestion = (description) => {
-    const question = description + "?";
-    return question;
+const generateEvaluation = (description) => {
+    const evaluation = {
+        question: description + "?",
+        responses: ["A","B","C","D"],
+        correct: "B" 
+    };
+    return evaluation;
 };
 
-module.exports = generateQuestion;
+module.exports = generateEvaluation;

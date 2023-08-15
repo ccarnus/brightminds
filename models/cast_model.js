@@ -24,7 +24,15 @@ const castSchema = mongoose.Schema({
             }
         ]
     },
-    question: { type: String }
+    evaluation: {
+        question: {type:String, required:true},
+        responses: [
+            {
+                type:String, required:false
+            }
+        ],
+        correct: {type:String, required:true}
+    }
 });
 
 module.exports = mongoose.model('cast',castSchema);

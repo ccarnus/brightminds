@@ -13,5 +13,6 @@ router.get('/category/:id', cast_controller.getAllCastByCategory);
 router.get("/brightmindid/:id", cast_controller.getAllCastByBrightmindid);
 router.post("/comment/:id",cast_controller.updateCastAddComment);
 router.post("/like/:id",cast_controller.updateCastAddLike);
+router.get("/evaluation/:id",cast_controller.getEvaluationForCast);
 
 module.exports = router;
