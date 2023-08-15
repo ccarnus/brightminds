@@ -1,5 +1,6 @@
 const Cast = require('../models/cast_model.js');
 const fs = require('fs');
+const generateEvaluation = require('../backend/generate_question');
 
 exports.createCast = (req, res, next) => {
 
@@ -15,8 +16,10 @@ exports.createCast = (req, res, next) => {
             category: req.body.cast.category,
             university: req.body.cast.university,
             likes: req.body.cast.likes,
-            comments: req.body.cast.comments
+            comments: req.body.cast.comments,
+            evaluation: generateEvaluation(req.body.cast.description)
         });
+
         cast.save().then(
             () => {
                 res.status(201).json({response:'Cast Created.'})
@@ -73,7 +76,8 @@ exports.updateOneCast = (req, res, next) => {
             caterogy: req.body.cast.category,
             university: req.body.cast.university,
             likes: req.body.cast.likes,
-            comments: req.body.cast.comments
+            comments: req.body.cast.comments,
+            evaluation: req.body.cast.evaluation
         };
     } else {
         cast = {
@@ -87,7 +91,8 @@ exports.updateOneCast = (req, res, next) => {
             university: req.body.universitylogourl,
             category: req.body.category,
             likes: req.body.likes,
-            comments: req.body.cast.comments
+            comments: req.body.cast.comments,
+            question: req.body.cast.question
         };
     }
     Cast.updateOne({_id:req.params.id}, cast)
@@ -101,7 +106,6 @@ exports.updateOneCast = (req, res, next) => {
         });
     });
 }
-
 
 exports.deleteOneCast = (req, res, next) => {
     Cast.findOne({_id:req.params.id}).then(
@@ -209,3 +213,20 @@ exports.updateCastAddComment = (req, res, next) => {
         });
     });
 }
+
+exports.getEvaluationForCast = (req, res, next) => {
+    const castId = req.params.id;
+
+    Cast.findById(castId)
+        .then((cast) => {
+            if (!cast) {
+                return res.status(404).json({ message: 'Cast not found.' });
+            }
+
+            const evaluation = cast.evaluation || '';
+            res.status(200).json({ evaluation });
+        })
+        .catch((error) => {
+            res.status(500).json({ error: 'An error occurred.' });
+        });
+};

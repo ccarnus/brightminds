@@ -23,6 +23,15 @@ const castSchema = mongoose.Schema({
                 content: {type:String, default:""}
             }
         ]
+    },
+    evaluation: {
+        question: {type:String, required:true},
+        responses: [
+            {
+                type:String, required:false
+            }
+        ],
+        correct: {type:String, required:true}
     }
 });
 
