@@ -23,7 +23,8 @@ const castSchema = mongoose.Schema({
                 content: {type:String, default:""}
             }
         ]
-    }
+    },
+    question: { type: String }
 });
 
 module.exports = mongoose.model('cast',castSchema);
