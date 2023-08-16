@@ -91,8 +91,9 @@ exports.updateOneCast = (req, res, next) => {
             university: req.body.universitylogourl,
             category: req.body.category,
             likes: req.body.likes,
-            comments: req.body.cast.comments,
-            question: req.body.cast.question
+            comments: req.body.comments,
+            question: req.body.question,
+            evaluation: req.body.evaluation
         };
     }
     Cast.updateOne({_id:req.params.id}, cast)
