@@ -218,3 +218,25 @@ exports.updateUserAddCastToList = (req, res, next) => {
             res.status(500).json({ error: 'An error occurred.' });
         });
 };
+
+exports.updateUserAddPoints = (req, res, next) => {
+    const userId = req.params.id;
+    const points = req.body.Points;
+
+    User.findById(userId)
+        .then((user) => {
+            if (!user) {
+                return res.status(404).json({ message: 'User not found.' });
+            }
+        
+            user.score += points;
+
+            return user.save();
+        })
+        .then(() => {
+            res.status(200).json({ message: 'Points added.' });
+        })
+        .catch((error) => {
+            res.status(500).json({ error: 'An error occurred.' });
+        });
+}
