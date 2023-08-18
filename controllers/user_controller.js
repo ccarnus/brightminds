@@ -228,6 +228,9 @@ exports.updateUserAddPoints = (req, res, next) => {
             if (!user) {
                 return res.status(404).json({ message: 'User not found.' });
             }
+            if (typeof points !== 'number') {
+                return res.status(400).json({ message: 'Points must be a valid number' });
+            }
         
             user.score += points;
 
