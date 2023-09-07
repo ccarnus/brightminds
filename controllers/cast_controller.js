@@ -17,7 +17,7 @@ exports.createCast = (req, res, next) => {
             university: req.body.cast.university,
             likes: req.body.cast.likes,
             comments: req.body.cast.comments,
-            visibility: req.body.visibility,
+            visibility: req.body.cast.visibility,
             evaluation: generateEvaluation(req.body.cast.description)
         });
 
