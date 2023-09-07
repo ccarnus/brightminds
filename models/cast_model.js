@@ -9,6 +9,7 @@ const castSchema = mongoose.Schema({
     casturl: {type:String, required:true},
     university: {type:String, requiered:true},
     category: {type:String, requiered:true},
+    visibility: {type:String, requiered:true},
     likes: {
         count: {type:Number, default:0},
         user: [

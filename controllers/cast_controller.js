@@ -17,6 +17,7 @@ exports.createCast = (req, res, next) => {
             university: req.body.cast.university,
             likes: req.body.cast.likes,
             comments: req.body.cast.comments,
+            visibility: req.body.visibility,
             evaluation: generateEvaluation(req.body.cast.description)
         });
 
@@ -77,7 +78,8 @@ exports.updateOneCast = (req, res, next) => {
             university: req.body.cast.university,
             likes: req.body.cast.likes,
             comments: req.body.cast.comments,
-            evaluation: req.body.cast.evaluation
+            evaluation: req.body.cast.evaluation,
+            visibility: req.body.cast.visibility,
         };
     } else {
         cast = {
