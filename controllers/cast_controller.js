@@ -3,35 +3,45 @@ const fs = require('fs');
 const generateEvaluation = require('../backend/generate_question');
 
 exports.createCast = (req, res, next) => {
+    const url = req.protocol + "://" + req.get('host');
+    req.body.cast = JSON.parse(req.body.cast);
 
-        const url = req.protocol + "://" + req.get('host');
-        req.body.cast = JSON.parse(req.body.cast);
-        const cast = new Cast({
-            title: req.body.cast.title,
-            description: req.body.cast.description,
-            department: req.body.cast.department,
-            type: req.body.cast.type,
-            brightmindid: req.body.cast.brightmindid,
-            casturl: url + '/backend/media/cast_videos/' + req.file.filename,
-            category: req.body.cast.category,
-            university: req.body.cast.university,
-            likes: req.body.cast.likes,
-            comments: req.body.cast.comments,
-            visibility: req.body.cast.visibility,
-            evaluation: generateEvaluation(req.body.cast.description)
-        });
+    if(!req.file.video){
+        return res.status(400).json({ error: 'Missing video file.' });
+    }
+    if(!req.file.image){
+        return res.status(400).json({ error: 'Missing image file.' });
+    }
 
-        cast.save().then(
-            () => {
-                res.status(201).json({response:'Cast Created.'})
-            }
-        ).catch((error) => {
+    const videoFilename = 'video_' + req.file.video.filename;
+    const imageFilename = 'image_' + req.file.image.filename;
+
+    const cast = new Cast({
+        title: req.body.cast.title,
+        description: req.body.cast.description,
+        department: req.body.cast.department,
+        type: req.body.cast.type,
+        brightmindid: req.body.cast.brightmindid,
+        casturl: url + '/backend/media/cast_videos/' + videoFilename,
+        casturlimage: url + '/backend/media/cast_images/' + imageFilename,
+        category: req.body.cast.category,
+        university: req.body.cast.university,
+        likes: req.body.cast.likes,
+        comments: req.body.cast.comments,
+        visibility: req.body.cast.visibility,
+        evaluation: generateEvaluation(req.body.cast.description)
+    });
+
+    cast.save()
+        .then(() => {
+            res.status(201).json({ response: 'Cast Created.' });
+        })
+        .catch((error) => {
             res.status(400).json({
                 error: error
             });
         });
 }
-
 
 exports.getAllCast = (req, res, next) => {
     Cast.find().sort({ _id: 1 }).then(
@@ -60,75 +70,106 @@ exports.getOneCast = (req, res, next) => {
     });
 }
 
-
 exports.updateOneCast = (req, res, next) => {
-    let cast = new Cast({_id: req.params._id});
-    if (req.file){
+    if (req.file) {
         const url = req.protocol + "://" + req.get('host');
         req.body.cast = JSON.parse(req.body.cast);
-        cast = {
-            _id:req.params.id,
+
+        const cast = {
             title: req.body.cast.title,
             description: req.body.cast.description,
             department: req.body.cast.department,
             type: req.body.cast.type,
             brightmindid: req.body.cast.brightmindid,
-            casturl: url + '/backend/media/user_images/' + req.file.filename,
-            caterogy: req.body.cast.category,
+            casturl: url + '/backend/media/cast_videos/' + req.file.filename,
+            casturlimage: url + '/backend/media/cast_images/' + req.file.filename,
+            category: req.body.cast.category,
             university: req.body.cast.university,
             likes: req.body.cast.likes,
             comments: req.body.cast.comments,
             evaluation: req.body.cast.evaluation,
             visibility: req.body.cast.visibility,
         };
+
+        Cast.updateOne({ _id: req.params.id }, cast)
+            .then(() => {
+                res.status(201).json({ response: "message updated" });
+            })
+            .catch((error) => {
+                res.status(400).json({
+                    error: error
+                });
+            });
     } else {
-        cast = {
-            _id:req.params.id,
+        const updatedCast = {
             title: req.body.title,
             description: req.body.description,
             department: req.body.department,
             type: req.body.type,
             brightmindid: req.body.brightmindid,
-            casturl: req.body.casturl,
-            university: req.body.universitylogourl,
             category: req.body.category,
+            university: req.body.university,
             likes: req.body.likes,
             comments: req.body.comments,
-            question: req.body.question,
-            evaluation: req.body.evaluation
+            evaluation: req.body.evaluation,
+            visibility: req.body.visibility,
         };
+
+        Cast.updateOne({ _id: req.params.id }, updatedCast)
+            .then(() => {
+                res.status(201).json({ response: "message updated" });
+            })
+            .catch((error) => {
+                res.status(400).json({
+                    error: error
+                });
+            });
     }
-    Cast.updateOne({_id:req.params.id}, cast)
-    .then(() => {
-        res.status(201).json({
-            response: "message updated"
-        })})
-    .catch((error) => {
-        res.status(400).json({
-            error: error
-        });
-    });
 }
 
 exports.deleteOneCast = (req, res, next) => {
-    Cast.findOne({_id:req.params.id}).then(
-        (cast) => {
-            const filename = cast.casturl.split('/media/cast_videos/')[1];
-            fs.unlink('./backend/media/cast_videos/' + filename, () => {
-                console.log('./backend/media/cast_videos/' + filename);
-                Cast.deleteOne({_id:req.params.id}).then(() => {
-                    res.status(200).json({
-                        response: 'Cast Deleted'
+    Cast.findOne({ _id: req.params.id })
+        .then((cast) => {
+            const videoFilename = cast.casturl.split('/media/cast_videos/')[1];
+            const imageFilename = cast.casturlimage.split('/media/cast_images/')[1];
+
+            fs.unlink('./backend/media/cast_videos/' + videoFilename, (videoError) => {
+                if (videoError) {
+                    console.error('./backend/media/cast_videos/' + videoFilename);
+                    return res.status(500).json({
+                        error: 'Error deleting video file',
                     });
-                }).catch((error) => {
-                    res.status(404).json({
-                        error: error
-                    });
+                }
+
+                fs.unlink('./backend/media/cast_images/' + imageFilename, (imageError) => {
+                    if (imageError) {
+                        console.error('./backend/media/cast_images/' + imageFilename);
+                        return res.status(500).json({
+                            error: 'Error deleting image file',
+                        });
+                    }
+
+                    Cast.deleteOne({ _id: req.params.id })
+                        .then(() => {
+                            res.status(200).json({
+                                response: 'Cast Deleted',
+                            });
+                        })
+                        .catch((error) => {
+                            res.status(404).json({
+                                error: error,
+                            });
+                        });
                 });
             });
-        }
-    );
+        })
+        .catch((error) => {
+            res.status(404).json({
+                error: error,
+            });
+        });
 }
+
 
 exports.getAllNewCast = (req, res, next) => {
 

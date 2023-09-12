@@ -7,6 +7,7 @@ const castSchema = mongoose.Schema({
     type: {type:String, required:true},
     brightmindid: {type:Number, required:true},
     casturl: {type:String, required:true},
+    casturlimage: { type: String, required: true },
     university: {type:String, requiered:true},
     category: {type:String, requiered:true},
     visibility: {type:String, requiered:true},
