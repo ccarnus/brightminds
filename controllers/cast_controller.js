@@ -152,6 +152,20 @@ exports.getAllCastByCategory = (req, res, next) => {
     );
 }
 
+exports.getAllCastByDepartment = (req, res, next) => {
+    Cast.find({department:{$exists:true, $eq: req.params.id}}).sort({ _id: 1 }).then(
+        (casts) => {
+            res.status(200).json(casts);
+        }
+    ).catch(
+        (error) => {
+            res.status(400).json({
+                error: error
+            });
+        }
+    );
+}
+
 exports.getAllCastByBrightmindid = (req, res, next) => {
     Cast.find({brightmindid:{$exists:true, $eq: req.params.id}}).sort({ _id: 1 }).then(
         (casts) => {
