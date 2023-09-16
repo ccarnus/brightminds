@@ -243,3 +243,54 @@ exports.updateUserAddPoints = (req, res, next) => {
             res.status(500).json({ error: 'An error occurred.' });
         });
 }
+
+exports.updateUserRemovePoints = (req, res, next) => {
+    const userId = req.params.id;
+    const points = req.body.Points;
+
+    User.findById(userId)
+        .then((user) => {
+            if (!user) {
+                return res.status(404).json({ message: 'User not found.' });
+            }
+            if (typeof points !== 'number') {
+                return res.status(400).json({ message: 'Points must be a valid number' });
+            }
+        
+            user.score -= points;
+
+            return user.save();
+        })
+        .then(() => {
+            res.status(200).json({ message: 'Points removed.' });
+        })
+        .catch((error) => {
+            res.status(500).json({ error: 'An error occurred.' });
+        });
+}
+
+exports.updateUserRemoveCastToList = (req, res, next) => {
+    const userId = req.params.id;
+    const castId = req.body.cast_id;
+
+    User.findById(userId)
+        .then((user) => {
+            if (!user) {
+                return res.status(404).json({ message: 'User not found.' });
+            }
+
+            // Filter out the evaluation object with the specified castId
+            user.evaluation_list = user.evaluation_list.filter((evaluationObject) => {
+                return evaluationObject.castid !== castId;
+            });
+
+            return user.save();
+        })
+        .then(() => {
+            res.status(200).json({ message: 'Cast removed from evaluation list.' });
+        })
+        .catch((error) => {
+            res.status(500).json({ error: 'An error occurred.' });
+        });
+};
+
