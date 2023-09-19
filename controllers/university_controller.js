@@ -22,17 +22,17 @@ exports.createUniversity = (req, res, next) => {
 }
 
 
-exports.getAllUniversity = (req, res, next) => {
-    University.find().sort({ _id: 1 }).then(
-        (University) => {
-            res.status(200).json(University);
-        }
-    ).catch((error) => {
-        res.status(400).json({
-            error: error
-        });
-    });
-}
+exports.getAllUniversity = async (req, res, next) => {
+    try {
+      const universities = await University.find()
+        .sort({ score: -1 });
+  
+      res.status(200).json(universities);
+    } catch (error) {
+      res.status(500).json({ error: 'An error occurred.' });
+    }
+  };
+  
 
 
 exports.updateOneUniversity = (req, res, next) => {
