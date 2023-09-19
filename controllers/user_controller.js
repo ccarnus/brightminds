@@ -84,35 +84,49 @@ exports.login = (req, res, next) => {
     );
 };
 
-exports.getAllUser = (req, res, next) => {
-    User.find().select('_id email username role department score profilePictureUrl evaluation_list').then(
-        (users) => {
-            res.status(200).json(
-                users
-            );
-        }
-    ).catch(
-        (error) => {
-            res.status(400).json({
-                error: error
-            });
-        }
-    );
-}
+exports.getAllUser = async (req, res, next) => {
+    try {
+      const users = await User.find()
+        .select('_id email username role department score profilePictureUrl evaluation_list')
+        .sort({ score: -1 }); 
+  
+      res.status(200).json(users);
+    } catch (error) {
+      res.status(500).json({ error: 'An error occurred.' });
+    }
+  };
+  
 
-exports.getOneUser = (req, res, next) => {
-    User.findOne({
-        _id:req.params.id
-    }).select('_id email username role department score profilePictureUrl evaluation_list').then(
-        (user) => {
-            res.status(200).json(user);
-        }
-    ).catch((error) => {
-        res.status(400).json({
-            error: error
-        });
-    });
-}
+exports.getOneUser = async (req, res, next) => {
+    try {
+      const user = await User.findById(req.params.id);
+  
+      if (!user) {
+        return res.status(404).json({ message: 'User not found.' });
+      }
+  
+      const userScore = user.score;
+      const countBelowScore = await User.countDocuments({ score: { $lt: userScore } });
+      const totalUsers = await User.countDocuments();
+      const percentage = Math.round((countBelowScore / (totalUsers-1)) * 100);
+      const userWithPercentage = {
+        _id: user._id,
+        email: user.email,
+        username: user.username,
+        role: user.role,
+        department: user.department,
+        score: user.score,
+        profilePictureUrl: user.profilePictureUrl,
+        evaluation_list: user.evaluation_list,
+        percentage: percentage
+      };
+  
+      res.status(200).json(userWithPercentage);
+    } catch (error) {
+      res.status(500).json({ error: 'An error occurred.' });
+    }
+  };
+  
 
 exports.updateOneUser = (req, res, next) => {
     let user = new User({_id: req.params._id});
