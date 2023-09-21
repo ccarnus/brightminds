@@ -14,6 +14,9 @@ router.post('/add/cast/:id',userCtrl.updateUserAddCastToList);
 router.post('/remove/cast/:id',userCtrl.updateUserRemoveCastToList);
 router.post('/add/points/:id',userCtrl.updateUserAddPoints);
 router.post('/remove/points/:id',userCtrl.updateUserRemovePoints);
+router.get('/bookmarks/:id', userCtrl.getUserBookmarks);
+router.post('/add/bookmarks/:id', userCtrl.addUserBookmark);
+router.delete('/remove/bookmarks/:id/:castId', userCtrl.removeUserBookmark);
 
 
 module.exports = router;

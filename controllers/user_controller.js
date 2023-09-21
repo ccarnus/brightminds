@@ -308,3 +308,71 @@ exports.updateUserRemoveCastToList = (req, res, next) => {
         });
 };
 
+exports.getUserBookmarks = async (req, res, next) => {
+    const userId = req.params.id;
+
+    try {
+        const user = await User.findById(userId);
+
+        if (!user) {
+            return res.status(404).json({ message: 'User not found.' });
+        }
+
+        const bookmarks = user.bookmarked_elements;
+        res.status(200).json(bookmarks);
+    } catch (error) {
+        res.status(500).json({ error: 'An error occurred.' });
+    }
+};
+
+exports.addUserBookmark = async (req, res, next) => {
+    const userId = req.params.id;
+    const castId = req.body.castId;
+
+    try {
+        const user = await User.findById(userId);
+
+        if (!user) {
+            return res.status(404).json({ message: 'User not found.' });
+        }
+
+        // Check if the castId is already in the user's bookmarks
+        if (user.bookmarked_elements.some((bookmark) => bookmark.castId === castId)) {
+            return res.status(400).json({ message: 'Element is already bookmarked.' });
+        }
+
+        // Add the castId to the user's bookmarks
+        user.bookmarked_elements.push({ castId });
+        await user.save();
+
+        res.status(201).json({ message: 'Element bookmarked.' });
+    } catch (error) {
+        res.status(500).json({ error: 'An error occurred.' });
+    }
+};
+
+exports.removeUserBookmark = async (req, res, next) => {
+    const userId = req.params.id;
+    const castId = req.params.castId;
+
+    try {
+        const user = await User.findById(userId);
+
+        if (!user) {
+            return res.status(404).json({ message: 'User not found.' });
+        }
+
+        // Filter out the bookmarked element with the specified castId
+        user.bookmarked_elements = user.bookmarked_elements.filter(
+            (bookmark) => bookmark.castId !== castId
+        );
+
+        await user.save();
+
+        res.status(200).json({ message: 'Element removed from bookmarks.' });
+    } catch (error) {
+        res.status(500).json({ error: 'An error occurred.' });
+    }
+};
+
+
