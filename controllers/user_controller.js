@@ -215,23 +215,34 @@ exports.updateUserAddCastToList = (req, res, next) => {
                 return res.status(404).json({ message: 'User not found.' });
             }
 
-            // Create the evaluation object
-            const evaluationObject = {
-                castid: castId,
-                watched: true,
-                answered: false
-            };
-            user.evaluation_list.push(evaluationObject);
+            // Check if an evaluation with the same castId already exists
+            const existingEvaluation = user.evaluation_list.find(evaluation => evaluation.castid === castId);
 
-            return user.save();
-        })
-        .then(() => {
-            res.status(200).json({ message: 'Cast added to evaluation list.' });
+            if (existingEvaluation) {
+                return res.status(200).json({ message: 'Cast already in the evaluation list.' });
+            } else {
+                // Create the evaluation object
+                const evaluationObject = {
+                    castid: castId,
+                    watched: true,
+                    answered: false
+                };
+                user.evaluation_list.push(evaluationObject);
+
+                return user.save()
+                    .then(() => {
+                        res.status(200).json({ message: 'Cast added to evaluation list.' });
+                    })
+                    .catch((error) => {
+                        res.status(500).json({ error: 'An error occurred while saving the user.' });
+                    });
+            }
         })
         .catch((error) => {
             res.status(500).json({ error: 'An error occurred.' });
         });
 };
+
 
 exports.updateUserAddPoints = (req, res, next) => {
     const userId = req.params.id;
