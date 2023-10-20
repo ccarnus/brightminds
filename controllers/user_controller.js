@@ -386,4 +386,33 @@ exports.removeUserBookmark = async (req, res, next) => {
     }
 };
 
+exports.markCastAsAnswered = async (req, res, next) => {
+    const userId = req.params.id;
+    const castId = req.body.castId;
 
+    User.findById(userId)
+        .then((user) => {
+            if (!user) {
+                return res.status(404).json({ message: 'User not found.' });
+            }
+
+            // Find the specific evaluation in the user's "evaluation_list" array
+            const evaluation = user.evaluation_list.find(item => item.castid === castId);
+
+            if (!evaluation) {
+                return res.status(404).json({ message: 'Evaluation not found.' });
+            }
+
+            // Update the "answered" field to true
+            evaluation.answered = true;
+
+            // Save the user object with the updated evaluation
+            return user.save();
+        })
+        .then(() => {
+            res.status(200).json({ message: 'Cast marked as answered.' });
+        })
+        .catch((error) => {
+            res.status(500).json({ error: 'An error occurred.' });
+        });
+}
