@@ -2,36 +2,52 @@ const Cast = require('../models/cast_model.js');
 const fs = require('fs');
 const generateEvaluation = require('../backend/generate_question');
 
-exports.createCast = (req, res, next) => {
-
-        const url = req.protocol + "://" + req.get('host');
-        req.body.cast = JSON.parse(req.body.cast);
-        const cast = new Cast({
-            title: req.body.cast.title,
-            description: req.body.cast.description,
-            department: req.body.cast.department,
-            type: req.body.cast.type,
-            brightmindid: req.body.cast.brightmindid,
-            casturl: url + '/backend/media/cast_videos/' + req.file.filename,
-            castimageurl: req.body.cast.castimageurl,
-            category: req.body.cast.category,
-            university: req.body.cast.university,
-            likes: req.body.cast.likes,
-            comments: req.body.cast.comments,
-            visibility: req.body.cast.visibility,
-            evaluation: generateEvaluation(req.body.cast.description)
+exports.createCast = async (req, res, next) => {
+    try {
+      const url = req.protocol + "://" + req.get('host');
+      req.body.cast = JSON.parse(req.body.cast);
+  
+      // Generate the evaluation question and wait for the response
+      const evaluation = await generateEvaluation(req.body.cast.description);
+  
+      // If there's an issue with generating the evaluation, return an error response
+      if (!evaluation) {
+        return res.status(400).json({
+          error: 'Failed to generate evaluation'
         });
-
-        cast.save().then(
-            () => {
-                res.status(201).json({response:'Cast Created.'})
-            }
-        ).catch((error) => {
-            res.status(400).json({
-                error: error
-            });
+      }
+  
+      // If evaluation is successfully generated, create the cast object
+      const cast = new Cast({
+        title: req.body.cast.title,
+        description: req.body.cast.description,
+        department: req.body.cast.department,
+        type: req.body.cast.type,
+        brightmindid: req.body.cast.brightmindid,
+        casturl: url + '/backend/media/cast_videos/' + req.file.filename,
+        castimageurl: req.body.cast.castimageurl,
+        category: req.body.cast.category,
+        university: req.body.cast.university,
+        likes: req.body.cast.likes,
+        comments: req.body.cast.comments,
+        visibility: req.body.cast.visibility,
+        evaluation: evaluation // Include the evaluation in the cast
+      });
+  
+      cast.save().then(() => {
+        res.status(201).json({ response: 'Cast Created.' });
+      }).catch((error) => {
+        res.status(400).json({
+          error: error
         });
-}
+      });
+    } catch (error) {
+      console.error('Error creating cast:', error);
+      res.status(500).json({
+        error: 'Internal server error'
+      });
+    }
+  };
 
 
 exports.getAllCast = (req, res, next) => {
