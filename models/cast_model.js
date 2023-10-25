@@ -27,13 +27,13 @@ const castSchema = mongoose.Schema({
         ]
     },
     evaluation: {
-        question: {type:String, required:true},
+        question: {type:String, required:false},
         responses: [
             {
                 type:String, required:false
             }
         ],
-        correct: {type:String, required:true}
+        correct: {type:String, required:false}
     }
 });
 
