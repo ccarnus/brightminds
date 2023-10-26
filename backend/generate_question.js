@@ -1,7 +1,8 @@
 const openai = require('openai');
 
 // Set your OpenAI API key
-const client = new openai({ process.env.OPENAI_API_KEY });
+const apikey = process.env.OPENAI_API_KEY;
+const client = new openai({apikey});
 
 function cleanAnswerChoice(choice) {
     return choice.replace(/^[a-zA-Z]\)\s*/, '');
