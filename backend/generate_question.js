@@ -1,7 +1,7 @@
 const openai = require('openai');
 
 // Set your OpenAI API key
-const apikey = "1234";
+const apikey = process.env.OPENAI_API_KEY;
 const client = new openai({apikey});
 
 function cleanAnswerChoice(choice) {
