@@ -142,7 +142,8 @@ exports.updateOneUser = (req, res, next) => {
             department: req.body.user.department,
             score: req.body.user.score,
             profilePictureUrl: url + '/backend/media/profile_pictures/' + req.file.filename,
-            evaluation_list: req.body.user.evaluation_list
+            evaluation_list: req.body.user.evaluation_list,
+            preferences: req.body.user.preferences
         };
     } else {
         user = {
@@ -153,7 +154,8 @@ exports.updateOneUser = (req, res, next) => {
             department: req.body.department,
             score: req.body.score,
             profilePictureUrl: req.body.profilePictureUrl,
-            evaluation_list: req.body.evaluation_list
+            evaluation_list: req.body.evaluation_list,
+            preferences: req.body.preferences
         };
     }
     User.updateOne({_id:req.params.id}, user).then(
