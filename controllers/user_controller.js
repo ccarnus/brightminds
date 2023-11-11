@@ -445,7 +445,7 @@ exports.getSuggestedForYou = (req, res, next) => {
             }
 
             // Step 3: Find casts in that category
-            Cast.find({ category: preferredCategory }).sort({ _id: 1 })
+            Cast.find({ department: preferredCategory }).sort({ _id: 1 })
                 .then(casts => {
                     res.status(200).json(casts);
                 })
