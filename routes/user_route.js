@@ -20,6 +20,7 @@ router.delete('/remove/bookmarks/:id/:castId', userCtrl.removeUserBookmark);
 router.post('/mark/cast/as/answered/:id', userCtrl.markCastAsAnswered);
 //Preferences
 router.get('/:id/suggested/for/you',userCtrl.getSuggestedForYou);
+router.get('/:id/preferences', userCtrl.getUserPreferences);
 
 
 module.exports = router;

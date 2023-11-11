@@ -456,3 +456,18 @@ exports.getSuggestedForYou = (req, res, next) => {
         });
 };
 
+exports.getUserPreferences = (req, res, next) => {
+    User.findById(req.params.id)
+        .then(user => {
+            if (!user) {
+                return res.status(404).json({ message: 'User not found.' });
+            }
+
+            res.status(200).json({ preferences: user.preferences });
+        })
+        .catch(error => {
+            res.status(500).json({ error: 'An error occurred while fetching user preferences.' });
+        });
+};
+
+
