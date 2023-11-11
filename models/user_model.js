@@ -16,6 +16,10 @@ const userSchema = mongoose.Schema({
     }],
     bookmarked_elements: [{
         castId: { type: String, required: false }
+    }],
+    preferences: [{
+        category: { type: String, required: true },
+        weight: { type: Number, required: true }
     }]
 });
 

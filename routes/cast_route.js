@@ -20,8 +20,8 @@ router.get("/verification/:id",cast_controller.getCastVerification);
 router.post("/verification/:id/decrement",cast_controller.DecrementCastVerification);
 router.post("/verification/:id/increment",cast_controller.IncrementCastVerification);
 //grading
-router.get('/cast/:id/grade', cast_controller.getCastGrade);
-router.post('/cast/:id/grade', cast_controller.updateCastGrade);
+router.get('/:id/grade', cast_controller.getCastGrade);
+router.post('/:id/grade', cast_controller.updateCastGrade);
 
 
 module.exports = router;

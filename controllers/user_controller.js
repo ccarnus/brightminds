@@ -3,6 +3,7 @@ const bcrypt = require('bcrypt');
 const emailVerificator = require('../backend/email_verificator.js');
 const jwt = require('jsonwebtoken');
 const fs = require('fs');
+const Cast = require('../models/cast_model.js');
 
 exports.signup = (req, res, next) => {
     req.body.user = JSON.parse(req.body.user);
@@ -416,3 +417,42 @@ exports.markCastAsAnswered = async (req, res, next) => {
             res.status(500).json({ error: 'An error occurred.' });
         });
 }
+
+exports.getSuggestedForYou = (req, res, next) => {
+    // Step 1: Fetch the user
+    User.findById(req.params.id)
+        .then(user => {
+            if (!user) {
+                return res.status(404).json({ message: 'User not found.' });
+            }
+
+            // Step 2: Find the highest weighted category
+            let maxWeight = 0;
+            let preferredCategory = '';
+
+            user.preferences.forEach(pref => {
+                if (pref.weight > maxWeight) {
+                    maxWeight = pref.weight;
+                    preferredCategory = pref.category;
+                }
+            });
+
+            // If no preferences are set, you might want to handle it differently
+            if (!preferredCategory) {
+                return res.status(404).json({ message: 'No preferences set for user.' });
+            }
+
+            // Step 3: Find casts in that category
+            Cast.find({ category: preferredCategory }).sort({ _id: 1 })
+                .then(casts => {
+                    res.status(200).json(casts);
+                })
+                .catch(error => {
+                    res.status(400).json({ error: error });
+                });
+        })
+        .catch(error => {
+            res.status(500).json({ error: 'An error occurred.' });
+        });
+};
+
