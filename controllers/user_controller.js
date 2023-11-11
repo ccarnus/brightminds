@@ -3,6 +3,7 @@ const bcrypt = require('bcrypt');
 const emailVerificator = require('../backend/email_verificator.js');
 const jwt = require('jsonwebtoken');
 const fs = require('fs');
+const Cast = require('../models/cast_model.js');
 
 exports.signup = (req, res, next) => {
     req.body.user = JSON.parse(req.body.user);
@@ -415,4 +416,18 @@ exports.markCastAsAnswered = async (req, res, next) => {
         .catch((error) => {
             res.status(500).json({ error: 'An error occurred.' });
         });
+}
+
+exports.getSuggestedForYou = (req, res, next) => {
+    Cast.find({category:{$exists:true, $eq: req.params.id}}).sort({ _id: 1 }).then(
+        (casts) => {
+            res.status(200).json(casts);
+        }
+    ).catch(
+        (error) => {
+            res.status(400).json({
+                error: error
+            });
+        }
+    );
 }
