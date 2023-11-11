@@ -12,6 +12,10 @@ const castSchema = mongoose.Schema({
     category: {type:String, requiered:true},
     visibility: {type:String, requiered:true},
     verified: {type:Number, default:0},
+    grade: {
+        value: { type: Number, min: 0, max: 10, default: 5 },
+        count: { type: Number, default: 0 }
+    },
     likes: {
         count: {type:Number, default:0},
         user: [

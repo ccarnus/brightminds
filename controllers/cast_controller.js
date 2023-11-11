@@ -299,3 +299,49 @@ exports.DecrementCastVerification = (req, res, next) => {
             res.status(400).json({ error: 'Unable to update verification status.' });
         });
 };
+
+exports.getCastGrade = (req, res, next) => {
+    Cast.findById(req.params.id)
+        .then(cast => {
+            if (!cast) {
+                return res.status(404).json({ message: 'Cast not found.' });
+            }
+            res.status(200).json({ grade: cast.grade });
+        })
+        .catch(error => {
+            res.status(500).json({ error: 'An error occurred.' });
+        });
+};
+
+exports.updateCastGrade = (req, res, next) => {
+    const action = req.body.action;
+
+    if (action !== '+' && action !== '-') {
+        return res.status(400).json({ message: 'Invalid action.' });
+    }
+
+    Cast.findById(req.params.id)
+        .then(cast => {
+            if (!cast) {
+                return res.status(404).json({ message: 'Cast not found.' });
+            }
+
+            // Update logic
+            if (action === '+') {
+                cast.grade.value = ((cast.grade.value * cast.grade.count) + 10) / (cast.grade.count + 1);
+            } else {
+                cast.grade.value = ((cast.grade.value * cast.grade.count)) / (cast.grade.count + 1);
+            }
+            cast.grade.count += 1;
+
+            // Save the updated cast
+            cast.save()
+                .then(() => res.status(200).json({ message: 'Grade updated.', grade: cast.grade }))
+                .catch(error => res.status(400).json({ error: 'Unable to update grade.' }));
+
+        })
+        .catch(error => {
+            res.status(500).json({ error: 'An error occurred.' });
+        });
+};
+
