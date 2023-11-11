@@ -31,7 +31,7 @@ exports.createCast = async (req, res, next) => {
         likes: req.body.cast.likes,
         comments: req.body.cast.comments,
         visibility: req.body.cast.visibility,
-        evaluation: evaluation // Include the evaluation in the cast
+        evaluation: evaluation
       });
   
       cast.save().then(() => {
