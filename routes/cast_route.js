@@ -15,5 +15,9 @@ router.get("/brightmindid/:id", cast_controller.getAllCastByBrightmindid);
 router.post("/comment/:id",cast_controller.updateCastAddComment);
 router.post("/like/:id",cast_controller.updateCastAddLike);
 router.get("/evaluation/:id",cast_controller.getEvaluationForCast);
+//verified status
+router.get("/verification/:id",cast_controller.getCastVerification);
+router.post("/verification/:id/decrement",cast_controller.DecrementCastVerification);
+router.post("/verification/:id/increment",cast_controller.IncrementCastVerification);
 
 module.exports = router;

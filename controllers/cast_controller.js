@@ -266,3 +266,36 @@ exports.getEvaluationForCast = (req, res, next) => {
             res.status(500).json({ error: 'An error occurred.' });
         });
 };
+
+exports.getCastVerification = (req, res, next) => {
+    Cast.findById(req.params.id)
+        .then(cast => {
+            if (!cast) {
+                return res.status(404).json({ message: 'Cast not found.' });
+            }
+            res.status(200).json({ verified: cast.verified });
+        })
+        .catch(error => {
+            res.status(500).json({ error: 'An error occurred.' });
+        });
+};
+
+exports.IncrementCastVerification = (req, res, next) => {
+    Cast.updateOne({ _id: req.params.id }, { $inc: { verified: 1 } })
+        .then(() => {
+            res.status(200).json({ message: 'Verification status incremented.' });
+        })
+        .catch(error => {
+            res.status(400).json({ error: 'Unable to update verification status.' });
+        });
+};
+
+exports.DecrementCastVerification = (req, res, next) => {
+    Cast.updateOne({ _id: req.params.id }, { $inc: { verified: -1 } })
+        .then(() => {
+            res.status(200).json({ message: 'Verification status decremented.' });
+        })
+        .catch(error => {
+            res.status(400).json({ error: 'Unable to update verification status.' });
+        });
+};
