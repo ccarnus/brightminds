@@ -22,6 +22,7 @@ exports.createCast = async (req, res, next) => {
             });
         }
       const castImageURL = url + imagePath.replace(/^.*\/backend/, '/backend');
+      console.log(castImageURL);
 
 
       const cast = new Cast({
