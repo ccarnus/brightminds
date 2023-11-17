@@ -22,6 +22,7 @@ router.post("/verification/:id/increment",cast_controller.IncrementCastVerificat
 //grading
 router.get('/:id/grade', cast_controller.getCastGrade);
 router.post('/:id/grade', cast_controller.updateCastGrade);
-
+//trending
+router.post('/:id/trending', cast_controller.getCastTrending);
 
 module.exports = router;

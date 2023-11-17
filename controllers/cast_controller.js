@@ -345,3 +345,20 @@ exports.updateCastGrade = (req, res, next) => {
         });
 };
 
+exports.getCastTrending = async (req, res, next) => {
+    try {
+        // Query for the most recent casts with the highest grades
+        const trendingCasts = await Cast.find()
+            .sort({ dateAdded: -1, 'grade.value': -1 })
+            .limit(10); // Limit the result to top 10 trending casts
+
+        if (!trendingCasts) {
+            return res.status(404).json({ message: 'No trending casts found.' });
+        }
+
+        res.status(200).json(trendingCasts);
+    } catch (error) {
+        res.status(500).json({ error: 'An error occurred while fetching trending casts.' });
+    }
+};
+

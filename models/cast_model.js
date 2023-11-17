@@ -12,6 +12,7 @@ const castSchema = mongoose.Schema({
     category: {type:String, requiered:true},
     visibility: {type:String, requiered:true},
     verified: {type:Number, default:0},
+    dateAdded: { type: Date, default: Date.now },
     grade: {
         value: { type: Number, min: 0, max: 10, default: 5 },
         count: { type: Number, default: 1 }
