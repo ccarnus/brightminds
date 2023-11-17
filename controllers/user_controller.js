@@ -472,4 +472,46 @@ exports.getUserPreferences = (req, res, next) => {
         });
 };
 
+exports.updateUserPreferences = async (req, res, next) => {
+    const userId = req.params.id;
+    const { category, modification } = req.body;
+
+    // Verification for 'modification' field
+    if (!modification || (modification !== 'positive' && modification !== 'negative')) {
+        return res.status(400).json({ message: 'Invalid modification type. Must be either "positive" or "negative".' });
+    }
+
+    try {
+        const user = await User.findById(userId);
+
+        if (!user) {
+            return res.status(404).json({ message: 'User not found.' });
+        }
+
+        // Check if the category already exists in user preferences
+        let existingCategory = user.preferences.find(pref => pref.category === category);
+
+        if (existingCategory) {
+            // Update the weight based on the modification type
+            existingCategory.weight += modification === 'positive' ? 1 : -1;
+        } else if (modification === 'positive') {
+            // If category doesn't exist and modification is positive, create new category
+            user.preferences.push({ category: category, weight: 1 });
+        } // If category doesn't exist and modification is negative, ignore
+
+        // Ensure the sum of weights equals 100
+        let totalWeight = user.preferences.reduce((acc, pref) => acc + pref.weight, 0);
+        user.preferences.forEach(pref => {
+            pref.weight = (pref.weight / totalWeight) * 100;
+        });
+
+        // Save the updated user
+        await user.save();
+
+        res.status(200).json({ message: 'User preferences updated.', preferences: user.preferences });
+    } catch (error) {
+        res.status(500).json({ error: 'An error occurred.' });
+    }
+};
+
 

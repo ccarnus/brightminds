@@ -21,6 +21,8 @@ router.post('/mark/cast/as/answered/:id', userCtrl.markCastAsAnswered);
 //Preferences
 router.get('/:id/suggested/for/you',userCtrl.getSuggestedForYou);
 router.get('/:id/preferences', userCtrl.getUserPreferences);
+router.post('/:id/preferences', userCtrl.updateUserPreferences);
+
 
 
 module.exports = router;
