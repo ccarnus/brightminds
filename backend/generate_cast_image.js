@@ -43,7 +43,7 @@ async function generateCastImage(description) {
 
         // Define the path where the image will be saved
         const imageFileName = 'cast_' + Date.now() + '.jpg';
-        const imagePath = path.join(__dirname, '/backend/media/cast_images/', imageFileName);
+        const imagePath = path.join(__dirname, '/media/cast_images/', imageFileName);
 
         // Download and save the image
         await downloadImage(imageUrl, imagePath);
