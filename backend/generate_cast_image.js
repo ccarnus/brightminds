@@ -1,11 +1,10 @@
+const openai = require('openai');
 const fs = require('fs');
 const path = require('path');
-const axios = require('axios');
-const { OpenAIApi } = require('openai');
+const axios = require('axios'); // To download the image
 
-const openai = new OpenAIApi({
-    apiKey: process.env.OPENAI_API_KEY,
-});
+const apikey = process.env.OPENAI_API_KEY;
+const openai = new openai({apikey});
 
 async function downloadImage(url, filepath) {
     const writer = fs.createWriteStream(filepath);
