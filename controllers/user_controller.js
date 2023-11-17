@@ -502,7 +502,7 @@ exports.updateUserPreferences = async (req, res, next) => {
         // Ensure the sum of weights equals 100
         let totalWeight = user.preferences.reduce((acc, pref) => acc + pref.weight, 0);
         user.preferences.forEach(pref => {
-            pref.weight = (pref.weight / totalWeight) * 100;
+            pref.weight = Math.round((pref.weight / totalWeight) * 100);
         });
 
         // Save the updated user
