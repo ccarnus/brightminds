@@ -1,10 +1,11 @@
-const openai = require('openai');
 const fs = require('fs');
 const path = require('path');
-const axios = require('axios'); // To download the image
+const axios = require('axios');
+const { OpenAIApi } = require('openai');
 
-const apikey = process.env.OPENAI_API_KEY;
-const client = new openai({apikey});
+const openai = new OpenAIApi({
+    apiKey: process.env.OPENAI_API_KEY,
+});
 
 async function downloadImage(url, filepath) {
     const writer = fs.createWriteStream(filepath);
@@ -26,7 +27,7 @@ async function downloadImage(url, filepath) {
 async function generateCastImage(description) {
     try {
         // Generate an image using the DALL-E API
-        const response = await client.createImage({
+        const response = await openai.createImage({
             model: "dall-e-3",
             prompt: description,
             n: 1,
