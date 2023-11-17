@@ -33,6 +33,15 @@ async function generateCastImage(description) {
             size: "1024x1792" // Portrait format
         });
 
+        // Log the response for debugging
+        console.log("DALL-E API response:", response);
+
+        // Check if the response has the expected structure
+        if (!response.data || !response.data.data || response.data.data.length === 0) {
+            console.error("Unexpected response structure:", response);
+            return null;
+        }
+
         // Extract the image URL from the response
         const imageUrl = response.data.data[0].url;
 
@@ -49,5 +58,6 @@ async function generateCastImage(description) {
         return null;
     }
 }
+
 
 module.exports = generateCastImage;
