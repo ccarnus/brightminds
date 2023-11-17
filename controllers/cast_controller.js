@@ -1,23 +1,29 @@
 const Cast = require('../models/cast_model.js');
 const fs = require('fs');
 const generateEvaluation = require('../backend/generate_question');
+const generateCastImage = require('../backend/generate_cast_image');
 
 exports.createCast = async (req, res, next) => {
     try {
       const url = req.protocol + "://" + req.get('host');
       req.body.cast = JSON.parse(req.body.cast);
   
-      // Generate the evaluation question and wait for the response
       const evaluation = await generateEvaluation(req.body.cast.description);
-  
-      // If there's an issue with generating the evaluation, return an error response
       if (!evaluation) {
         return res.status(400).json({
           error: 'Failed to generate evaluation'
         });
       }
-  
-      // If evaluation is successfully generated, create the cast object
+
+      const imagePath = await generateCastImage(req.body.cast.description);
+        if (!imagePath) {
+            return res.status(400).json({
+                error: 'Failed to generate cast image'
+            });
+        }
+      const castImageURL = url + imagePath.replace(/^.*\/backend/, '/backend');
+
+
       const cast = new Cast({
         title: req.body.cast.title,
         description: req.body.cast.description,
@@ -25,7 +31,7 @@ exports.createCast = async (req, res, next) => {
         type: req.body.cast.type,
         brightmindid: req.body.cast.brightmindid,
         casturl: url + '/backend/media/cast_videos/' + req.file.filename,
-        castimageurl: req.body.cast.castimageurl,
+        castimageurl: castImageURL,
         category: req.body.cast.category,
         university: req.body.cast.university,
         likes: req.body.cast.likes,
