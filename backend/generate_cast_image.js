@@ -24,12 +24,13 @@ async function downloadImage(url, filepath) {
 }
 
 async function generateCastImage(description) {
+    const modifiedDescription = `Create an engaging and visually appealing landscape cover image for a video. The content of the image should closely align with the following theme: ${description}. The design should be user-friendly, inviting, and accurately depict the video's subject matter.`;
     try {
         const response = await client.images.generate({
             model: "dall-e-3",
             prompt: description,
             n: 1,
-            size: "1024x1792" // Portrait format
+            size: "1792x1024"
         });
 
         // Check if the response has the expected structure
