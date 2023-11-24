@@ -24,7 +24,7 @@ async function downloadImage(url, filepath) {
 }
 
 async function generateCastImage(description) {
-    const modifiedDescription = `Create an engaging and visually appealing landscape cover image for a video. The content of the image should closely align with the following theme: ${description}. The design should be user-friendly, inviting, and accurately depict the video's subject matter.`;
+    const modifiedDescription = `Create an engaging and visually appealing landscape cover image for a video. The content of the image should closely align with the following theme: ${description}. The design should be user-friendly, inviting, and accurately depict the video's subject matter. Don't make the image too dense, keep it simple.`;
     try {
         const response = await client.images.generate({
             model: "dall-e-3",
