@@ -85,3 +85,22 @@ exports.deleteOneUniversity = (req, res, next) => {
         }
     );
 }
+
+exports.getOneUniversityByName = (req, res, next) => {
+    const universityName = req.params.id;
+
+    University.findOne({ name: universityName })
+        .then((university) => {
+            if (!university) {
+                return res.status(404).json({ message: 'University not found.' });
+            }
+            res.status(200).json(university);
+        })
+        .catch((error) => {
+            res.status(500).json({
+                error: 'An error occurred.',
+                details: error
+            });
+        });
+};
+
