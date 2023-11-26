@@ -139,22 +139,31 @@ exports.updateOneCast = (req, res, next) => {
 exports.deleteOneCast = (req, res, next) => {
     Cast.findOne({_id:req.params.id}).then(
         (cast) => {
-            const filename = cast.casturl.split('/media/cast_videos/')[1];
-            fs.unlink('./backend/media/cast_videos/' + filename, () => {
-                console.log('./backend/media/cast_videos/' + filename);
-                Cast.deleteOne({_id:req.params.id}).then(() => {
-                    res.status(200).json({
-                        response: 'Cast Deleted'
-                    });
-                }).catch((error) => {
-                    res.status(404).json({
-                        error: error
+            // Delete video file
+            const videoFilename = cast.casturl.split('/media/cast_videos/')[1];
+            fs.unlink('./backend/media/cast_videos/' + videoFilename, () => {
+                // Delete image file
+                const imageFilename = cast.castimageurl.split('/media/cast_images/')[1];
+                fs.unlink('./backend/media/cast_images/' + imageFilename, () => {
+                    Cast.deleteOne({_id:req.params.id}).then(() => {
+                        res.status(200).json({
+                            response: 'Cast Deleted'
+                        });
+                    }).catch((error) => {
+                        res.status(404).json({
+                            error: error
+                        });
                     });
                 });
             });
         }
-    );
-}
+    ).catch((error) => {
+        res.status(404).json({
+            error: 'Cast not found.'
+        });
+    });
+};
+
 
 exports.getAllNewCast = (req, res, next) => {
 
