@@ -353,16 +353,23 @@ exports.updateCastGrade = (req, res, next) => {
 };
 
 exports.getCastTrending = (req, res, next) => {
-    Cast.find().sort({ dateAdded: -1, 'grade.value': -1 }).then(
-        (casts) => {
-            res.status(200).json(casts);
-        }
-    ).catch(
-        (error) => {
-            res.status(400).json({
-                error: error
-            });
-        }
-    );
+    // Calculate the date one week ago
+    const oneWeekAgo = new Date();
+    oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
 
+    Cast.find({ dateAdded: { $gte: oneWeekAgo } })
+        .sort({ 'grade.value': -1 })
+        .then(
+            (casts) => {
+                res.status(200).json(casts);
+            }
+        )
+        .catch(
+            (error) => {
+                res.status(400).json({
+                    error: error
+                });
+            }
+        );
 };
+
