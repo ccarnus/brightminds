@@ -105,6 +105,7 @@ exports.updateOneCast = (req, res, next) => {
             comments: req.body.cast.comments,
             evaluation: req.body.cast.evaluation,
             visibility: req.body.cast.visibility,
+            university: req.body.cast.university,
         };
     } else {
         cast = {
@@ -121,7 +122,8 @@ exports.updateOneCast = (req, res, next) => {
             likes: req.body.likes,
             comments: req.body.comments,
             question: req.body.question,
-            evaluation: req.body.evaluation
+            evaluation: req.body.evaluation,
+            university: req.body.university,
         };
     }
     Cast.updateOne({_id:req.params.id}, cast)
