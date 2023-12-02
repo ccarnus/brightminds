@@ -23,6 +23,9 @@ router.post('/mark/cast/as/answered/:id', userCtrl.markCastAsAnswered);
 router.get('/:id/suggested/for/you',userCtrl.getSuggestedForYou);
 router.get('/:id/preferences', userCtrl.getUserPreferences);
 router.post('/:id/preferences', userCtrl.updateUserPreferences);
+//Tracking
+router.put('/:id/update/tracking', userCtrl.updateUserTracking);
+router.get('/:id/tracking', userCtrl.getUserTracking);
 
 
 

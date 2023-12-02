@@ -119,7 +119,8 @@ exports.getOneUser = async (req, res, next) => {
         score: user.score,
         profilePictureUrl: user.profilePictureUrl,
         evaluation_list: user.evaluation_list,
-        percentage: percentage
+        percentage: percentage,
+        tracking: user.tracking,
       };
   
       res.status(200).json(userWithPercentage);
@@ -143,7 +144,8 @@ exports.updateOneUser = (req, res, next) => {
             score: req.body.user.score,
             profilePictureUrl: url + '/backend/media/profile_pictures/' + req.file.filename,
             evaluation_list: req.body.user.evaluation_list,
-            preferences: req.body.user.preferences
+            preferences: req.body.user.preferences,
+            tracking: req.body.user.tracking,
         };
     } else {
         user = {
@@ -155,7 +157,8 @@ exports.updateOneUser = (req, res, next) => {
             score: req.body.score,
             profilePictureUrl: req.body.profilePictureUrl,
             evaluation_list: req.body.evaluation_list,
-            preferences: req.body.preferences
+            preferences: req.body.preferences,
+            tracking: req.body.tracking,
         };
     }
     User.updateOne({_id:req.params.id}, user).then(
@@ -513,5 +516,49 @@ exports.updateUserPreferences = async (req, res, next) => {
         res.status(500).json({ error: 'An error occurred.' });
     }
 };
+
+exports.updateUserTracking = async (req, res) => {
+    const userId = req.params.id;
+    const { objective } = req.body;
+
+    // Define the valid objectives
+    const validObjectives = ['Follower', 'Explorer', 'DeepLearner', 'Career', 'Researcher'];
+
+    try {
+        // Validate the objective value
+        if (!validObjectives.includes(objective)) {
+            return res.status(400).json({ message: 'Invalid objective value. Must be one of Follower, Explorer, DeepLearner, Career, or Researcher.' });
+        }
+
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found.' });
+        }
+
+        user.tracking.objective = objective;
+
+        await user.save();
+        res.status(200).json({ message: 'Tracking updated successfully.', tracking: user.tracking });
+    } catch (error) {
+        res.status(500).json({ error: 'An error occurred.' });
+    }
+};
+
+
+exports.getUserTracking = async (req, res) => {
+    const userId = req.params.id;
+
+    try {
+        const user = await User.findById(userId).select('tracking');
+        if (!user) {
+            return res.status(404).json({ message: 'User not found.' });
+        }
+
+        res.status(200).json({ tracking: user.tracking});
+    } catch (error) {
+        res.status(500).json({ error: 'An error occurred.' });
+    }
+};
+
 
 
