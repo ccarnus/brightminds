@@ -20,7 +20,11 @@ const userSchema = mongoose.Schema({
     preferences: [{
         category: { type: String, required: true },
         weight: { type: Number, required: true }
-    }]
+    }],
+    tracking: {
+        objective: { type: String, default:"Explorer" },
+        progress: { type: Number, default: 0 }
+    }
 });
 
 userSchema.plugin(uniqueValidator);
