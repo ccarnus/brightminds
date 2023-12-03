@@ -27,6 +27,4 @@ router.post('/:id/preferences', userCtrl.updateUserPreferences);
 router.put('/:id/update/tracking', userCtrl.updateUserTracking);
 router.get('/:id/tracking', userCtrl.getUserTracking);
 
-
-
 module.exports = router;

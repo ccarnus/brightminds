@@ -366,7 +366,7 @@ exports.updateCastGrade = (req, res, next) => {
 exports.getCastTrending = (req, res, next) => {
     // Calculate the date one week ago
     const oneWeekAgo = new Date();
-    oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+    oneWeekAgo.setDate(oneWeekAgo.getDate() - 14);
 
     Cast.find({ dateAdded: { $gte: oneWeekAgo } })
         .sort({ 'grade.value': -1 })
