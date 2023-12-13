@@ -106,6 +106,7 @@ exports.updateOneCast = (req, res, next) => {
             evaluation: req.body.cast.evaluation,
             visibility: req.body.cast.visibility,
             university: req.body.cast.university,
+            dateAdded: req.body.cast.dateAdded,
         };
     } else {
         cast = {
@@ -124,6 +125,7 @@ exports.updateOneCast = (req, res, next) => {
             question: req.body.question,
             evaluation: req.body.evaluation,
             university: req.body.university,
+            dateAdded: req.body.dateAdded,
         };
     }
     Cast.updateOne({_id:req.params.id}, cast)
