@@ -26,4 +26,4 @@ const virtualLabSchema = mongoose.Schema({
 
 virtualLabSchema.plugin(uniqueValidator);
 
-module.exports = mongoose.model('user', virtualLabSchema);
+module.exports = mongoose.model('VirtualLab', virtualLabSchema);
