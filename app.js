@@ -7,6 +7,7 @@ const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const castRoutes = require('./routes/cast_route.js');
 const userRoutes = require('./routes/user_route.js');
+const virtualLabRoutes = require('./routes/virtual_lab_route.js');
 const universityRoutes = require('./routes/university_route.js');
 const app = express();
 const path = require('path');
@@ -37,5 +38,6 @@ app.use('/backend/media/university_icon', express.static(path.join(__dirname,'/b
 app.use('/cast', castRoutes);
 app.use('/user', userRoutes);
 app.use('/university', universityRoutes);
+app.use('/virtual/lab', virtualLabRoutes);
 
 module.exports = app;
