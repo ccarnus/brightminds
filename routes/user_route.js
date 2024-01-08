@@ -26,5 +26,11 @@ router.post('/:id/preferences', userCtrl.updateUserPreferences);
 //Tracking
 router.put('/:id/update/tracking', userCtrl.updateUserTracking);
 router.get('/:id/tracking', userCtrl.getUserTracking);
+//Virtual Labs
+router.get('/:id/virtual/labs',userCtrl.getVirtualLabs);
+router.post('/:id/add/member', userCtrl.addVirtualLabMember);
+router.delete('/:id/remove/member', userCtrl.removeVirtualLabMember);
+router.post('/:id/add/follower', userCtrl.addVirtualLabFollower);
+router.delete('/:id/remove/follower', userCtrl.removeVirtualLabFollower);
 
 module.exports = router;

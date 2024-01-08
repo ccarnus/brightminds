@@ -565,4 +565,98 @@ exports.getUserTracking = async (req, res) => {
 };
 
 
+exports.getVirtualLabs = async (req, res) => {
+    try {
+        const user = await User.findById(req.params.id).select('virtual_labs');
+        if (!user) {
+            return res.status(404).json({ message: 'User not found.' });
+        }
+        res.status(200).json({ virtualLabs: user.virtual_labs });
+    } catch (error) {
+        res.status(500).json({ error: 'An error occurred.' });
+    }
+};
 
+exports.addVirtualLabMember = async (req, res) => {
+    const userId = req.params.id;
+    const labId = req.body.labId;
+    
+    try {
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found.' });
+        }
+
+        if (user.virtual_labs.member.some(lab => lab.labId === labId)) {
+            return res.status(400).json({ message: 'Member already in the virtual lab.' });
+        }
+
+        user.virtual_labs.member.push({ labId });
+        await user.save();
+
+        res.status(200).json({ message: 'Member added to the virtual lab.' });
+    } catch (error) {
+        res.status(500).json({ error: 'An error occurred.' });
+    }
+};
+
+exports.removeVirtualLabMember = async (req, res) => {
+    const userId = req.params.id;
+    const labId = req.body.labId;
+
+    try {
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found.' });
+        }
+
+        user.virtual_labs.member = user.virtual_labs.member.filter(member => member.labId !== labId);
+        await user.save();
+
+        res.status(200).json({ message: 'Member removed from the virtual lab.' });
+    } catch (error) {
+        res.status(500).json({ error: 'An error occurred.' });
+    }
+};
+
+exports.addVirtualLabFollower = async (req, res) => {
+    const userId = req.params.id;
+    const labId = req.body.labId;
+
+    try {
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found.' });
+        }
+
+        if (user.virtual_labs.follower.some(follower => follower.labId === labId)) {
+            return res.status(400).json({ message: 'Already following the virtual lab.' });
+        }
+
+        user.virtual_labs.follower.push({ labId });
+        await user.save();
+
+        res.status(200).json({ message: 'Now following the virtual lab.' });
+    } catch (error) {
+        res.status(500).json({ error: 'An error occurred.' });
+    }
+};
+
+exports.removeVirtualLabFollower = async (req, res) => {
+    const userId = req.params.id;
+    const labId = req.body.labId;
+
+    try {
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found.' });
+        }
+
+        user.virtual_labs.follower = user.virtual_labs.follower.filter(follower => follower.labId !== labId);
+        await user.save();
+
+        res.status(200).json({ message: 'Unfollowed the virtual lab.' });
+    } catch (error) {
+        res.status(500).json({ error: 'An error occurred.' });
+    }
+};
