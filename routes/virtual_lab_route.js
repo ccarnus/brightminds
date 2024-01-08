@@ -7,5 +7,7 @@ router.get('/',virtualLabCtrl.getAllVirtualLabs);
 router.get('/:id',virtualLabCtrl.getOneVirtualLab);
 router.delete('/:id', virtualLabCtrl.deleteOneVirtualLab);
 router.put('/:id', virtualLabCtrl.updateOneVirtualLab);
+//Topics
+router.post('/:id/add/topic', virtualLabCtrl.addTopic);
 
 module.exports = router;
