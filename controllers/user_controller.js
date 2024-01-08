@@ -88,7 +88,7 @@ exports.login = (req, res, next) => {
 exports.getAllUser = async (req, res, next) => {
     try {
       const users = await User.find()
-        .select('_id email username role department score profilePictureUrl evaluation_list')
+        .select('_id email username role department score profilePictureUrl evaluation_list virtual_labs preferences tracking')
         .sort({ score: -1 }); 
   
       res.status(200).json(users);
@@ -121,6 +121,8 @@ exports.getOneUser = async (req, res, next) => {
         evaluation_list: user.evaluation_list,
         percentage: percentage,
         tracking: user.tracking,
+        virtual_labs: user.virtual_labs,
+
       };
   
       res.status(200).json(userWithPercentage);
