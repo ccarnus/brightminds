@@ -1,4 +1,5 @@
 const User = require('../models/user_model.js');
+const VirtualLab = require('../models/virtual_lab_model.js');
 const bcrypt = require('bcrypt');
 const emailVerificator = require('../backend/email_verificator.js');
 const jwt = require('jsonwebtoken');
