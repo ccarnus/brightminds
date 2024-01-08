@@ -24,6 +24,14 @@ const userSchema = mongoose.Schema({
     tracking: {
         objective: { type: String, default:"Explorer" },
         progress: { type: Number, default: 0 }
+    },
+    virtual_labs: {
+        member: [{
+            labId: { type: String, required: false }
+        }],
+        follower: [{
+            labId: { type: String, required: false }
+        }]
     }
 });
 

@@ -146,6 +146,7 @@ exports.updateOneUser = (req, res, next) => {
             evaluation_list: req.body.user.evaluation_list,
             preferences: req.body.user.preferences,
             tracking: req.body.user.tracking,
+            virtual_labs: req.body.user.virtual_labs,
         };
     } else {
         user = {
@@ -159,6 +160,7 @@ exports.updateOneUser = (req, res, next) => {
             evaluation_list: req.body.evaluation_list,
             preferences: req.body.preferences,
             tracking: req.body.tracking,
+            virtual_labs: req.body.virtual_labs,
         };
     }
     User.updateOne({_id:req.params.id}, user).then(
@@ -198,7 +200,7 @@ exports.deleteOneUser = (req, res, next) => {
 }
 
 exports.getAllByScore = (req, res, next) => {
-    User.find().select('_id email username role department score profilePictureUrl evaluation_list').sort({score: 1}).then(
+    User.find().select('_id email username role department score profilePictureUrl evaluation_list preferences tracking').sort({score: 1}).then(
         (users) => {
             res.status(200).json(users);
         }
