@@ -9,5 +9,7 @@ router.delete('/:id', virtualLabCtrl.deleteOneVirtualLab);
 router.put('/:id', virtualLabCtrl.updateOneVirtualLab);
 //Topics
 router.post('/:id/add/topic', virtualLabCtrl.addTopic);
+router.put('/:labId/update/topic/:topicId', virtualLabCtrl.updateTopic);
+router.delete('/:labId/remove/topic/:topicId', virtualLabCtrl.removeTopic);
 
 module.exports = router;
