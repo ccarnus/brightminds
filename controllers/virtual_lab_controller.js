@@ -3,10 +3,10 @@ const VirtualLab = require('../models/virtual_lab_model.js');
 
 exports.createVirtualLab = async (req, res, next) => {
     const virtualLab = new VirtualLab({
-        name: req.body.name,
-        followers: req.body.followers, // Array of objects with userID
-        members: req.body.members, // Array of objects with brightmindsID
-        topics: req.body.topics // Array of topic objects
+        name: req.body.virtuallab.name,
+        followers: req.body.virtuallab.followers,
+        members: req.body.virtuallab.members,
+        topics: req.body.virtuallab.topics
     });
 
     try {
