@@ -7,18 +7,11 @@ exports.createVirtualLab = async (req, res, next) => {
     const url = req.protocol + "://" + req.get('host');
     req.body.virtuallab = JSON.parse(req.body.virtuallab);
     const virtualLab = new VirtualLab({
-<<<<<<< HEAD
         name: req.body.virtuallab.name,
         followers: req.body.virtuallab.followers,
         members: req.body.virtuallab.members,
-        topics: req.body.virtuallab.topics
-=======
-        name: req.body.name,
-        followers: req.body.followers, // Array of objects with userID
-        members: req.body.members, // Array of objects with brightmindsID
-        topics: req.body.topics, // Array of topic objects
+        topics: req.body.virtuallab.topics,
         iconurl: url + '/backend/media/virtuallab_icon/' + req.file.filename
->>>>>>> 1063d900a890a913adde683df8b68a330ede14a1
     });
 
     try {
