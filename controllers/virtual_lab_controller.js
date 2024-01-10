@@ -1,12 +1,17 @@
 const VirtualLab = require('../models/virtual_lab_model.js');
+const fs = require('fs');
 
 
 exports.createVirtualLab = async (req, res, next) => {
+
+    const url = req.protocol + "://" + req.get('host');
+    req.body.virtuallab = JSON.parse(req.body.virtuallab);
     const virtualLab = new VirtualLab({
         name: req.body.name,
         followers: req.body.followers, // Array of objects with userID
         members: req.body.members, // Array of objects with brightmindsID
-        topics: req.body.topics // Array of topic objects
+        topics: req.body.topics, // Array of topic objects
+        iconurl: url + '/backend/media/virtuallab_icon/' + req.file.filename
     });
 
     try {
@@ -41,32 +46,50 @@ exports.getOneVirtualLab = async (req, res, next) => {
 };
 
 
-exports.updateOneVirtualLab = async (req, res, next) => {
-    const virtualLab = {
+exports.updateOneVirtualLab = (req, res, next) => {
+    let virtualLabData = {
         _id: req.params.id,
         name: req.body.name,
-        followers: req.body.followers, // Array of objects with userID
-        members: req.body.members, // Array of objects with brightmindsID
-        topics: req.body.topics // Array of topic objects
+        followers: req.body.followers,
+        members: req.body.members,
+        topics: req.body.topics
     };
 
-    try {
-        await VirtualLab.updateOne({ _id: req.params.id }, virtualLab);
-        res.status(200).json({ message: 'Virtual lab updated successfully.' });
-    } catch (error) {
-        res.status(500).json({ error });
+    if (req.file) {
+        const url = req.protocol + "://" + req.get('host');
+        virtualLabData.iconurl = url + '/backend/media/virtuallab_icon/' + req.file.filename;
+    } else {
+        virtualLabData.iconurl = req.body.iconurl;
     }
+
+    VirtualLab.updateOne({ _id: req.params.id }, virtualLabData)
+        .then(() => {
+            res.status(200).json({ message: 'Virtual lab updated successfully.' });
+        })
+        .catch((error) => {
+            res.status(500).json({ error });
+        });
 };
 
 
-exports.deleteOneVirtualLab = async (req, res, next) => {
-    try {
-        await VirtualLab.deleteOne({ _id: req.params.id });
-        res.status(200).json({ message: 'Virtual lab deleted successfully.' });
-    } catch (error) {
-        res.status(500).json({ error });
-    }
+
+exports.deleteOneVirtualLab = (req, res, next) => {
+    VirtualLab.findOne({ _id: req.params.id }).then(
+        (virtualLab) => {
+            const filename = virtualLab.iconurl.split('/backend/media/virtuallab_icon/')[1];
+            fs.unlink('./backend/media/virtuallab_icon/' + filename, () => {
+                VirtualLab.deleteOne({ _id: req.params.id }).then(() => {
+                    res.status(200).json({ message: 'Virtual lab deleted successfully.' });
+                }).catch((error) => {
+                    res.status(500).json({ error });
+                });
+            });
+        }
+    ).catch((error) => {
+        res.status(404).json({ error });
+    });
 };
+
 
 
 exports.addTopic = async (req, res, next) => {
