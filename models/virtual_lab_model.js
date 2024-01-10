@@ -21,7 +21,8 @@ const virtualLabSchema = mongoose.Schema({
         threads: [{
             content: { type: String, required: true }
         }],
-    }]
+    }],
+    iconurl: {type:String, required:true}
 });
 
 virtualLabSchema.plugin(uniqueValidator);
