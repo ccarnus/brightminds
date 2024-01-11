@@ -11,6 +11,7 @@ exports.createVirtualLab = async (req, res, next) => {
         followers: req.body.virtuallab.followers,
         members: req.body.virtuallab.members,
         topics: req.body.virtuallab.topics,
+        colorcode: req.body.virtualLab.colorcode,
         iconurl: url + '/backend/media/virtuallab_icon/' + req.file.filename
     });
 
@@ -52,7 +53,8 @@ exports.updateOneVirtualLab = (req, res, next) => {
         name: req.body.name,
         followers: req.body.followers,
         members: req.body.members,
-        topics: req.body.topics
+        topics: req.body.topics,
+        colorcode: req.body.colorcode,
     };
 
     if (req.file) {
