@@ -11,7 +11,7 @@ exports.createVirtualLab = async (req, res, next) => {
         followers: req.body.virtuallab.followers,
         members: req.body.virtuallab.members,
         topics: req.body.virtuallab.topics,
-        colorcode: req.body.virtualLab.colorcode,
+        colorcode: req.body.virtuallab.colorcode,
         iconurl: url + '/backend/media/virtuallab_icon/' + req.file.filename
     });
 
