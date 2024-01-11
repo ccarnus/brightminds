@@ -22,7 +22,8 @@ const virtualLabSchema = mongoose.Schema({
             content: { type: String, required: true }
         }],
     }],
-    iconurl: {type:String, required:true}
+    iconurl: {type:String, required:true},
+    colorcode: {type:String, required:true}
 });
 
 virtualLabSchema.plugin(uniqueValidator);
