@@ -12,13 +12,13 @@ const castSchema = mongoose.Schema({
     category: {type:String, requiered:true},
     visibility: {type:String, requiered:true},
     verificationStatus: {
-        status: {type:String, requiered:true},
-        approvals: {type: Number, required: true},
+        status: {type:String, requiered:false},
+        approvals: {type: Number, required: false},
         approvers_id: [
-            {type:String, required: true}
+            {type:String, required: false}
         ],
         disapprovers_id: [
-            {type:String, required: true}
+            {type:String, required: false}
         ]
     },
     dateAdded: { type: Date, default: Date.now },
