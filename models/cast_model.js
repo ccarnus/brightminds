@@ -15,10 +15,10 @@ const castSchema = mongoose.Schema({
         status: {type:String, requiered:true},
         approvals: {type: Number, required: true},
         approvers_id: [
-            {type:String, default:""}
+            {type:String, required: true}
         ],
         disapprovers_id: [
-            {type:String, default:""}
+            {type:String, required: true}
         ]
     },
     dateAdded: { type: Date, default: Date.now },
