@@ -11,7 +11,7 @@ const castSchema = mongoose.Schema({
     university: {type:String, requiered:true},
     category: {type:String, requiered:true},
     visibility: {type:String, requiered:true},
-    verified: {
+    verificationStatus: {
         status: {type:String, requiered:true},
         approvals: {type: Number, required: true},
         approvers_id: [

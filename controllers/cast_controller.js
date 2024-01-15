@@ -107,6 +107,7 @@ exports.updateOneCast = (req, res, next) => {
             visibility: req.body.cast.visibility,
             university: req.body.cast.university,
             dateAdded: req.body.cast.dateAdded,
+            verificationStatus: req.body.cast.verificationStatus,
         };
     } else {
         cast = {
@@ -126,6 +127,7 @@ exports.updateOneCast = (req, res, next) => {
             evaluation: req.body.evaluation,
             university: req.body.university,
             dateAdded: req.body.dateAdded,
+            verificationStatus: req.body.verificationStatus,
         };
     }
     Cast.updateOne({_id:req.params.id}, cast)
@@ -294,10 +296,10 @@ exports.getCastVerification = (req, res, next) => {
                 return res.status(404).json({ message: 'Cast not found.' });
             }
             res.status(200).json({ 
-                verified: cast.verified.status,
-                approvals: cast.verified.approvals,
-                approvers_id: cast.verified.approvers_id,
-                disapprovers_id: cast.verified.disapprovers_id
+                verificationStatus: cast.verificationStatus.status,
+                approvals: cast.verificationStatus.approvals,
+                approvers_id: cast.verificationStatus.approvers_id,
+                disapprovers_id: cast.verificationStatus.disapprovers_id
             });
         })
         .catch(error => {
@@ -313,13 +315,13 @@ exports.IncrementCastVerification = (req, res, next) => {
             if (!cast) {
                 return res.status(404).json({ message: 'Cast not found.' });
             }
-            if (!cast.verified.approvers_id.includes(userId)) {
-                if (cast.verified.disapprovers_id.includes(userId)) {
-                    cast.verified.disapprovers_id.pull(userId);
-                    cast.verified.approvals += 1; // Adjust approval count since switching sides
+            if (!cast.verificationStatus.approvers_id.includes(userId)) {
+                if (cast.verificationStatus.disapprovers_id.includes(userId)) {
+                    cast.verificationStatus.disapprovers_id.pull(userId);
+                    cast.verificationStatus.approvals += 1; // Adjust approval count since switching sides
                 }
-                cast.verified.approvals += 1;
-                cast.verified.approvers_id.push(userId);
+                cast.verificationStatus.approvals += 1;
+                cast.verificationStatus.approvers_id.push(userId);
                 cast.save()
                     .then(() => res.status(200).json({ message: 'Verification incremented and disapproval reversed.' }))
                     .catch(error => res.status(400).json({ error: 'Unable to update verification.' }));
@@ -333,7 +335,6 @@ exports.IncrementCastVerification = (req, res, next) => {
 };
 
 
-
 exports.DecrementCastVerification = (req, res, next) => {
     const userId = req.body.userId; // Assuming the user's ID is passed in the request body
     Cast.findById(req.params.id)
@@ -341,15 +342,15 @@ exports.DecrementCastVerification = (req, res, next) => {
             if (!cast) {
                 return res.status(404).json({ message: 'Cast not found.' });
             }
-            const isApprover = cast.verified.approvers_id.includes(userId);
-            const isDisapprover = cast.verified.disapprovers_id.includes(userId);
+            const isApprover = cast.verificationStatus.approvers_id.includes(userId);
+            const isDisapprover = cast.verificationStatus.disapprovers_id.includes(userId);
 
             if (!isDisapprover) {
                 if (isApprover) {
-                    cast.verified.approvers_id.pull(userId);
-                    cast.verified.approvals -= 1;
+                    cast.verificationStatus.approvers_id.pull(userId);
+                    cast.verificationStatus.approvals -= 1;
                 }
-                cast.verified.disapprovers_id.push(userId);
+                cast.verificationStatus.disapprovers_id.push(userId);
                 cast.save()
                     .then(() => res.status(200).json({ message: 'Disapproval recorded.' }))
                     .catch(error => res.status(400).json({ error: 'Unable to update disapproval.' }));
