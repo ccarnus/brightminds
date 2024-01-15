@@ -11,7 +11,16 @@ const castSchema = mongoose.Schema({
     university: {type:String, requiered:true},
     category: {type:String, requiered:true},
     visibility: {type:String, requiered:true},
-    verified: {type:Number, default:0},
+    verified: {
+        status: {type:String, requiered:true},
+        approvals: {type: Number, required: true},
+        approvers_id: [
+            {type:String, default:""}
+        ],
+        disapprovers_id: [
+            {type:String, default:""}
+        ]
+    },
     dateAdded: { type: Date, default: Date.now },
     grade: {
         value: { type: Number, min: 0, max: 10, default: 5 },

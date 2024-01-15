@@ -293,32 +293,76 @@ exports.getCastVerification = (req, res, next) => {
             if (!cast) {
                 return res.status(404).json({ message: 'Cast not found.' });
             }
-            res.status(200).json({ verified: cast.verified });
+            res.status(200).json({ 
+                verified: cast.verified.status,
+                approvals: cast.verified.approvals,
+                approvers_id: cast.verified.approvers_id,
+                disapprovers_id: cast.verified.disapprovers_id
+            });
         })
         .catch(error => {
             res.status(500).json({ error: 'An error occurred.' });
         });
 };
 
+
 exports.IncrementCastVerification = (req, res, next) => {
-    Cast.updateOne({ _id: req.params.id }, { $inc: { verified: 1 } })
-        .then(() => {
-            res.status(200).json({ message: 'Verification status incremented.' });
+    const userId = req.body.userId; // Assuming the user's ID is passed in the request body
+    Cast.findById(req.params.id)
+        .then(cast => {
+            if (!cast) {
+                return res.status(404).json({ message: 'Cast not found.' });
+            }
+            if (!cast.verified.approvers_id.includes(userId)) {
+                if (cast.verified.disapprovers_id.includes(userId)) {
+                    cast.verified.disapprovers_id.pull(userId);
+                    cast.verified.approvals += 1; // Adjust approval count since switching sides
+                }
+                cast.verified.approvals += 1;
+                cast.verified.approvers_id.push(userId);
+                cast.save()
+                    .then(() => res.status(200).json({ message: 'Verification incremented and disapproval reversed.' }))
+                    .catch(error => res.status(400).json({ error: 'Unable to update verification.' }));
+            } else {
+                res.status(400).json({ message: 'User has already approved this cast.' });
+            }
         })
         .catch(error => {
-            res.status(400).json({ error: 'Unable to update verification status.' });
+            res.status(500).json({ error: 'An error occurred.' });
         });
 };
 
+
+
 exports.DecrementCastVerification = (req, res, next) => {
-    Cast.updateOne({ _id: req.params.id }, { $inc: { verified: -1 } })
-        .then(() => {
-            res.status(200).json({ message: 'Verification status decremented.' });
+    const userId = req.body.userId; // Assuming the user's ID is passed in the request body
+    Cast.findById(req.params.id)
+        .then(cast => {
+            if (!cast) {
+                return res.status(404).json({ message: 'Cast not found.' });
+            }
+            const isApprover = cast.verified.approvers_id.includes(userId);
+            const isDisapprover = cast.verified.disapprovers_id.includes(userId);
+
+            if (!isDisapprover) {
+                if (isApprover) {
+                    cast.verified.approvers_id.pull(userId);
+                    cast.verified.approvals -= 1;
+                }
+                cast.verified.disapprovers_id.push(userId);
+                cast.save()
+                    .then(() => res.status(200).json({ message: 'Disapproval recorded.' }))
+                    .catch(error => res.status(400).json({ error: 'Unable to update disapproval.' }));
+            } else {
+                res.status(400).json({ message: 'User has already disapproved this cast.' });
+            }
         })
         .catch(error => {
-            res.status(400).json({ error: 'Unable to update verification status.' });
+            res.status(500).json({ error: 'An error occurred.' });
         });
 };
+
+
 
 exports.getCastGrade = (req, res, next) => {
     Cast.findById(req.params.id)
