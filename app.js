@@ -6,6 +6,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const castRoutes = require('./routes/cast_route.js');
+const articleRoutes = require('./routes/article_route.js');
 const userRoutes = require('./routes/user_route.js');
 const virtualLabRoutes = require('./routes/virtual_lab_route.js');
 const universityRoutes = require('./routes/university_route.js');
@@ -32,11 +33,13 @@ app.use(bodyParser.json());
 
 app.use('/backend/media/cast_videos', express.static(path.join(__dirname,'/backend/media/cast_videos')));
 app.use('/backend/media/cast_images', express.static(path.join(__dirname,'/backend/media/cast_images')));
+app.use('/backend/media/article_images', express.static(path.join(__dirname,'/backend/media/article_images')));
 app.use('/backend/media/profile_pictures', express.static(path.join(__dirname,'/backend/media/profile_pictures')));
 app.use('/backend/media/university_icon', express.static(path.join(__dirname,'/backend/media/university_icon')));
 app.use('/backend/media/virtuallab_icon', express.static(path.join(__dirname,'/backend/media/virtuallab_icon')));
 
 app.use('/cast', castRoutes);
+app.use('/article', articleRoutes);
 app.use('/user', userRoutes);
 app.use('/university', universityRoutes);
 app.use('/virtual/lab', virtualLabRoutes);
