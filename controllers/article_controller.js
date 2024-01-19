@@ -5,16 +5,15 @@ const generateCastImage = require('../backend/generate_cast_image');
 exports.createArticle = async (req, res, next) => {
     try {
         const url = req.protocol + "://" + req.get('host');
-        req.body.article = JSON.parse(req.body.article);
 
-        const evaluation = await generateEvaluation(req.body.article.articleDescription);
+        const evaluation = await generateEvaluation(req.body.articleDescription); // Directly use req.body.articleDescription
         if (!evaluation) {
             return res.status(400).json({
                 error: 'Failed to generate evaluation'
             });
         }
 
-        const imagePath = await generateCastImage(req.body.article.articleDescription);
+        const imagePath = await generateCastImage(req.body.articleDescription); // Directly use req.body.articleDescription
         if (!imagePath) {
             return res.status(400).json({
                 error: 'Failed to generate article image'
@@ -23,7 +22,7 @@ exports.createArticle = async (req, res, next) => {
         const articleImageURL = url + imagePath.replace(/^.*\/backend/, '/backend');
 
         const article = new Article({
-            ...req.body.article,
+            ...req.body,
             articleimageurl: articleImageURL,
             evaluation: evaluation
         });
@@ -42,6 +41,7 @@ exports.createArticle = async (req, res, next) => {
         });
     }
 };
+
 
 
 exports.getAllArticle = (req, res, next) => {
