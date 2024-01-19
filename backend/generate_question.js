@@ -25,9 +25,9 @@ const generateEvaluation = async (description) => {
         { role: 'system', content: 'You are a helpful assistant.' },
         { role: 'user', content: `Generate a multiple-choice question based on the following description (place the correct answer first): ${description}\nQuestion:` },
     ],
-      max_tokens: 50,
+      max_tokens: 500,
       temperature: 0.7, // Adjust temperature for response randomness
-      n : 4, // Number of answer choices
+      n : 4, // Number of answer choice
     });
 
     console.log( response.choices[0].message.content);
