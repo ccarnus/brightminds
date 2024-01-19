@@ -2,7 +2,6 @@ const mongoose = require('mongoose');
 
 const articleSchema = mongoose.Schema({
     title: {type:String, required:true},
-    description: {type:String, required:true},
     department: {type: String, required: true},
     type: {type:String, required:true},
     brightmindid: {type:Number, required:true},
