@@ -7,14 +7,14 @@ exports.createArticle = async (req, res, next) => {
         const url = req.protocol + "://" + req.get('host');
         req.body.article = JSON.parse(req.body.article);
 
-        const evaluation = await generateEvaluation(req.body.article.article);
+        const evaluation = await generateEvaluation(req.body.article.articleDescription);
         if (!evaluation) {
             return res.status(400).json({
                 error: 'Failed to generate evaluation'
             });
         }
 
-        const imagePath = await generateCastImage(req.body.article.article);
+        const imagePath = await generateCastImage(req.body.article.articleDescription);
         if (!imagePath) {
             return res.status(400).json({
                 error: 'Failed to generate article image'
