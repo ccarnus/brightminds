@@ -38,7 +38,8 @@ exports.createCast = async (req, res, next) => {
         likes: req.body.cast.likes,
         comments: req.body.cast.comments,
         visibility: req.body.cast.visibility,
-        evaluation: evaluation
+        evaluation: evaluation,
+        duration: req.body.cast.duration,
       });
   
       cast.save().then(() => {
@@ -108,6 +109,7 @@ exports.updateOneCast = (req, res, next) => {
             university: req.body.cast.university,
             dateAdded: req.body.cast.dateAdded,
             verificationStatus: req.body.cast.verificationStatus,
+            duration: req.body.cast.duration,
         };
     } else {
         cast = {
@@ -128,6 +130,7 @@ exports.updateOneCast = (req, res, next) => {
             university: req.body.university,
             dateAdded: req.body.dateAdded,
             verificationStatus: req.body.verificationStatus,
+            duration: req.body.duration,
         };
     }
     Cast.updateOne({_id:req.params.id}, cast)
