@@ -168,5 +168,73 @@ exports.removeTopic = async (req, res, next) => {
     }
 };
 
+exports.addInstitute = async (req, res, next) => {
+    const labId = req.params.labId;
+    const newInstitute = {
+        instituteID: req.body.instituteID,
+        score: req.body.score || 0
+    };
+
+    try {
+        const virtualLab = await VirtualLab.findById(labId);
+        if (!virtualLab) {
+            return res.status(404).json({ message: 'Virtual lab not found.' });
+        }
+
+        virtualLab.institute.push(newInstitute);
+        await virtualLab.save();
+
+        res.status(200).json({ message: 'Institute added successfully to the virtual lab.' });
+    } catch (error) {
+        res.status(500).json({ error });
+    }
+};
+
+exports.updateInstitute = async (req, res, next) => {
+    const { labId, instituteId } = req.params;
+    const updatedInstituteData = req.body; // Data to update the institute
+
+    try {
+        const virtualLab = await VirtualLab.findById(labId);
+        if (!virtualLab) {
+            return res.status(404).json({ message: 'Virtual lab not found.' });
+        }
+
+        const instituteIndex = virtualLab.institute.findIndex(inst => inst._id.toString() === instituteId);
+        if (instituteIndex === -1) {
+            return res.status(404).json({ message: 'Institute not found.' });
+        }
+
+        virtualLab.institute[instituteIndex] = { ...virtualLab.institute[instituteIndex].toObject(), ...updatedInstituteData };
+        await virtualLab.save();
+
+        res.status(200).json({ message: 'Institute updated successfully.' });
+    } catch (error) {
+        res.status(500).json({ error });
+    }
+};
+
+exports.removeInstitute = async (req, res, next) => {
+    const { labId, instituteId } = req.params;
+
+    try {
+        const virtualLab = await VirtualLab.findById(labId);
+        if (!virtualLab) {
+            return res.status(404).json({ message: 'Virtual lab not found.' });
+        }
+
+        const instituteIndex = virtualLab.institute.findIndex(inst => inst._id.toString() === instituteId);
+        if (instituteIndex === -1) {
+            return res.status(404).json({ message: 'Institute not found.' });
+        }
+
+        virtualLab.institute.splice(instituteIndex, 1);
+        await virtualLab.save();
+
+        res.status(200).json({ message: 'Institute removed successfully.' });
+    } catch (error) {
+        res.status(500).json({ error });
+    }
+};
 
 module.exports = exports;

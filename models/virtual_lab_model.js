@@ -9,6 +9,10 @@ const virtualLabSchema = mongoose.Schema({
     members: [{
         brightmindsID: { type: String, required: true }
     }],
+    institute: [{
+        instituteID: { type: String, required: true },
+        score: { type: Number, required: FileSystemWritableFileStream, default:0}
+    }],
     topics: [{
         name: { type: String, required: true},
         gage: { type: Number, required: true, default: 0 },

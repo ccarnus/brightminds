@@ -8,6 +8,10 @@ router.get('/',virtualLabCtrl.getAllVirtualLabs);
 router.get('/:id',virtualLabCtrl.getOneVirtualLab);
 router.delete('/:id', virtualLabCtrl.deleteOneVirtualLab);
 router.put('/:id', multer, virtualLabCtrl.updateOneVirtualLab);
+//Institutes
+router.post('/:labId/add/institute', virtualLabCtrl.addInstitute);
+router.put('/:labId/update/institute/:instituteId', virtualLabCtrl.updateInstitute);
+router.delete('/:labId/remove/institute/:instituteId', virtualLabCtrl.removeInstitute);
 //Topics
 router.post('/:id/add/topic', virtualLabCtrl.addTopic);
 router.put('/:labId/update/topic/:topicId', virtualLabCtrl.updateTopic);
