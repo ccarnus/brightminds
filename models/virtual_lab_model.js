@@ -11,7 +11,7 @@ const virtualLabSchema = mongoose.Schema({
     }],
     institute: [{
         instituteID: { type: String, required: true },
-        score: { type: Number, required: FileSystemWritableFileStream, default:0}
+        score: { type: Number, required: false, default:0}
     }],
     topics: [{
         name: { type: String, required: true},
