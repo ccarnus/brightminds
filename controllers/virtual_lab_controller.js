@@ -191,7 +191,8 @@ exports.addInstitute = async (req, res, next) => {
 };
 
 exports.updateInstitute = async (req, res, next) => {
-    const { labId, instituteId } = req.params;
+    const { labId } = req.params;
+    const instituteIdToUpdate = req.params.instituteId;  // This is the 'instituteID' from the institute object
     const updatedInstituteData = req.body; // Data to update the institute
 
     try {
@@ -200,11 +201,13 @@ exports.updateInstitute = async (req, res, next) => {
             return res.status(404).json({ message: 'Virtual lab not found.' });
         }
 
-        const instituteIndex = virtualLab.institute.findIndex(inst => inst._id.toString() === instituteId);
+        // Find the institute by instituteID
+        const instituteIndex = virtualLab.institute.findIndex(inst => inst.instituteID === instituteIdToUpdate);
         if (instituteIndex === -1) {
             return res.status(404).json({ message: 'Institute not found.' });
         }
 
+        // Update the institute data
         virtualLab.institute[instituteIndex] = { ...virtualLab.institute[instituteIndex].toObject(), ...updatedInstituteData };
         await virtualLab.save();
 
@@ -213,6 +216,7 @@ exports.updateInstitute = async (req, res, next) => {
         res.status(500).json({ error });
     }
 };
+
 
 exports.removeInstitute = async (req, res, next) => {
     const { labId, instituteId } = req.params;
