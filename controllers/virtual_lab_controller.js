@@ -219,7 +219,8 @@ exports.updateInstitute = async (req, res, next) => {
 
 
 exports.removeInstitute = async (req, res, next) => {
-    const { labId, instituteId } = req.params;
+    const { labId } = req.params;
+    const instituteIdToRemove = req.params.instituteId; // This is the 'instituteID' from the institute object
 
     try {
         const virtualLab = await VirtualLab.findById(labId);
@@ -227,11 +228,13 @@ exports.removeInstitute = async (req, res, next) => {
             return res.status(404).json({ message: 'Virtual lab not found.' });
         }
 
-        const instituteIndex = virtualLab.institute.findIndex(inst => inst._id.toString() === instituteId);
+        // Find the institute by instituteID
+        const instituteIndex = virtualLab.institute.findIndex(inst => inst.instituteID === instituteIdToRemove);
         if (instituteIndex === -1) {
             return res.status(404).json({ message: 'Institute not found.' });
         }
 
+        // Remove the institute
         virtualLab.institute.splice(instituteIndex, 1);
         await virtualLab.save();
 
@@ -240,5 +243,6 @@ exports.removeInstitute = async (req, res, next) => {
         res.status(500).json({ error });
     }
 };
+
 
 module.exports = exports;
