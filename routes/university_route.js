@@ -6,6 +6,7 @@ const multer = require('../backend/multer-config_university.js');
 
 router.post("/", multer, university_controller.createUniversity);
 router.get("/", university_controller.getAllUniversity);
+router.get("/:id", university_controller.getOneUniversity);
 router.put('/:id', multer, university_controller.updateOneUniversity);
 router.delete('/:id', university_controller.deleteOneUniversity);
 router.get("/by/name/:id",university_controller.getOneUniversityByName);

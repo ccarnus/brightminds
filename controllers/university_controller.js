@@ -21,7 +21,6 @@ exports.createUniversity = (req, res, next) => {
         });
 }
 
-
 exports.getAllUniversity = async (req, res, next) => {
     try {
       const universities = await University.find()
@@ -33,7 +32,21 @@ exports.getAllUniversity = async (req, res, next) => {
     }
   };
   
-
+  exports.getOneUniversity = (req, res, next) => {
+    University.findOne({ _id:req.params.id })
+        .then((university) => {
+            if (!university) {
+                return res.status(404).json({ message: 'University not found.' });
+            }
+            res.status(200).json(university);
+        })
+        .catch((error) => {
+            res.status(500).json({
+                error: 'An error occurred.',
+                details: error
+            });
+        });
+};
 
 exports.updateOneUniversity = (req, res, next) => {
     let university = new University({_id: req.params._id});
