@@ -415,10 +415,10 @@ exports.updateCastGrade = (req, res, next) => {
 
 exports.getCastTrending = (req, res, next) => {
 
-    const twoWeeksAgo = new Date();
-    twoWeeksAgo.setDate(twoWeeksAgo.getDate() - 14);
+    const twoMonthsAgo = new Date();
+    twoMonthsAgo.setDate(twoMonthsAgo.getDate() - 60);
 
-    Cast.find({ dateAdded: { $gte: twoWeeksAgo } })
+    Cast.find({ dateAdded: { $gte: twoMonthsAgo } })
         .sort({ 'grade.value': -1 })
         .then(
             (casts) => {
