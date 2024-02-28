@@ -16,7 +16,7 @@ const virtualLabSchema = mongoose.Schema({
     topics: [{
         name: { type: String, required: true},
         gage: { type: Number, required: true, default: 0 },
-        institues: [{
+        institutes: [{
             instituteId: { type: String, required: true }
         }],
         description: { type: String, required: true},

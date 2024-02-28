@@ -92,7 +92,7 @@ exports.addTopic = async (req, res, next) => {
     const newTopic = {
         name: req.body.name,
         gage: req.body.gage || 0,
-        institues: req.body.institutes,
+        institutes: req.body.institutes,
         description: req.body.description,
         followers: [],
         members: [],
