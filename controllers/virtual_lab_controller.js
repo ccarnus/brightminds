@@ -23,7 +23,6 @@ exports.createVirtualLab = async (req, res, next) => {
     }
 };
 
-
 exports.getAllVirtualLabs = async (req, res, next) => {
     try {
         const virtualLabs = await VirtualLab.find();
@@ -32,7 +31,6 @@ exports.getAllVirtualLabs = async (req, res, next) => {
         res.status(500).json({ error });
     }
 };
-
 
 exports.getOneVirtualLab = async (req, res, next) => {
     try {
@@ -45,7 +43,6 @@ exports.getOneVirtualLab = async (req, res, next) => {
         res.status(500).json({ error });
     }
 };
-
 
 exports.updateOneVirtualLab = (req, res, next) => {
     let virtualLabData = {
@@ -73,8 +70,6 @@ exports.updateOneVirtualLab = (req, res, next) => {
         });
 };
 
-
-
 exports.deleteOneVirtualLab = (req, res, next) => {
     VirtualLab.findOne({ _id: req.params.id }).then(
         (virtualLab) => {
@@ -92,13 +87,13 @@ exports.deleteOneVirtualLab = (req, res, next) => {
     });
 };
 
-
-
 exports.addTopic = async (req, res, next) => {
     const labId = req.params.id;
     const newTopic = {
         name: req.body.name,
         gage: req.body.gage || 0,
+        institues: req.body.institutes,
+        description: req.body.description,
         followers: [],
         members: [],
         threads: []
@@ -119,10 +114,9 @@ exports.addTopic = async (req, res, next) => {
     }
 };
 
-
 exports.updateTopic = async (req, res, next) => {
     const { labId, topicId } = req.params;
-    const updatedTopicData = req.body; // Data to update the topic
+    const updatedTopicData = req.body;
 
     try {
         const virtualLab = await VirtualLab.findById(labId);
@@ -143,7 +137,6 @@ exports.updateTopic = async (req, res, next) => {
         res.status(500).json({ error });
     }
 };
-
 
 exports.removeTopic = async (req, res, next) => {
     const { labId, topicId } = req.params;
@@ -217,7 +210,6 @@ exports.updateInstitute = async (req, res, next) => {
     }
 };
 
-
 exports.removeInstitute = async (req, res, next) => {
     const { labId } = req.params;
     const instituteIdToRemove = req.params.instituteId; // This is the 'instituteID' from the institute object
@@ -243,6 +235,5 @@ exports.removeInstitute = async (req, res, next) => {
         res.status(500).json({ error });
     }
 };
-
 
 module.exports = exports;
