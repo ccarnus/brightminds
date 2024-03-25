@@ -418,7 +418,7 @@ exports.getCastTrending = (req, res, next) => {
     const FourMonthsAgo = new Date();
     FourMonthsAgo.setDate(FourMonthsAgo.getDate() - 120);
 
-    Cast.find({ dateAdded: { $gte: twoMonthsAgo } })
+    Cast.find({ dateAdded: { $gte: FourMonthsAgo } })
         .sort({ 'grade.value': -1 })
         .then(
             (casts) => {
