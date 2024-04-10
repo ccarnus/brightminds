@@ -1,61 +1,85 @@
 const Cast = require('../models/cast_model.js');
 const fs = require('fs');
+const ffmpeg = require('fluent-ffmpeg'); // Make sure you've installed fluent-ffmpeg
 const generateEvaluation = require('../backend/generate_question');
 const generateCastImage = require('../backend/generate_cast_image');
 
 exports.createCast = async (req, res, next) => {
     try {
-      const url = req.protocol + "://" + req.get('host');
-      req.body.cast = JSON.parse(req.body.cast);
-  
-      const evaluation = await generateEvaluation(req.body.cast.description);
-      if (!evaluation) {
-        return res.status(400).json({
-          error: 'Failed to generate evaluation'
-        });
-      }
+        // Construct the base URL from the request
+        const url = req.protocol + "://" + req.get('host');
+        
+        // Parse the JSON body for the cast details
+        req.body.cast = JSON.parse(req.body.cast);
 
-      const imagePath = await generateCastImage(req.body.cast.description);
+        // Attempt to generate an evaluation based on the cast description
+        const evaluation = await generateEvaluation(req.body.cast.description);
+        if (!evaluation) {
+            return res.status(400).json({
+                error: 'Failed to generate evaluation'
+            });
+        }
+
+        // Attempt to generate a cast image based on the cast description
+        const imagePath = await generateCastImage(req.body.cast.description);
         if (!imagePath) {
             return res.status(400).json({
                 error: 'Failed to generate cast image'
             });
         }
-      const castImageURL = url + imagePath.replace(/^.*\/backend/, '/backend');
-      console.log(castImageURL);
 
+        // Construct the cast image URL from the generated path
+        const castImageURL = url + imagePath.replace(/^.*\/backend/, '/backend');
 
-      const cast = new Cast({
-        title: req.body.cast.title,
-        description: req.body.cast.description,
-        department: req.body.cast.department,
-        type: req.body.cast.type,
-        brightmindid: req.body.cast.brightmindid,
-        casturl: url + '/backend/media/cast_videos/' + req.file.filename,
-        castimageurl: castImageURL,
-        category: req.body.cast.category,
-        university: req.body.cast.university,
-        likes: req.body.cast.likes,
-        comments: req.body.cast.comments,
-        visibility: req.body.cast.visibility,
-        evaluation: evaluation,
-        duration: req.body.cast.duration,
-      });
-  
-      cast.save().then(() => {
-        res.status(201).json({ response: 'Cast Created.' });
-      }).catch((error) => {
-        res.status(400).json({
-          error: error
+        // Determine the path to the uploaded video file
+        const videoFilePath = './backend/media/cast_videos/' + req.file.filename;
+
+        // Use ffprobe to extract the video duration
+        ffmpeg.ffprobe(videoFilePath, async (err, metadata) => {
+            if (err) {
+                console.error('Error extracting video duration:', err);
+                return res.status(500).json({
+                    error: 'Internal server error processing video file'
+                });
+            }
+            
+            // Extract the duration from the video metadata
+            const duration = metadata.format.duration;
+
+            // Create a new Cast object with the retrieved information, including the video duration
+            const cast = new Cast({
+                title: req.body.cast.title,
+                description: req.body.cast.description,
+                department: req.body.cast.department,
+                type: req.body.cast.type,
+                brightmindid: req.body.cast.brightmindid,
+                casturl: url + '/backend/media/cast_videos/' + req.file.filename,
+                castimageurl: castImageURL,
+                university: req.body.cast.university,
+                category: req.body.cast.category,
+                visibility: req.body.cast.visibility,
+                duration: duration, // Set the video duration here
+                evaluation: evaluation,
+                // Set any additional fields as necessary
+            });
+
+            // Save the new Cast document to the database
+            try {
+                await cast.save();
+                res.status(201).json({ response: 'Cast Created.' });
+            } catch (saveError) {
+                res.status(400).json({
+                    error: saveError
+                });
+            }
         });
-      });
     } catch (error) {
-      console.error('Error creating cast:', error);
-      res.status(500).json({
-        error: 'Internal server error'
-      });
+        console.error('Error creating cast:', error);
+        res.status(500).json({
+            error: 'Internal server error'
+        });
     }
-  };
+};
 
 
 exports.getAllCast = (req, res, next) => {
