@@ -1,5 +1,5 @@
 const Cast = require('../models/cast_model.js');
-const fs = require('fs');
+const { getVideoDurationInSeconds } = require('../backend/videoUtils');
 const generateEvaluation = require('../backend/generate_question');
 const generateCastImage = require('../backend/generate_cast_image');
 
@@ -24,6 +24,9 @@ exports.createCast = async (req, res, next) => {
       const castImageURL = url + imagePath.replace(/^.*\/backend/, '/backend');
       console.log(castImageURL);
 
+      // Use the utility function to get the video duration
+      const videoFilePath = './backend/media/cast_videos/' + req.file.filename;
+      const duration = await getVideoDurationInSeconds(videoFilePath);
 
       const cast = new Cast({
         title: req.body.cast.title,
@@ -39,7 +42,7 @@ exports.createCast = async (req, res, next) => {
         comments: req.body.cast.comments,
         visibility: req.body.cast.visibility,
         evaluation: evaluation,
-        duration: req.body.cast.duration,
+        duration: duration,
       });
   
       cast.save().then(() => {
