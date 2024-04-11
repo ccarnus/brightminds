@@ -171,7 +171,7 @@ exports.deleteOneCast = (req, res, next) => {
         }
     ).catch((error) => {
         res.status(404).json({
-            error: 'Cast not found.'
+            error: 'Cast not found.' + error
         });
     });
 };
