@@ -12,7 +12,7 @@ const getVideoDurationInSeconds = (videoFilePath) => {
         reject(err);
       } else {
         const durationInMinutes = metadata.format.duration / 60;
-        resolve(metaddurationInMinutes);
+        resolve(durationInMinutes);
       }
     });
   });
