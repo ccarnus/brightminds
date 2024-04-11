@@ -1,5 +1,6 @@
 const Cast = require('../models/cast_model.js');
 const { getVideoDurationInSeconds } = require('../backend/videoUtils');
+const fs = require('fs');
 const generateEvaluation = require('../backend/generate_question');
 const generateCastImage = require('../backend/generate_cast_image');
 
