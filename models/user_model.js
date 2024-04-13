@@ -10,7 +10,8 @@ const userSchema = mongoose.Schema({
     score: { type: Number, required: true },
     profilePictureUrl: { type: String, required: true },
     evaluation_list: [{
-        castid: { type: String, required: false },
+        contentid: { type: String, required: false },
+        type: {type: String, required: false},
         watched: { type: Boolean, required: false },
         answered: { type: Boolean, required: false }
     }],

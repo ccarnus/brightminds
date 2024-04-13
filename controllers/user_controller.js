@@ -216,9 +216,10 @@ exports.getAllByScore = (req, res, next) => {
     );
 }
 
-exports.updateUserAddCastToList = (req, res, next) => {
+exports.updateUserAddContentToList = (req, res, next) => {
     const userId = req.params.id;
     const castId = req.body.cast_id;
+    const type = req.body.type;
 
     User.findById(userId)
         .then((user) => {
@@ -236,7 +237,8 @@ exports.updateUserAddCastToList = (req, res, next) => {
                 const evaluationObject = {
                     castid: castId,
                     watched: true,
-                    answered: false
+                    answered: false,
+                    type: type,
                 };
                 user.evaluation_list.push(evaluationObject);
 
@@ -305,7 +307,7 @@ exports.updateUserRemovePoints = (req, res, next) => {
         });
 }
 
-exports.updateUserRemoveCastToList = (req, res, next) => {
+exports.updateUserRemoveContentFromList = (req, res, next) => {
     const userId = req.params.id;
     const castId = req.body.cast_id;
 

@@ -10,8 +10,10 @@ router.get('/:id',userCtrl.getOneUser);
 router.delete('/:id', userCtrl.deleteOneUser);
 router.put('/:id', multer, userCtrl.updateOneUser);
 router.get('/leaderboard/by/score',userCtrl.getAllByScore);
-router.post('/add/cast/:id',userCtrl.updateUserAddCastToList);
-router.post('/remove/cast/:id',userCtrl.updateUserRemoveCastToList);
+//add remove content
+router.post('/add/content/:id',userCtrl.updateUserAddContentToList);
+router.post('/remove/content/:id',userCtrl.updateUserRemoveContentFromList);
+//Points
 router.post('/add/points/:id',userCtrl.updateUserAddPoints);
 router.post('/remove/points/:id',userCtrl.updateUserRemovePoints);
 //Bookmarks
