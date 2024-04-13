@@ -399,9 +399,9 @@ exports.removeUserBookmark = async (req, res, next) => {
     }
 };
 
-exports.markCastAsAnswered = async (req, res, next) => {
+exports.markContentAsAnswered = async (req, res, next) => {
     const userId = req.params.id;
-    const castId = req.body.castId;
+    const contentId = req.body.contentId;
 
     User.findById(userId)
         .then((user) => {
@@ -410,7 +410,7 @@ exports.markCastAsAnswered = async (req, res, next) => {
             }
 
             // Find the specific evaluation in the user's "evaluation_list" array
-            const evaluation = user.evaluation_list.find(item => item.castid === castId);
+            const evaluation = user.evaluation_list.find(item => item.contentid === contentId);
 
             if (!evaluation) {
                 return res.status(404).json({ message: 'Evaluation not found.' });
@@ -423,7 +423,7 @@ exports.markCastAsAnswered = async (req, res, next) => {
             return user.save();
         })
         .then(() => {
-            res.status(200).json({ message: 'Cast marked as answered.' });
+            res.status(200).json({ message: 'Content marked as answered.' });
         })
         .catch((error) => {
             res.status(500).json({ error: 'An error occurred.' });
