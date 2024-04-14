@@ -306,7 +306,7 @@ exports.updateUserRemovePoints = (req, res, next) => {
 
 exports.updateUserRemoveContentFromList = (req, res, next) => {
     const userId = req.params.id;
-    const castId = req.body.cast_id;
+    const contentId = req.body.contentId;
 
     User.findById(userId)
         .then((user) => {
@@ -316,13 +316,13 @@ exports.updateUserRemoveContentFromList = (req, res, next) => {
 
             // Filter out the evaluation object with the specified castId
             user.evaluation_list = user.evaluation_list.filter((evaluationObject) => {
-                return evaluationObject.castid !== castId;
+                return evaluationObject.contentid !== contentId;
             });
 
             return user.save();
         })
         .then(() => {
-            res.status(200).json({ message: 'Cast removed from evaluation list.' });
+            res.status(200).json({ message: 'Content removed from evaluation list.' });
         })
         .catch((error) => {
             res.status(500).json({ error: 'An error occurred.' });
