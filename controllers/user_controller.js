@@ -217,8 +217,8 @@ exports.getAllByScore = (req, res, next) => {
 }
 
 exports.updateUserAddContentToList = (req, res, next) => {
-    const contentId = req.params.id;
-    const castId = req.body.cast_id;
+    const userId = req.params.id;
+    const contentId = req.body.contentId;
     const type = req.body.type;
 
     User.findById(userId)
@@ -226,10 +226,10 @@ exports.updateUserAddContentToList = (req, res, next) => {
             if (!user) {
                 return res.status(404).json({ message: 'User not found.' });
             }
-            const existingEvaluation = user.evaluation_list.find(evaluation => evaluation.castid === castId);
+            const existingEvaluation = user.evaluation_list.find(evaluation => evaluation.contentid === contentId);
 
             if (existingEvaluation) {
-                return res.status(200).json({ message: 'Cast already in the evaluation list.' });
+                return res.status(200).json({ message: 'Content already in the evaluation list.' });
             } else {
                 const evaluationObject = {
                     contentid: contentId,
