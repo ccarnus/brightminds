@@ -1,6 +1,6 @@
 const Article = require('../models/article_model.js');
 const generateEvaluation = require('../backend/generate_question');
-const generateCastImage = require('../backend/generate_cast_image');
+const generateArticleImage = require('../backend/generate_cast_image');
 
 exports.createArticle = async (req, res, next) => {
     try {
@@ -13,7 +13,7 @@ exports.createArticle = async (req, res, next) => {
             });
         }
 
-        const imagePath = await generateCastImage(req.body.articleDescription); // Directly use req.body.articleDescription
+        const imagePath = await generateArticleImage(req.body.articleDescription); // Directly use req.body.articleDescription
         if (!imagePath) {
             return res.status(400).json({
                 error: 'Failed to generate article image'
