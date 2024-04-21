@@ -1,6 +1,7 @@
 const Article = require('../models/article_model.js');
 const generateEvaluation = require('../backend/generate_question');
 const generateArticleImage = require('../backend/generate_article_image');
+const fs = require('fs');
 
 exports.createArticle = async (req, res, next) => {
     try {
@@ -41,8 +42,6 @@ exports.createArticle = async (req, res, next) => {
         });
     }
 };
-
-
 
 exports.getAllArticle = (req, res, next) => {
     Article.find().sort({ _id: 1 }).then(
