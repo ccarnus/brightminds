@@ -89,14 +89,37 @@ exports.updateOneArticle = (req, res, next) => {
 };
 
 exports.deleteOneArticle = (req, res, next) => {
-    Article.deleteOne({_id: req.params.id}).then(() => {
-        res.status(200).json({
-            response: 'Article Deleted'
-        });
-    }).catch((error) => {
-        res.status(404).json({
-            error: error
-        });
+    Article.findById(req.params.id).then(article => {
+        if (!article) {
+            return res.status(404).json({ message: 'Article not found.' });
+        }
+
+        // Delete associated image file
+        const imagePath = article.articleimageurl.split('/backend/media/article_images/')[1];
+        if (imagePath) {
+            fs.unlink(`./backend/media/article_images/${imagePath}`, err => {
+                if (err) {
+                    console.error('Error deleting article image:', err);
+                    return res.status(500).json({ error: 'Failed to delete associated article image.' });
+                }
+
+                // Proceed to delete the article record after the image has been successfully deleted
+                Article.deleteOne({ _id: req.params.id }).then(() => {
+                    res.status(200).json({ response: 'Article Deleted' });
+                }).catch(error => {
+                    res.status(400).json({ error });
+                });
+            });
+        } else {
+            // No image path found, directly delete the article
+            Article.deleteOne({ _id: req.params.id }).then(() => {
+                res.status(200).json({ response: 'Article Deleted' });
+            }).catch(error => {
+                res.status(400).json({ error });
+            });
+        }
+    }).catch(error => {
+        res.status(404).json({ error: 'Article not found.' });
     });
 };
 
