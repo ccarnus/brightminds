@@ -1,6 +1,6 @@
 const Article = require('../models/article_model.js');
 const generateEvaluation = require('../backend/generate_question');
-const generateArticleImage = require('../backend/generate_cast_image');
+const generateArticleImage = require('../backend/generate_article_image');
 
 exports.createArticle = async (req, res, next) => {
     try {
