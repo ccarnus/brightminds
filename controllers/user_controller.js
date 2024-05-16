@@ -216,43 +216,61 @@ exports.getAllByScore = (req, res, next) => {
     );
 }
 
-exports.updateUserAddContentToList = (req, res, next) => {
+exports.updateUserAddContentToList = async (req, res, next) => {
     const userId = req.params.id;
     const contentId = req.body.contentId;
     const type = req.body.type;
 
-    User.findById(userId)
-        .then((user) => {
-            if (!user) {
-                return res.status(404).json({ message: 'User not found.' });
-            }
-            const existingEvaluation = user.evaluation_list.find(evaluation => evaluation.contentid === contentId);
+    try {
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found.' });
+        }
 
-            if (existingEvaluation) {
-                return res.status(200).json({ message: 'Content already in the evaluation list.' });
-            } else {
-                const evaluationObject = {
-                    contentid: contentId,
-                    watched: true,
-                    answered: false,
-                    type: type,
-                };
-                user.evaluation_list.push(evaluationObject);
+        const existingEvaluation = user.evaluation_list.find(evaluation => evaluation.contentid === contentId);
+        if (existingEvaluation) {
+            return res.status(200).json({ message: 'Content already in the evaluation list.' });
+        }
 
-                return user.save()
-                    .then(() => {
-                        res.status(200).json({ message: 'Cast added to evaluation list.' });
-                    })
-                    .catch((error) => {
-                        res.status(500).json({ error: 'An error occurred while saving the user.' });
-                    });
+        // Determine the category of the content
+        let category;
+        if (type === 'cast') {
+            const cast = await Cast.findById(contentId);
+            if (!cast) {
+                return res.status(404).json({ message: 'Cast not found.' });
             }
-        })
-        .catch((error) => {
-            res.status(500).json({ error: 'An error occurred.' });
+            category = cast.department;
+        } else if (type === 'article') {
+            const article = await Article.findById(contentId);
+            if (!article) {
+                return res.status(404).json({ message: 'Article not found.' });
+            }
+            category = article.department;
+        } else {
+            return res.status(400).json({ message: 'Invalid content type.' });
+        }
+
+        user.evaluation_list.push({
+            contentid: contentId,
+            type: type,
+            watched: true,
+            answered: false
         });
-};
 
+        // Update the history field
+        const historyItem = user.tracking.history.find(item => item.category === category);
+        if (historyItem) {
+            historyItem.count += 1;
+        } else {
+            user.tracking.history.push({ category: category, count: 1 });
+        }
+
+        await user.save();
+        res.status(200).json({ message: 'Content added to evaluation list and history updated.' });
+    } catch (error) {
+        res.status(500).json({ error: 'An error occurred.' });
+    }
+};
 
 exports.updateUserAddPoints = (req, res, next) => {
     const userId = req.params.id;

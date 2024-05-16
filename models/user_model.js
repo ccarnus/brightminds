@@ -23,8 +23,12 @@ const userSchema = mongoose.Schema({
         weight: { type: Number, required: true }
     }],
     tracking: {
-        objective: { type: String, default:"Explorer" },
-        progress: { type: Number, default: 0 }
+        objective: { type: String, default: "Explorer" },
+        progress: { type: Number, default: 0 },
+        history: [{
+            category: { type: String, required: true },
+            count: { type: Number, default: 0 }
+        }]
     },
     virtual_labs: {
         member: [{
