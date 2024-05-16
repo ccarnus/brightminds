@@ -5,6 +5,7 @@ const emailVerificator = require('../backend/email_verificator.js');
 const jwt = require('jsonwebtoken');
 const fs = require('fs');
 const Cast = require('../models/cast_model.js');
+const Article = require('../models/article_model.js');
 
 exports.signup = (req, res, next) => {
     req.body.user = JSON.parse(req.body.user);
