@@ -166,9 +166,8 @@ const removeCastFromUsers = async (castId) => {
                 bookmark => bookmark.castId !== castId
             );
 
-            // Remove cast from evaluation list
             user.evaluation_list = user.evaluation_list.filter(
-                evaluation => evaluation.contentid !== castId
+                evaluation => !(evaluation.contentid === articleId && !evaluation.answered)
             );
 
             // Save the updated user

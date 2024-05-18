@@ -104,9 +104,8 @@ const removeArticleFromUsers = async (articleId) => {
                 bookmark => bookmark.castId !== articleId
             );
 
-            // Remove article from evaluation list
             user.evaluation_list = user.evaluation_list.filter(
-                evaluation => evaluation.contentid !== articleId
+                evaluation => !(evaluation.contentid === articleId && !evaluation.answered)
             );
 
             // Save the updated user
