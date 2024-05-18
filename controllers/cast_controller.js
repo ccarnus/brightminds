@@ -1,4 +1,5 @@
 const Cast = require('../models/cast_model.js');
+const User = require('../models/user_model.js');
 const { getVideoDurationInSeconds } = require('../backend/videoUtils');
 const fs = require('fs');
 const generateEvaluation = require('../backend/generate_question');
@@ -149,34 +150,77 @@ exports.updateOneCast = (req, res, next) => {
     });
 }
 
-exports.deleteOneCast = (req, res, next) => {
-    Cast.findOne({_id:req.params.id}).then(
-        (cast) => {
-            // Delete video file
-            const videoFilename = cast.casturl.split('/media/cast_videos/')[1];
-            fs.unlink('./backend/media/cast_videos/' + videoFilename, () => {
-                // Delete image file
-                const imageFilename = cast.castimageurl.split('/media/cast_images/')[1];
-                fs.unlink('./backend/media/cast_images/' + imageFilename, () => {
-                    Cast.deleteOne({_id:req.params.id}).then(() => {
-                        res.status(200).json({
-                            response: 'Cast Deleted'
-                        });
-                    }).catch((error) => {
-                        res.status(404).json({
-                            error: error
-                        });
-                    });
-                });
-            });
-        }
-    ).catch((error) => {
-        res.status(404).json({
-            error: 'Cast not found.' + error
+const removeCastFromUsers = async (castId) => {
+    try {
+        // Find users with the cast in their bookmarked elements or evaluation list
+        const users = await User.find({
+            $or: [
+                { 'bookmarked_elements.castId': castId },
+                { 'evaluation_list.contentid': castId }
+            ]
         });
-    });
+
+        for (let user of users) {
+            // Remove cast from bookmarked elements
+            user.bookmarked_elements = user.bookmarked_elements.filter(
+                bookmark => bookmark.castId !== castId
+            );
+
+            // Remove cast from evaluation list
+            user.evaluation_list = user.evaluation_list.filter(
+                evaluation => evaluation.contentid !== castId
+            );
+
+            // Save the updated user
+            await user.save();
+        }
+    } catch (error) {
+        console.error('Error removing cast from users:', error);
+    }
 };
 
+exports.deleteOneCast = async (req, res, next) => {
+    try {
+        const cast = await Cast.findOne({ _id: req.params.id });
+        if (!cast) {
+            return res.status(404).json({ error: 'Cast not found.' });
+        }
+
+        // Delete video file
+        const videoFilename = cast.casturl.split('/media/cast_videos/')[1];
+        fs.unlink('./backend/media/cast_videos/' + videoFilename, async (err) => {
+            if (err) {
+                console.error('Error deleting video file:', err);
+                return res.status(500).json({ error: 'Error deleting video file.' });
+            }
+
+            // Delete image file
+            const imageFilename = cast.castimageurl.split('/media/cast_images/')[1];
+            fs.unlink('./backend/media/cast_images/' + imageFilename, async (err) => {
+                if (err) {
+                    console.error('Error deleting image file:', err);
+                    return res.status(500).json({ error: 'Error deleting image file.' });
+                }
+
+                try {
+                    // Delete the cast
+                    await Cast.deleteOne({ _id: req.params.id });
+
+                    // Remove the cast from users' bookmarked elements and evaluation list
+                    await removeCastFromUsers(req.params.id);
+
+                    res.status(200).json({ response: 'Cast deleted and references removed from users.' });
+                } catch (error) {
+                    console.error('Error deleting cast:', error);
+                    res.status(500).json({ error: 'Error deleting cast.' });
+                }
+            });
+        });
+    } catch (error) {
+        console.error('Error finding cast:', error);
+        res.status(500).json({ error: 'Error finding cast.' });
+    }
+};
 
 exports.getAllNewCast = (req, res, next) => {
 
