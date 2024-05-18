@@ -167,7 +167,7 @@ const removeCastFromUsers = async (castId) => {
             );
 
             user.evaluation_list = user.evaluation_list.filter(
-                evaluation => !(evaluation.contentid === articleId && !evaluation.answered)
+                evaluation => !(evaluation.contentid === castId && !evaluation.answered)
             );
 
             // Save the updated user
