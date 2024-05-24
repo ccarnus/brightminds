@@ -4,11 +4,20 @@ const { getVideoDurationInSeconds } = require('../backend/videoUtils');
 const fs = require('fs');
 const generateEvaluation = require('../backend/generate_question');
 const generateCastImage = require('../backend/generate_cast_image');
+const departments = require('..lists/departments.js');
+
+const isValidDepartment = (department) => departments.includes(department);
 
 exports.createCast = async (req, res, next) => {
     try {
       const url = req.protocol + "://" + req.get('host');
       req.body.cast = JSON.parse(req.body.cast);
+
+      if (!isValidDepartment(req.body.cast.department)) {
+            return res.status(400).json({
+                error: 'Invalid department'
+            });
+        }
   
       const evaluation = await generateEvaluation(req.body.cast.description);
       if (!evaluation) {
@@ -92,19 +101,26 @@ exports.getOneCast = (req, res, next) => {
 
 
 exports.updateOneCast = (req, res, next) => {
-    let cast = new Cast({_id: req.params._id});
-    if (req.file){
+    let cast = new Cast({ _id: req.params._id });
+    if (req.file) {
         const url = req.protocol + "://" + req.get('host');
         req.body.cast = JSON.parse(req.body.cast);
+
+        if (!isValidDepartment(req.body.cast.department)) {
+            return res.status(400).json({
+                error: 'Invalid department'
+            });
+        }
+
         cast = {
-            _id:req.params.id,
+            _id: req.params.id,
             title: req.body.cast.title,
             description: req.body.cast.description,
             department: req.body.cast.department,
             brightmindid: req.body.cast.brightmindid,
             casturl: url + '/backend/media/user_images/' + req.file.filename,
             castimageurl: req.body.cast.castimageurl,
-            caterogy: req.body.cast.category,
+            category: req.body.cast.category,
             university: req.body.cast.university,
             likes: req.body.cast.likes,
             comments: req.body.cast.comments,
@@ -117,8 +133,14 @@ exports.updateOneCast = (req, res, next) => {
             duration: req.body.cast.duration,
         };
     } else {
+        if (!isValidDepartment(req.body.department)) {
+            return res.status(400).json({
+                error: 'Invalid department'
+            });
+        }
+
         cast = {
-            _id:req.params.id,
+            _id: req.params.id,
             title: req.body.title,
             description: req.body.description,
             department: req.body.department,
@@ -137,17 +159,18 @@ exports.updateOneCast = (req, res, next) => {
             duration: req.body.duration,
         };
     }
-    Cast.updateOne({_id:req.params.id}, cast)
-    .then(() => {
-        res.status(201).json({
-            response: "message updated"
-        })})
-    .catch((error) => {
-        res.status(400).json({
-            error: error
+    Cast.updateOne({ _id: req.params.id }, cast)
+        .then(() => {
+            res.status(201).json({
+                response: "message updated"
+            })
+        })
+        .catch((error) => {
+            res.status(400).json({
+                error: error
+            });
         });
-    });
-}
+};
 
 const removeCastFromUsers = async (castId) => {
     try {

@@ -3,10 +3,19 @@ const generateEvaluation = require('../backend/generate_question');
 const generateArticleImage = require('../backend/generate_article_image');
 const fs = require('fs');
 const User = require('../models/user_model.js');
+const departments = require('..lists/departments.js');
+
+const isValidDepartment = (department) => departments.includes(department);
 
 exports.createArticle = async (req, res, next) => {
     try {
         const url = req.protocol + "://" + req.get('host');
+
+        if (!isValidDepartment(req.body.department)) {
+            return res.status(400).json({
+                error: 'Invalid department'
+            });
+        }
 
         const evaluation = await generateEvaluation(req.body.articleDescription); // Directly use req.body.articleDescription
         if (!evaluation) {
@@ -71,12 +80,18 @@ exports.getOneArticle = (req, res, next) => {
 };
 
 exports.updateOneArticle = (req, res, next) => {
+    if (!isValidDepartment(req.body.department)) {
+        return res.status(400).json({
+            error: 'Invalid department'
+        });
+    }
+
     const article = {
         _id: req.params.id,
         ...req.body
     };
 
-    Article.updateOne({_id: req.params.id}, article)
+    Article.updateOne({ _id: req.params.id }, article)
     .then(() => {
         res.status(201).json({
             response: "Article updated"
