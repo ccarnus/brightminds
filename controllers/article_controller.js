@@ -3,7 +3,7 @@ const generateEvaluation = require('../backend/generate_question');
 const generateArticleImage = require('../backend/generate_article_image');
 const fs = require('fs');
 const User = require('../models/user_model.js');
-const departments = require('..lists/departments.js');
+const departments = require('../lists/departments.js');
 
 const isValidDepartment = (department) => departments.includes(department);
 
