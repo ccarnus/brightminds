@@ -42,6 +42,7 @@ exports.createCast = async (req, res, next) => {
         likes: req.body.cast.likes,
         comments: req.body.cast.comments,
         visibility: req.body.cast.visibility,
+        link: req.body.cast.link,
         evaluation: evaluation,
         duration: duration,
       });
@@ -109,6 +110,7 @@ exports.updateOneCast = (req, res, next) => {
             comments: req.body.cast.comments,
             evaluation: req.body.cast.evaluation,
             visibility: req.body.cast.visibility,
+            link: req.body.cast.link,
             university: req.body.cast.university,
             dateAdded: req.body.cast.dateAdded,
             verificationStatus: req.body.cast.verificationStatus,

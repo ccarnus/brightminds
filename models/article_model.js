@@ -9,6 +9,7 @@ const articleSchema = mongoose.Schema({
     university: {type:String, requiered:true},
     category: {type:String, requiered:true},
     visibility: {type:String, requiered:true},
+    link: {type:String, requiered:false},
     duration: {type:Number, required:true},
     verificationStatus: {
         status: {type:String, requiered:false},
