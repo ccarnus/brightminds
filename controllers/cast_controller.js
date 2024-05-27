@@ -3,7 +3,7 @@ const User = require('../models/user_model.js');
 const { getVideoDurationInSeconds } = require('../backend/videoUtils');
 const fs = require('fs');
 const departments = require('../lists/departments.js');
-const castQueue = require('queues/castQueue');
+const castQueue = require('../queues/castQueue.js');
 
 const isValidDepartment = (department) => departments.includes(department);
 

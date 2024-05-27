@@ -1,7 +1,7 @@
 // queues/castQueue.js
 const Queue = require('bull');
-const generateEvaluation = require('../../backend/generate_question');
-const generateCastImage = require('../../backend/generate_cast_image');
+const generateEvaluation = require('../backend/generate_question');
+const generateCastImage = require('../backend/generate_cast_image');
 const Cast = require('../models/cast_model');
 
 const castQueue = new Queue('castQueue');
