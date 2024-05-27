@@ -24,7 +24,7 @@ async function downloadImage(url, filepath) {
 }
 
 async function generateArticleImage(description) {
-    const modifiedDescription = `Create an engaging and visually appealing landscape cover image for an article. IMPORTANT, the design should be user-friendly, inviting, and accurately depict the article's subject matter and shall not have any text. Don't make the image too dense, keep it simple, simple shapes. The content of the image should align with the following theme: ${description}.`;
+    const modifiedDescription = `Create an engaging and visually appealing landscape cover image for an article. IMPORTANT, the design should be user-friendly, inviting, and accurately depict the article's subject matter and shall not have any text. Don't make the image too dense, keep it simple, simple shapes. The content of the image should align with the following theme: ${description}. Don't make the image too detailled, keep the image simple with few components.`;
     try {
         const response = await client.images.generate({
             model: "dall-e-3",
