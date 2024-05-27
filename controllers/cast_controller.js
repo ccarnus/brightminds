@@ -5,71 +5,59 @@ const fs = require('fs');
 const generateEvaluation = require('../backend/generate_question');
 const generateCastImage = require('../backend/generate_cast_image');
 const departments = require('../lists/departments.js');
+const castQueue = require('../queues/castQueue');
 
 const isValidDepartment = (department) => departments.includes(department);
 
 exports.createCast = async (req, res, next) => {
     try {
-      const url = req.protocol + "://" + req.get('host');
-      req.body.cast = JSON.parse(req.body.cast);
+        const url = req.protocol + "://" + req.get('host');
+        req.body.cast = JSON.parse(req.body.cast);
 
-      if (!isValidDepartment(req.body.cast.department)) {
+        if (!isValidDepartment(req.body.cast.department)) {
             return res.status(400).json({
                 error: 'Invalid department'
             });
         }
-  
-      const evaluation = await generateEvaluation(req.body.cast.description);
-      if (!evaluation) {
-        return res.status(400).json({
-          error: 'Failed to generate evaluation'
+
+        // Use the utility function to get the video duration
+        const videoFilePath = './backend/media/cast_videos/' + req.file.filename;
+        const duration = await getVideoDurationInSeconds(videoFilePath);
+
+        const cast = new Cast({
+            title: req.body.cast.title,
+            description: req.body.cast.description,
+            department: req.body.cast.department,
+            brightmindid: req.body.cast.brightmindid,
+            casturl: url + '/backend/media/cast_videos/' + req.file.filename,
+            castimageurl: '',  // Placeholder for now
+            category: req.body.cast.category,
+            university: req.body.cast.university,
+            likes: req.body.cast.likes,
+            comments: req.body.cast.comments,
+            visibility: req.body.cast.visibility,
+            link: req.body.cast.link,
+            evaluation: '',  // Placeholder for now
+            duration: duration,
         });
-      }
 
-      const imagePath = await generateCastImage(req.body.cast.description);
-        if (!imagePath) {
-            return res.status(400).json({
-                error: 'Failed to generate cast image'
-            });
-        }
-      const castImageURL = url + imagePath.replace(/^.*\/backend/, '/backend');
-      console.log(castImageURL);
+        await cast.save();
 
-      // Use the utility function to get the video duration
-      const videoFilePath = './backend/media/cast_videos/' + req.file.filename;
-      const duration = await getVideoDurationInSeconds(videoFilePath);
-
-      const cast = new Cast({
-        title: req.body.cast.title,
-        description: req.body.cast.description,
-        department: req.body.cast.department,
-        brightmindid: req.body.cast.brightmindid,
-        casturl: url + '/backend/media/cast_videos/' + req.file.filename,
-        castimageurl: castImageURL,
-        category: req.body.cast.category,
-        university: req.body.cast.university,
-        likes: req.body.cast.likes,
-        comments: req.body.cast.comments,
-        visibility: req.body.cast.visibility,
-        link: req.body.cast.link,
-        evaluation: evaluation,
-        duration: duration,
-      });
-  
-      cast.save().then(() => {
-        res.status(201).json({ response: 'Cast Created.' });
-      }).catch((error) => {
-        res.status(400).json({
-          error: error
+        // Add job to the queue
+        castQueue.add({
+            castId: cast._id,
+            description: req.body.cast.description,
+            url: url
         });
-      });
+
+        res.status(201).json({ response: 'Cast Created and processing in background.' });
     } catch (error) {
-      console.error('Error creating cast:', error);
-      res.status(500).json({
-        error: 'Internal server error'
-      });
+        console.error('Error creating cast:', error);
+        res.status(500).json({
+            error: 'Internal server error'
+        });
     }
-  };
+};
 
 
 exports.getAllCast = (req, res, next) => {
