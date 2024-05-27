@@ -2,10 +2,8 @@ const Cast = require('../models/cast_model.js');
 const User = require('../models/user_model.js');
 const { getVideoDurationInSeconds } = require('../backend/videoUtils');
 const fs = require('fs');
-const generateEvaluation = require('../backend/generate_question');
-const generateCastImage = require('../backend/generate_cast_image');
 const departments = require('../lists/departments.js');
-const castQueue = require('../queues/castQueue');
+const castQueue = require('queues/castQueue');
 
 const isValidDepartment = (department) => departments.includes(department);
 
