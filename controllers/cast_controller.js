@@ -195,18 +195,16 @@ exports.deleteOneCast = async (req, res, next) => {
 
         // Delete video file
         const videoFilename = cast.casturl.split('/media/cast_videos/')[1];
-        fs.unlink('./backend/media/cast_videos/' + videoFilename, async (err) => {
-            if (err) {
-                console.error('Error deleting video file:', err);
-                return res.status(500).json({ error: 'Error deleting video file.' });
+        fs.unlink('./backend/media/cast_videos/' + videoFilename, async (videoErr) => {
+            if (videoErr) {
+                console.error('Error deleting video file:', videoErr);
             }
 
             // Delete image file
             const imageFilename = cast.castimageurl.split('/media/cast_images/')[1];
-            fs.unlink('./backend/media/cast_images/' + imageFilename, async (err) => {
-                if (err) {
-                    console.error('Error deleting image file:', err);
-                    return res.status(500).json({ error: 'Error deleting image file.' });
+            fs.unlink('./backend/media/cast_images/' + imageFilename, async (imageErr) => {
+                if (imageErr) {
+                    console.error('Error deleting image file:', imageErr);
                 }
 
                 try {
@@ -228,6 +226,7 @@ exports.deleteOneCast = async (req, res, next) => {
         res.status(500).json({ error: 'Error finding cast.' });
     }
 };
+
 
 exports.getAllNewCast = (req, res, next) => {
 
