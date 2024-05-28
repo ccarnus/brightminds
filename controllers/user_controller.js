@@ -446,42 +446,39 @@ exports.markContentAsAnswered = async (req, res, next) => {
         });
 }
 
-exports.getSuggestedForYou = (req, res, next) => {
-    // Step 1: Fetch the user
-    User.findById(req.params.id)
-        .then(user => {
-            if (!user) {
-                return res.status(404).json({ message: 'User not found.' });
-            }
+exports.getSuggestedForYou = async (req, res, next) => {
+    try {
+        const user = await User.findById(req.params.id);
 
-            // Step 2: Find the highest weighted category
-            let maxWeight = 0;
-            let preferredCategory = '';
+        if (!user) {
+            return res.status(404).json({ message: 'User not found.' });
+        }
 
-            user.preferences.forEach(pref => {
-                if (pref.weight > maxWeight) {
-                    maxWeight = pref.weight;
-                    preferredCategory = pref.category;
-                }
-            });
+        if (!user.preferences || user.preferences.length === 0) {
+            return res.status(404).json({ message: 'No preferences set for user.' });
+        }
 
-            // If no preferences are set, you might want to handle it differently
-            if (!preferredCategory) {
-                return res.status(404).json({ message: 'No preferences set for user.' });
-            }
+        // Step 1: Fetch user preferences
+        const preferences = user.preferences;
 
-            // Step 3: Find casts in that category
-            Cast.find({ department: preferredCategory }).sort({ _id: 1 })
-                .then(casts => {
-                    res.status(200).json(casts);
-                })
-                .catch(error => {
-                    res.status(400).json({ error: error });
-                });
-        })
-        .catch(error => {
-            res.status(500).json({ error: 'An error occurred.' });
-        });
+        // Step 2: Fetch casts for each preference category
+        const castsByCategory = await Promise.all(preferences.map(async (pref) => {
+            const casts = await Cast.find({ department: pref.category }).sort({ _id: 1 }).lean();
+            return casts.map(cast => ({ ...cast, weight: pref.weight }));
+        }));
+
+        // Step 3: Flatten the array and sort the casts by weight
+        const allCasts = castsByCategory.flat();
+        allCasts.sort((a, b) => b.weight - a.weight);
+
+        // Removing the weight property for the final response
+        const finalCasts = allCasts.map(({ weight, ...rest }) => rest);
+
+        res.status(200).json(finalCasts);
+    } catch (error) {
+        console.error('Error fetching suggested casts:', error);
+        res.status(500).json({ error: 'An error occurred.' });
+    }
 };
 
 exports.getUserPreferences = (req, res, next) => {
