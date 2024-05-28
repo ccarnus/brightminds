@@ -193,11 +193,15 @@ exports.deleteOneCast = async (req, res, next) => {
             return res.status(404).json({ error: 'Cast not found.' });
         }
 
+        let videoDeleteError = false;
+        let imageDeleteError = false;
+
         // Delete video file
         const videoFilename = cast.casturl.split('/media/cast_videos/')[1];
         fs.unlink('./backend/media/cast_videos/' + videoFilename, async (videoErr) => {
             if (videoErr) {
                 console.error('Error deleting video file:', videoErr);
+                videoDeleteError = true;
             }
 
             // Delete image file
@@ -205,6 +209,7 @@ exports.deleteOneCast = async (req, res, next) => {
             fs.unlink('./backend/media/cast_images/' + imageFilename, async (imageErr) => {
                 if (imageErr) {
                     console.error('Error deleting image file:', imageErr);
+                    imageDeleteError = true;
                 }
 
                 try {
@@ -214,7 +219,16 @@ exports.deleteOneCast = async (req, res, next) => {
                     // Remove the cast from users' bookmarked elements and evaluation list
                     await removeCastFromUsers(req.params.id);
 
-                    res.status(200).json({ response: 'Cast deleted and references removed from users.' });
+                    let responseMessage = 'Cast deleted and references removed from users.';
+                    if (videoDeleteError && imageDeleteError) {
+                        responseMessage += ' However, there were errors deleting both the video and image files.';
+                    } else if (videoDeleteError) {
+                        responseMessage += ' However, there was an error deleting the video file.';
+                    } else if (imageDeleteError) {
+                        responseMessage += ' However, there was an error deleting the image file.';
+                    }
+
+                    res.status(200).json({ response: responseMessage });
                 } catch (error) {
                     console.error('Error deleting cast:', error);
                     res.status(500).json({ error: 'Error deleting cast.' });
@@ -226,7 +240,6 @@ exports.deleteOneCast = async (req, res, next) => {
         res.status(500).json({ error: 'Error finding cast.' });
     }
 };
-
 
 exports.getAllNewCast = (req, res, next) => {
 

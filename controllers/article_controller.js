@@ -131,29 +131,37 @@ const removeArticleFromUsers = async (articleId) => {
     }
 };
 
-exports.deleteOneArticle = (req, res, next) => {
-    Article.findById(req.params.id).then(article => {
+exports.deleteOneArticle = async (req, res, next) => {
+    try {
+        const article = await Article.findById(req.params.id);
         if (!article) {
             return res.status(404).json({ message: 'Article not found.' });
         }
 
+        let imageDeleteError = false;
+
         // Delete associated image file
         const imagePath = article.articleimageurl.split('/backend/media/article_images/')[1];
         if (imagePath) {
-            fs.unlink(`./backend/media/article_images/${imagePath}`, async err => {
+            fs.unlink(`./backend/media/article_images/${imagePath}`, async (err) => {
                 if (err) {
                     console.error('Error deleting article image:', err);
-                    return res.status(500).json({ error: 'Failed to delete associated article image.' });
+                    imageDeleteError = true;
                 }
 
                 try {
-                    // Proceed to delete the article record after the image has been successfully deleted
+                    // Proceed to delete the article record after attempting to delete the image
                     await Article.deleteOne({ _id: req.params.id });
 
                     // Remove the article from users' bookmarked elements and evaluation list
                     await removeArticleFromUsers(req.params.id);
 
-                    res.status(200).json({ response: 'Article deleted and references removed from users.' });
+                    let responseMessage = 'Article deleted and references removed from users.';
+                    if (imageDeleteError) {
+                        responseMessage += ' However, there was an error deleting the associated article image.';
+                    }
+
+                    res.status(200).json({ response: responseMessage });
                 } catch (error) {
                     console.error('Error deleting article:', error);
                     res.status(500).json({ error: 'Error deleting article.' });
@@ -161,18 +169,22 @@ exports.deleteOneArticle = (req, res, next) => {
             });
         } else {
             // No image path found, directly delete the article
-            Article.deleteOne({ _id: req.params.id }).then(async () => {
+            try {
+                await Article.deleteOne({ _id: req.params.id });
+
                 // Remove the article from users' bookmarked elements and evaluation list
                 await removeArticleFromUsers(req.params.id);
 
                 res.status(200).json({ response: 'Article deleted and references removed from users.' });
-            }).catch(error => {
-                res.status(400).json({ error });
-            });
+            } catch (error) {
+                console.error('Error deleting article:', error);
+                res.status(500).json({ error: 'Error deleting article.' });
+            }
         }
-    }).catch(error => {
-        res.status(404).json({ error: 'Article not found.' });
-    });
+    } catch (error) {
+        console.error('Error finding article:', error);
+        res.status(500).json({ error: 'Error finding article.' });
+    }
 };
 
 exports.getAllArticleByCategory = (req, res, next) => {
