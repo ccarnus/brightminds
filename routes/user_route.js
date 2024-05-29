@@ -22,10 +22,10 @@ router.get('/bookmarks/:id', userCtrl.getUserBookmarks);
 router.post('/add/bookmarks/:id', userCtrl.addUserBookmark);
 router.delete('/remove/bookmarks/:id/:castId', userCtrl.removeUserBookmark);
 //Preferences
-router.get('/:id/suggested/for/you',userCtrl.getSuggestedForYou);
 router.get('/:id/preferences', userCtrl.getUserPreferences);
 router.post('/:id/preferences', userCtrl.updateUserPreferences);
 //Tracking
+router.get('/:id/suggested/for/you',userCtrl.getSuggestedForYou);
 router.put('/:id/update/tracking', userCtrl.updateUserTracking);
 router.get('/:id/tracking', userCtrl.getUserTracking);
 //Virtual Labs
