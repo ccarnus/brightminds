@@ -23,7 +23,7 @@ const generateEvaluation = async (description) => {
     model: 'gpt-3.5-turbo', // You can specify the model you want to use
     messages: [
         { role: 'system', content: 'You are a helpful assistant.' },
-        { role: 'user', content: `Generate a multiple-choice question based on the following description (place the correct answer first): ${description}\nQuestion:` },
+        { role: 'user', content: `Generate a multiple-choice question based on the following description (place the correct answer first). The question should aim to see if the user understood what was described. The user will answer the question after seeing many different description, so the question should not expect the user to know what description it refers to. Here is the description: ${description}\nQuestion:` },
     ],
       max_tokens: 500,
       temperature: 0.7, // Adjust temperature for response randomness
