@@ -11,7 +11,7 @@ exports.signup = (req, res, next) => {
     req.body.user = JSON.parse(req.body.user);
     if(!emailVerificator(req.body.user.email)) {
         return res.status(400).json({
-            error: "The email domain name id not a valid one."
+            error: "The email domain name is not a valid one."
         });
     }
     bcrypt.hash(req.body.user.password, 10).then(
@@ -19,11 +19,10 @@ exports.signup = (req, res, next) => {
             const url = req.protocol + "://" + req.get('host');
             const user = new User({
                 email: req.body.user.email,
-                password: req.body.user.password,
+                password: hash,
                 username: req.body.user.username,
                 role: req.body.user.role,
-                department: req.body.user.department,
-                score: req.body.user.score,
+                score: 0,
                 profilePictureUrl: url + '/backend/media/profile_pictures/' + req.file.filename,
             });
             user.save().then(
@@ -32,7 +31,7 @@ exports.signup = (req, res, next) => {
                 }
             ).catch(
                 (error) => {
-                    res.status(501).json({
+                    res.status(500).json({
                         error: error
                     });
                 }
@@ -40,7 +39,7 @@ exports.signup = (req, res, next) => {
         }
     ).catch(
         (error) => {
-            res.status(501).json({
+            res.status(500).json({
                 error: error
             });
         }

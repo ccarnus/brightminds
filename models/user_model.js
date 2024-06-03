@@ -5,9 +5,13 @@ const userSchema = mongoose.Schema({
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
     username: { type: String, required: true },
-    role: { type: String, required: true },
-    department: { type: String, required: true },
-    score: { type: Number, required: true },
+    role: { 
+        type: String, 
+        required: true,
+        enum: ['College Student', 'Professor', 'Researcher', 'Learning Enthusiast', 'PhD Student']
+    },
+    department: { type: String, required: false },
+    score: { type: Number, required: true, default: 0 },
     profilePictureUrl: { type: String, required: true },
     evaluation_list: [{
         contentid: { type: String, required: false },
@@ -42,4 +46,4 @@ const userSchema = mongoose.Schema({
 
 userSchema.plugin(uniqueValidator);
 
-module.exports = mongoose.model('user', userSchema);
+module.exports = mongoose.model('User', userSchema);
