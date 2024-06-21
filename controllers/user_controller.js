@@ -122,6 +122,7 @@ exports.getOneUser = async (req, res, next) => {
         profilePictureUrl: user.profilePictureUrl,
         evaluation_list: user.evaluation_list,
         percentage: percentage,
+        preferences: user.preferences,
         tracking: user.tracking,
         virtual_labs: user.virtual_labs,
 
