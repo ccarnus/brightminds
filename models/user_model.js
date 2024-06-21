@@ -24,7 +24,8 @@ const userSchema = mongoose.Schema({
     }],
     preferences: [{
         category: { type: String, required: true },
-        weight: { type: Number, required: true }
+        weight: { type: Number, required: true },
+        count: { type: Number, required: true, default: 0 }
     }],
     tracking: {
         objective: { type: String, default: "Explorer" },

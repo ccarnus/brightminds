@@ -6,6 +6,7 @@ const jwt = require('jsonwebtoken');
 const fs = require('fs');
 const Cast = require('../models/cast_model.js');
 const Article = require('../models/article_model.js');
+const departments = require('../lists/departments.js');
 
 exports.signup = (req, res, next) => {
     req.body.user = JSON.parse(req.body.user);
@@ -503,6 +504,11 @@ exports.updateUserPreferences = async (req, res, next) => {
         return res.status(400).json({ message: 'Invalid modification type. Must be either "positive" or "negative".' });
     }
 
+    // Verification for 'category' field
+    if (!departments.includes(category)) {
+        return res.status(400).json({ message: 'Invalid category. Must be one of the predefined departments.' });
+    }
+
     try {
         const user = await User.findById(userId);
 
@@ -514,17 +520,24 @@ exports.updateUserPreferences = async (req, res, next) => {
         let existingCategory = user.preferences.find(pref => pref.category === category);
 
         if (existingCategory) {
-            // Update the weight based on the modification type
-            existingCategory.weight += modification === 'positive' ? 1 : -1;
+            // Update the count based on the modification type
+            existingCategory.count += modification === 'positive' ? 1 : -1;
+            if (existingCategory.count < 0) existingCategory.count = 0; // Ensure count does not go negative
         } else if (modification === 'positive') {
-            // If category doesn't exist and modification is positive, create new category
-            user.preferences.push({ category: category, weight: 1 });
+            // If category doesn't exist and modification is positive, create new category with count 1
+            user.preferences.push({ category: category, weight: 0, count: 1 });
         } // If category doesn't exist and modification is negative, ignore
 
-        // Ensure the sum of weights equals 100
-        let totalWeight = user.preferences.reduce((acc, pref) => acc + pref.weight, 0);
+        // Calculate the total count of all preferences
+        const totalCount = user.preferences.reduce((acc, pref) => acc + pref.count, 0);
+
+        // Update the weights based on the count
         user.preferences.forEach(pref => {
-            pref.weight = (pref.weight / totalWeight) * 100;
+            if (totalCount > 0) {
+                pref.weight = (pref.count / totalCount) * 100;
+            } else {
+                pref.weight = 0;
+            }
         });
 
         // Save the updated user
