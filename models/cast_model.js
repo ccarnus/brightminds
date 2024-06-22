@@ -1,25 +1,25 @@
- const mongoose = require('mongoose');
+const mongoose = require('mongoose');
 
 const castSchema = mongoose.Schema({
-    title: {type:String, required:true},
-    description: {type:String, required:true},
-    department: {type: String, required: true},
-    brightmindid: {type:Number, required:true},
-    casturl: {type:String, required:true},
-    castimageurl: { type: String, required:false},
-    university: {type:String, requiered:true},
-    category: {type:String, requiered:true},
-    visibility: {type:String, requiered:true},
-    link: {type:String, requiered:false},
-    duration: {type: Number, requiered:false},
+    title: { type: String, required: true },
+    description: { type: String, required: true },
+    department: { type: String, required: true },
+    brightmindid: { type: mongoose.Schema.Types.ObjectId, required: true, ref: 'User' },
+    casturl: { type: String, required: true },
+    castimageurl: { type: String, required: false },
+    university: { type: String, required: true },
+    category: { type: String, required: true },
+    visibility: { type: String, required: true },
+    link: { type: String, required: false },
+    duration: { type: Number, required: false },
     verificationStatus: {
-        status: {type:String, requiered:false},
-        approvals: {type: Number, required: false},
+        status: { type: String, required: false },
+        approvals: { type: Number, required: false },
         approvers_id: [
-            {type:String, required: false}
+            { type: String, required: false }
         ],
         disapprovers_id: [
-            {type:String, required: false}
+            { type: String, required: false }
         ]
     },
     dateAdded: { type: Date, default: Date.now },
@@ -28,29 +28,29 @@ const castSchema = mongoose.Schema({
         count: { type: Number, default: 1 }
     },
     likes: {
-        count: {type:Number, default:0},
+        count: { type: Number, default: 0 },
         user: [
-            {type:String, default:""}
+            { type: String, default: "" }
         ]
     },
     comments: {
-        count: {type:Number, default:0},
+        count: { type: Number, default: 0 },
         comment: [
             {
-                author: {type:String, default:""},
-                content: {type:String, default:""}
+                author: { type: String, default: "" },
+                content: { type: String, default: "" }
             }
         ]
     },
     evaluation: {
-        question: {type:String, required:false},
+        question: { type: String, required: false },
         responses: [
             {
-                type:String, required:false
+                type: String, required: false
             }
         ],
-        correct: {type:String, required:false}
+        correct: { type: String, required: false }
     }
 });
 
-module.exports = mongoose.model('cast',castSchema);
+module.exports = mongoose.model('Cast', castSchema);
