@@ -90,7 +90,7 @@ exports.login = (req, res, next) => {
 exports.getAllUser = async (req, res, next) => {
     try {
       const users = await User.find()
-        .select('_id email username role department score profilePictureUrl evaluation_list virtual_labs preferences tracking')
+        .select('_id email username role department score profilePictureUrl evaluation_list virtual_labs preferences tracking castPublications articlePublications')
         .sort({ score: -1 }); 
   
       res.status(200).json(users);
@@ -125,6 +125,8 @@ exports.getOneUser = async (req, res, next) => {
         preferences: user.preferences,
         tracking: user.tracking,
         virtual_labs: user.virtual_labs,
+        castPublications: user.castPublications,
+        articlePublications: user.articlePublications,
 
       };
   
@@ -152,6 +154,8 @@ exports.updateOneUser = (req, res, next) => {
             preferences: req.body.user.preferences,
             tracking: req.body.user.tracking,
             virtual_labs: req.body.user.virtual_labs,
+            castPublications: req.body.user.castPublications,
+            articlePublications: req.body.user.articlePublications,
         };
     } else {
         user = {
@@ -166,6 +170,8 @@ exports.updateOneUser = (req, res, next) => {
             preferences: req.body.preferences,
             tracking: req.body.tracking,
             virtual_labs: req.body.virtual_labs,
+            castPublications: req.body.castPublications,
+            articlePublications: req.body.articlePublications,
         };
     }
     User.updateOne({_id:req.params.id}, user).then(

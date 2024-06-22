@@ -41,6 +41,13 @@ exports.createCast = async (req, res, next) => {
 
         await cast.save();
 
+        // Add cast ID to the user's castPublications
+        const user = await User.findById(req.body.cast.brightmindid);
+        if (user) {
+            user.castPublications.push(cast._id);
+            await user.save();
+        }
+
         // Add job to the queue
         castQueue.add({
             castId: cast._id,
@@ -57,7 +64,6 @@ exports.createCast = async (req, res, next) => {
     }
 };
 
-
 exports.getAllCast = (req, res, next) => {
     Cast.find().sort({ _id: 1 }).then(
         (casts) => {
@@ -69,7 +75,6 @@ exports.getAllCast = (req, res, next) => {
         });
     });
 }
-
 
 exports.getOneCast = (req, res, next) => {
     Cast.findOne({

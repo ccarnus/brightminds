@@ -15,7 +15,7 @@ const userSchema = mongoose.Schema({
     profilePictureUrl: { type: String, required: true },
     evaluation_list: [{
         contentid: { type: String, required: false },
-        type: {type: String, required: false},
+        type: { type: String, required: false },
         watched: { type: Boolean, required: false },
         answered: { type: Boolean, required: false }
     }],
@@ -42,7 +42,13 @@ const userSchema = mongoose.Schema({
         follower: [{
             labId: { type: String, required: false }
         }]
-    }
+    },
+    castPublications: [{ 
+        type: mongoose.Schema.Types.ObjectId, ref: 'Cast' 
+        }],
+    articlePublications: [{ 
+        type: mongoose.Schema.Types.ObjectId, ref: 'Article' 
+    }]
 });
 
 userSchema.plugin(uniqueValidator);

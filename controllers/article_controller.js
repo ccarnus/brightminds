@@ -38,13 +38,16 @@ exports.createArticle = async (req, res, next) => {
             evaluation: evaluation
         });
 
-        article.save().then(() => {
-            res.status(201).json({ response: 'Article Created.' });
-        }).catch((error) => {
-            res.status(400).json({
-                error: error
-            });
-        });
+        await article.save();
+
+        // Add article ID to the user's articlePublications
+        const user = await User.findById(req.body.brightmindid);
+        if (user) {
+            user.articlePublications.push(article._id);
+            await user.save();
+        }
+
+        res.status(201).json({ response: 'Article Created.' });
     } catch (error) {
         console.error('Error creating article:', error);
         res.status(500).json({
