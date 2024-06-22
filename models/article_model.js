@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const articleSchema = mongoose.Schema({
     title: { type: String, required: true },
     department: { type: String, required: true },
-    brightmindid: { type: mongoose.Schema.Types.ObjectId, required: true, ref: 'User' },
+    brightmindid: { type: String, required: true},
     articleDescription: { type: String, required: true },
     articleimageurl: { type: String, required: true },
     university: { type: String, required: true },

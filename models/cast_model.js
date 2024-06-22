@@ -4,7 +4,7 @@ const castSchema = mongoose.Schema({
     title: { type: String, required: true },
     description: { type: String, required: true },
     department: { type: String, required: true },
-    brightmindid: { type: mongoose.Schema.Types.ObjectId, required: true, ref: 'User' },
+    brightmindid: { type: String, required: true},
     casturl: { type: String, required: true },
     castimageurl: { type: String, required: false },
     university: { type: String, required: true },
