@@ -159,6 +159,13 @@ exports.deleteOneArticle = async (req, res, next) => {
                     // Remove the article from users' bookmarked elements and evaluation list
                     await removeArticleFromUsers(req.params.id);
 
+                    // Remove article ID from the user's articlePublications
+                    const user = await User.findById(article.brightmindid);
+                    if (user) {
+                        user.articlePublications = user.articlePublications.filter(pubId => !pubId.equals(article._id));
+                        await user.save();
+                    }
+
                     let responseMessage = 'Article deleted and references removed from users.';
                     if (imageDeleteError) {
                         responseMessage += ' However, there was an error deleting the associated article image.';
@@ -177,6 +184,13 @@ exports.deleteOneArticle = async (req, res, next) => {
 
                 // Remove the article from users' bookmarked elements and evaluation list
                 await removeArticleFromUsers(req.params.id);
+
+                // Remove article ID from the user's articlePublications
+                const user = await User.findById(article.brightmindid);
+                if (user) {
+                    user.articlePublications = user.articlePublications.filter(pubId => !pubId.equals(article._id));
+                    await user.save();
+                }
 
                 res.status(200).json({ response: 'Article deleted and references removed from users.' });
             } catch (error) {

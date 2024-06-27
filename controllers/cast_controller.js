@@ -224,6 +224,13 @@ exports.deleteOneCast = async (req, res, next) => {
                     // Remove the cast from users' bookmarked elements and evaluation list
                     await removeCastFromUsers(req.params.id);
 
+                    // Remove cast ID from the user's castPublications
+                    const user = await User.findById(cast.brightmindid);
+                    if (user) {
+                        user.castPublications = user.castPublications.filter(pubId => !pubId.equals(cast._id));
+                        await user.save();
+                    }
+
                     let responseMessage = 'Cast deleted and references removed from users.';
                     if (videoDeleteError && imageDeleteError) {
                         responseMessage += ' However, there were errors deleting both the video and image files.';
@@ -245,6 +252,7 @@ exports.deleteOneCast = async (req, res, next) => {
         res.status(500).json({ error: 'Error finding cast.' });
     }
 };
+
 
 exports.getAllNewCast = (req, res, next) => {
 
