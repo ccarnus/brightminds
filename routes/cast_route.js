@@ -24,5 +24,7 @@ router.get('/:id/grade', cast_controller.getCastGrade);
 router.post('/:id/grade', cast_controller.updateCastGrade);
 //trending
 router.get('/trending/right/now', cast_controller.getCastTrending);
+//by department
+router.get('/department/:id', cast_controller.getAllCastByDepartment);
 
 module.exports = router;

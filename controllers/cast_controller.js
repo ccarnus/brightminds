@@ -511,4 +511,18 @@ exports.getCastTrending = (req, res, next) => {
         );
 };
 
+exports.getAllCastByDepartment = (req, res, next) => {
+    const departmentId = req.params.id;
+
+    Cast.find({ department: departmentId })
+        .sort({ _id: 1 })
+        .then((casts) => {
+            res.status(200).json(casts);
+        })
+        .catch((error) => {
+            res.status(400).json({
+                error: error
+            });
+        });
+};
 
