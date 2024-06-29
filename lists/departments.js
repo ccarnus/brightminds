@@ -19,16 +19,12 @@ const departments = [
   'Engineering',
   'Medicine and Health Sciences',
   'Agricultural Sciences',
-  'Environmental Engineering',
   'Computer Science',
   'History',
   'Philosophy',
   'Linguistics',
-  'Art History',
-  'Cognitive Science',
   'Neuroscience',
   'Biophysics',
-  'Biochemistry',
   'Data Science',
   'Artificial Intelligence'
   ];
