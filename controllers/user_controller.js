@@ -478,8 +478,19 @@ exports.getSuggestedForYou = async (req, res, next) => {
         const allCasts = castsByCategory.flat();
         allCasts.sort((a, b) => b.weight - a.weight);
 
+        // Removing duplicates using a Set
+        const uniqueCasts = [];
+        const seenCasts = new Set();
+
+        for (const cast of allCasts) {
+            if (!seenCasts.has(cast._id.toString())) {
+                uniqueCasts.push(cast);
+                seenCasts.add(cast._id.toString());
+            }
+        }
+
         // Removing the weight property for the final response
-        const finalCasts = allCasts.map(({ weight, ...rest }) => rest);
+        const finalCasts = uniqueCasts.map(({ weight, ...rest }) => rest);
 
         res.status(200).json(finalCasts);
     } catch (error) {
