@@ -18,14 +18,20 @@ exports.signup = (req, res, next) => {
     bcrypt.hash(req.body.user.password, 10).then(
         (hash) => {
             const url = req.protocol + "://" + req.get('host');
-            const user = new User({
+            const userData = {
                 email: req.body.user.email,
                 password: hash,
                 username: req.body.user.username,
                 role: req.body.user.role,
                 score: 0,
                 profilePictureUrl: url + '/backend/media/profile_pictures/' + req.file.filename,
-            });
+            };
+
+            if (['Professor', 'PhD Student', 'Researcher'].includes(req.body.user.role)) {
+                userData.university = req.body.user.university;
+            }
+
+            const user = new User(userData);
             user.save().then(
                 () => {
                     res.status(201).json({response:'User Created.'});
@@ -90,7 +96,7 @@ exports.login = (req, res, next) => {
 exports.getAllUser = async (req, res, next) => {
     try {
       const users = await User.find()
-        .select('_id email username role department score profilePictureUrl evaluation_list virtual_labs preferences tracking castPublications articlePublications')
+        .select('_id email username role department score profilePictureUrl evaluation_list virtual_labs preferences tracking castPublications articlePublications university')
         .sort({ score: -1 }); 
   
       res.status(200).json(users);
@@ -100,7 +106,7 @@ exports.getAllUser = async (req, res, next) => {
   };
   
 
-exports.getOneUser = async (req, res, next) => {
+  exports.getOneUser = async (req, res, next) => {
     try {
       const user = await User.findById(req.params.id);
   
@@ -118,6 +124,7 @@ exports.getOneUser = async (req, res, next) => {
         username: user.username,
         role: user.role,
         department: user.department,
+        university: user.university,
         score: user.score,
         profilePictureUrl: user.profilePictureUrl,
         evaluation_list: user.evaluation_list,
@@ -127,14 +134,13 @@ exports.getOneUser = async (req, res, next) => {
         virtual_labs: user.virtual_labs,
         castPublications: user.castPublications,
         articlePublications: user.articlePublications,
-
       };
   
       res.status(200).json(userWithPercentage);
     } catch (error) {
       res.status(500).json({ error: 'An error occurred.' });
     }
-  };
+};
   
 
 exports.updateOneUser = (req, res, next) => {
@@ -156,6 +162,7 @@ exports.updateOneUser = (req, res, next) => {
             virtual_labs: req.body.user.virtual_labs,
             castPublications: req.body.user.castPublications,
             articlePublications: req.body.user.articlePublications,
+            university: req.body.user.university
         };
     } else {
         user = {
@@ -172,6 +179,7 @@ exports.updateOneUser = (req, res, next) => {
             virtual_labs: req.body.virtual_labs,
             castPublications: req.body.castPublications,
             articlePublications: req.body.articlePublications,
+            university: req.body.university
         };
     }
     User.updateOne({_id:req.params.id}, user).then(

@@ -11,6 +11,7 @@ const userSchema = mongoose.Schema({
         enum: ['College Student', 'Professor', 'Researcher', 'Learning Enthusiast', 'PhD Student']
     },
     department: { type: String, required: false },
+    university: { type: String, required: false },
     score: { type: Number, required: true, default: 0 },
     profilePictureUrl: { type: String, required: true },
     evaluation_list: [{
