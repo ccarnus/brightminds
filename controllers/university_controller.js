@@ -57,13 +57,15 @@ exports.updateOneUniversity = (req, res, next) => {
             _id:req.params.id,
             name:req.body.university.name,
             iconurl: url + '/backend/media/university_icon/' + req.file.filename,
-            score: req.body.university.score
+            score: req.body.university.score,
+            displayedName: req.body.university.displayedName
         };
     } else {university = {
             _id:req.params.id,
             name: req.body.name,
             score: req.body.score,
-            iconurl: req.body.iconurl
+            iconurl: req.body.iconurl,
+            displayedName: req.body.displayedName
         };
     }
     University.updateOne({_id:req.params.id}, university)
