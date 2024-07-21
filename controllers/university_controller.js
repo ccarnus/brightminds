@@ -7,6 +7,7 @@ exports.createUniversity = (req, res, next) => {
         req.body.university = JSON.parse(req.body.university);
         const university = new University({
             name: req.body.university.name,
+            displayedName: req.body.university.displayedName,
             iconurl: url + '/backend/media/university_icon/' + req.file.filename,
             score: req.body.university.score
         });
