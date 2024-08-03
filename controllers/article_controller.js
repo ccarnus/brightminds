@@ -17,6 +17,13 @@ exports.createArticle = async (req, res, next) => {
             });
         }
 
+        // Check if the title exceeds 65 characters
+        if (req.body.title && req.body.title.length > 65) {
+            return res.status(400).json({
+                error: 'Title must be 65 characters or less'
+            });
+        }
+
         const evaluation = await generateEvaluation(req.body.articleDescription); // Directly use req.body.articleDescription
         if (!evaluation) {
             return res.status(400).json({
