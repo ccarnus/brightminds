@@ -31,6 +31,7 @@ const userSchema = mongoose.Schema({
     tracking: {
         objective: { type: String, default: "Explorer" },
         progress: { type: Number, default: 0 },
+        target: { type: Number, default: 10 },
         history: [{
             category: { type: String, required: true },
             count: { type: Number, default: 0 }

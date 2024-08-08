@@ -8,9 +8,26 @@ const Cast = require('../models/cast_model.js');
 const Article = require('../models/article_model.js');
 const departments = require('../lists/departments.js');
 
+const getTargetValue = (objective) => {
+    switch (objective) {
+        case 'Follower':
+            return 5;
+        case 'Explorer':
+            return 10;
+        case 'Deep Learner':
+            return 20;
+        case 'Researcher':
+            return 30;
+        case 'Career':
+            return 50;
+        default:
+            return 10;
+    }
+};
+
 exports.signup = (req, res, next) => {
     req.body.user = JSON.parse(req.body.user);
-    if(!emailVerificator(req.body.user.email)) {
+    if (!emailVerificator(req.body.user.email)) {
         return res.status(400).json({
             error: "The email domain name is not a valid one."
         });
@@ -25,6 +42,10 @@ exports.signup = (req, res, next) => {
                 role: req.body.user.role,
                 score: 0,
                 profilePictureUrl: url + '/backend/media/profile_pictures/' + req.file.filename,
+                tracking: {
+                    objective: req.body.user.objective || 'Explorer',
+                    target: getTargetValue(req.body.user.objective || 'Explorer')
+                }
             };
 
             if (['Professor', 'PhD Student', 'Researcher'].includes(req.body.user.role)) {
@@ -34,7 +55,7 @@ exports.signup = (req, res, next) => {
             const user = new User(userData);
             user.save().then(
                 () => {
-                    res.status(201).json({response:'User Created.'});
+                    res.status(201).json({ response: 'User Created.' });
                 }
             ).catch(
                 (error) => {
@@ -52,6 +73,7 @@ exports.signup = (req, res, next) => {
         }
     );
 };
+
 
 exports.login = (req, res, next) => {
     User.findOne({email: req.body.email}).then(
@@ -575,11 +597,11 @@ exports.updateUserPreferences = async (req, res, next) => {
     }
 };
 
+
 exports.updateUserTracking = async (req, res) => {
     const userId = req.params.id;
     const { objective } = req.body;
 
-    // Define the valid objectives
     const validObjectives = ['Follower', 'Explorer', 'DeepLearner', 'Career', 'Researcher'];
 
     try {
@@ -594,6 +616,7 @@ exports.updateUserTracking = async (req, res) => {
         }
 
         user.tracking.objective = objective;
+        user.tracking.target = getTargetValue(objective);
 
         await user.save();
         res.status(200).json({ message: 'Tracking updated successfully.', tracking: user.tracking });
