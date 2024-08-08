@@ -602,12 +602,13 @@ exports.updateUserTracking = async (req, res) => {
     const userId = req.params.id;
     const { objective } = req.body;
 
-    const validObjectives = ['Follower', 'Explorer', 'DeepLearner', 'Career', 'Researcher'];
+    // Define the valid objectives
+    const validObjectives = ['Follower', 'Explorer', 'Deep Learner', 'Career', 'Researcher'];
 
     try {
         // Validate the objective value
         if (!validObjectives.includes(objective)) {
-            return res.status(400).json({ message: 'Invalid objective value. Must be one of Follower, Explorer, DeepLearner, Career, or Researcher.' });
+            return res.status(400).json({ message: 'Invalid objective value. Must be one of Follower, Explorer, Deep Learner, Career, or Researcher.' });
         }
 
         const user = await User.findById(userId);
@@ -615,8 +616,9 @@ exports.updateUserTracking = async (req, res) => {
             return res.status(404).json({ message: 'User not found.' });
         }
 
+        // Set the objective and target fields
         user.tracking.objective = objective;
-        user.tracking.target = getTargetValue(objective);
+        user.tracking.target = getTargetValue(objective); // Set or update the target field
 
         await user.save();
         res.status(200).json({ message: 'Tracking updated successfully.', tracking: user.tracking });
