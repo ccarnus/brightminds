@@ -637,7 +637,7 @@ exports.getUserTracking = async (req, res) => {
             return res.status(404).json({ message: 'User not found.' });
         }
 
-        res.status(200).json({ tracking: user.tracking});
+        res.status(200).json({ tracking: user.tracking, target: user.tracking.target});
     } catch (error) {
         res.status(500).json({ error: 'An error occurred.' });
     }
