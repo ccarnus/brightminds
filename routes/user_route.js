@@ -4,6 +4,7 @@ const userCtrl = require('../controllers/user_controller.js');
 const multer = require('../backend/multer-config_user.js');
 
 router.post('/signup', multer, userCtrl.signup);
+router.get('/confirmation/:token', userCtrl.confirmation);
 router.post('/login', userCtrl.login);
 router.get('/',userCtrl.getAllUser);
 router.get('/:id',userCtrl.getOneUser);

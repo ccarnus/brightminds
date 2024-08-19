@@ -7,6 +7,10 @@ const fs = require('fs');
 const Cast = require('../models/cast_model.js');
 const Article = require('../models/article_model.js');
 const departments = require('../lists/departments.js');
+const crypto = require('crypto');
+const nodemailer = require('nodemailer');
+
+const EMAIL_PWD = process.env.EMAIL_PWD;
 
 const getTargetValue = (objective) => {
     switch (objective) {
@@ -35,6 +39,8 @@ exports.signup = (req, res, next) => {
     bcrypt.hash(req.body.user.password, 10).then(
         (hash) => {
             const url = req.protocol + "://" + req.get('host');
+            const token = crypto.randomBytes(16).toString('hex'); // Generate a verification token
+
             const userData = {
                 email: req.body.user.email,
                 password: hash,
@@ -42,6 +48,7 @@ exports.signup = (req, res, next) => {
                 role: req.body.user.role,
                 score: 0,
                 profilePictureUrl: url + '/backend/media/profile_pictures/' + req.file.filename,
+                verificationToken: token,
                 tracking: {
                     objective: req.body.user.objective || 'Explorer',
                     target: getTargetValue(req.body.user.objective || 'Explorer')
@@ -53,17 +60,31 @@ exports.signup = (req, res, next) => {
             }
 
             const user = new User(userData);
-            user.save().then(
-                () => {
-                    res.status(201).json({ response: 'User Created.' });
-                }
-            ).catch(
-                (error) => {
-                    res.status(500).json({
-                        error: error
-                    });
-                }
-            );
+            user.save().then(async () => {
+                // Send verification email
+                const transporter = nodemailer.createTransport({
+                    service: 'Gmail',
+                    auth: {
+                        user: 'clement.carnus@brightmindsresearch.com',
+                        pass: EMAIL_PWD
+                    }
+                });
+
+                const mailOptions = {
+                    from: 'clement.carnus@brightmindsresearch.com',
+                    to: user.email,
+                    subject: 'Account Verification Token',
+                    text: `Hello,\n\nPlease verify your account by clicking the link: \nhttp:\/\/${req.headers.host}\/user/confirmation\/${token}\n`
+                };
+
+                await transporter.sendMail(mailOptions);
+
+                res.status(201).json({ response: 'User Created. Please check your email to verify your account.' });
+            }).catch((error) => {
+                res.status(500).json({
+                    error: error
+                });
+            });
         }
     ).catch(
         (error) => {
@@ -74,6 +95,24 @@ exports.signup = (req, res, next) => {
     );
 };
 
+exports.confirmation = (req, res, next) => {
+    User.findOne({ verificationToken: req.params.token }, (err, user) => {
+        if (!user) {
+            return res.status(400).send({ msg: 'We were unable to find a user for this token.' });
+        }
+        if (user.isVerified) {
+            return res.status(400).send({ msg: 'This user has already been verified.' });
+        }
+
+        user.isVerified = true;
+        user.verificationToken = undefined;
+
+        user.save((err) => {
+            if (err) { return res.status(500).send({ msg: err.message }); }
+            res.status(200).send("The account has been verified. Please log in.");
+        });
+    });
+};
 
 exports.login = (req, res, next) => {
     User.findOne({email: req.body.email}).then(

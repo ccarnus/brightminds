@@ -14,6 +14,8 @@ const userSchema = mongoose.Schema({
     university: { type: String, required: false },
     score: { type: Number, required: true, default: 0 },
     profilePictureUrl: { type: String, required: true },
+    isVerified: { type: Boolean, default: false },
+    verificationToken: { type: String, required: false },
     evaluation_list: [{
         contentid: { type: String, required: false },
         type: { type: String, required: false },
