@@ -29,71 +29,80 @@ const getTargetValue = (objective) => {
     }
 };
 
-exports.signup = (req, res, next) => {
+exports.signup = async (req, res, next) => {
     req.body.user = JSON.parse(req.body.user);
+    
+    // Validate email domain
     if (!emailVerificator(req.body.user.email)) {
         return res.status(400).json({
             error: "The email domain name is not a valid one."
         });
     }
-    bcrypt.hash(req.body.user.password, 10).then(
-        (hash) => {
-            const url = req.protocol + "://" + req.get('host');
-            const token = crypto.randomBytes(16).toString('hex'); // Generate a verification token
 
-            const userData = {
-                email: req.body.user.email,
-                password: hash,
-                username: req.body.user.username,
-                role: req.body.user.role,
-                score: 0,
-                profilePictureUrl: url + '/backend/media/profile_pictures/' + req.file.filename,
-                verificationToken: token,
-                tracking: {
-                    objective: req.body.user.objective || 'Explorer',
-                    target: getTargetValue(req.body.user.objective || 'Explorer')
-                }
-            };
+    try {
+        // Hash the password
+        const hash = await bcrypt.hash(req.body.user.password, 10);
 
-            if (['Professor', 'PhD Student', 'Researcher'].includes(req.body.user.role)) {
-                userData.university = req.body.user.university;
+        // Generate the verification token
+        const token = crypto.randomBytes(16).toString('hex');
+        const url = req.protocol + "://" + req.get('host');
+
+        // Prepare the user data
+        const userData = {
+            email: req.body.user.email,
+            password: hash,
+            username: req.body.user.username,
+            role: req.body.user.role,
+            score: 0,
+            profilePictureUrl: url + '/backend/media/profile_pictures/' + req.file.filename,
+            verificationToken: token,
+            tracking: {
+                objective: req.body.user.objective || 'Explorer',
+                target: getTargetValue(req.body.user.objective || 'Explorer')
             }
+        };
 
-            const user = new User(userData);
-            user.save().then(async () => {
-                // Send verification email
-                const transporter = nodemailer.createTransport({
-                    service: 'Gmail',
-                    auth: {
-                        user: 'clement.carnus@brightmindsresearch.com',
-                        pass: EMAIL_PWD
-                    }
-                });
-
-                const mailOptions = {
-                    from: 'clement.carnus@brightmindsresearch.com',
-                    to: user.email,
-                    subject: 'Account Verification Token',
-                    text: `Hello,\n\nPlease verify your account by clicking the link: \nhttp:\/\/${req.headers.host}\/user/confirmation\/${token}\n`
-                };
-
-                await transporter.sendMail(mailOptions);
-
-                res.status(201).json({ response: 'User Created. Please check your email to verify your account.' });
-            }).catch((error) => {
-                res.status(500).json({
-                    error: error
-                });
-            });
+        if (['Professor', 'PhD Student', 'Researcher'].includes(req.body.user.role)) {
+            userData.university = req.body.user.university;
         }
-    ).catch(
-        (error) => {
-            res.status(500).json({
-                error: error
-            });
-        }
-    );
+
+        // Configure nodemailer
+        const transporter = nodemailer.createTransport({
+            service: 'Gmail',
+            auth: {
+                user: 'clement.carnus@brightmindsresearch.com',
+                pass: EMAIL_PWD
+            }
+        });
+
+        const mailOptions = {
+            from: 'clement.carnus@brightmindsresearch.com',
+            to: req.body.user.email,
+            subject: 'Account Verification Token',
+            text: `Hello,\n\nPlease verify your account by clicking the link: \nhttp:\/\/${req.headers.host}\/user/confirmation\/${token}\n`
+        };
+
+        // Attempt to send the verification email
+        await transporter.sendMail(mailOptions);
+
+        // If email is sent successfully, create the user in the database
+        const user = new User(userData);
+        await user.save();
+
+        // Respond with success message
+        res.status(201).json({ response: 'User created. Please check your email to verify your account.' });
+
+    } catch (error) {
+        // Handle errors in email sending or user creation
+        console.error('Error during signup:', error);
+
+        // Return a meaningful error message
+        res.status(500).json({
+            error: 'An error occurred during signup. Please try again later.'
+        });
+    }
 };
+
 
 exports.confirmation = (req, res, next) => {
     User.findOne({ verificationToken: req.params.token }, (err, user) => {
