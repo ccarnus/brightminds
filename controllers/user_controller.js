@@ -166,7 +166,7 @@ exports.login = (req, res, next) => {
 exports.getAllUser = async (req, res, next) => {
     try {
       const users = await User.find()
-        .select('_id email username role department score profilePictureUrl evaluation_list virtual_labs preferences tracking castPublications articlePublications university')
+        .select('_id email username role department score profilePictureUrl evaluation_list virtual_labs preferences tracking castPublications articlePublications university verificationToken isVerified')
         .sort({ score: -1 }); 
   
       res.status(200).json(users);
