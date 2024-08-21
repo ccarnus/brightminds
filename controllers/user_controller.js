@@ -78,18 +78,31 @@ exports.signup = async (req, res, next) => {
         const mailOptions = {
             from: 'clement.carnus@brightmindsresearch.com',
             to: req.body.user.email,
-            subject: 'Account Verification Token',
-            text: `Hello,\n\nPlease verify your account by clicking the link: \nhttp:\/\/${req.headers.host}\/user/confirmation\/${token}\n`
+            subject: 'Account Verification - BrightMinds Research',
+            html: `
+            <div style="max-width: 600px; margin: 0 auto; font-family: Arial, sans-serif; color: #333; border: 1px solid #e0e0e0; border-radius: 8px; padding: 20px;">
+                <div style="text-align: center;">
+                    <img src="https://your-website.com/logo.png" alt="BrightMinds Research" style="max-width: 100px; margin-bottom: 20px;">
+                </div>
+                <h2 style="text-align: center; color: #0044cc;">Welcome to BrightMinds Research!</h2>
+                <p style="font-size: 16px; line-height: 1.5; text-align: center;">Thank you for signing up with us. To complete your registration, please confirm your email address by clicking the button below.</p>
+                <div style="text-align: center; margin: 30px 0;">
+                    <a href="http://${req.headers.host}/user/confirmation/${token}" style="background-color: #0044cc; color: #fff; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-size: 16px;">Verify Email</a>
+                </div>
+                <p style="font-size: 14px; line-height: 1.5; text-align: center;">If you did not create an account with us, please ignore this email.</p>
+                <div style="text-align: center; margin-top: 20px;">
+                    <img src="https://your-website.com/footer-image.png" alt="BrightMinds Footer" style="max-width: 100px; margin-top: 20px;">
+                </div>
+                <p style="font-size: 12px; line-height: 1.5; text-align: center; color: #999;">&copy; 2024 BrightMinds Research. All rights reserved.</p>
+            </div>
+            `
         };
 
-        // Attempt to send the verification email
         await transporter.sendMail(mailOptions);
 
-        // If email is sent successfully, create the user in the database
         const user = new User(userData);
         await user.save();
 
-        // Respond with success message
         res.status(201).json({ response: 'User created. Please check your email to verify your account.' });
 
     } catch (error) {
@@ -107,10 +120,24 @@ exports.signup = async (req, res, next) => {
 exports.confirmation = (req, res, next) => {
     User.findOne({ verificationToken: req.params.token }, (err, user) => {
         if (!user) {
-            return res.status(400).send({ msg: 'We were unable to find a user for this token.' });
+            return res.status(400).send(`
+                <div style="max-width: 600px; margin: 0 auto; font-family: Arial, sans-serif; color: #333; text-align: center;">
+                    <img src="https://your-website.com/logo.png" alt="BrightMinds Research" style="max-width: 100px; margin-top: 20px;">
+                    <h2 style="color: #cc0000;">Verification Failed</h2>
+                    <p style="font-size: 16px;">We were unable to find a user for this token.</p>
+                    <p style="font-size: 16px;">Please check the link or contact support.</p>
+                </div>
+            `);
         }
         if (user.isVerified) {
-            return res.status(400).send({ msg: 'This user has already been verified.' });
+            return res.status(400).send(`
+                <div style="max-width: 600px; margin: 0 auto; font-family: Arial, sans-serif; color: #333; text-align: center;">
+                    <img src="https://your-website.com/logo.png" alt="BrightMinds Research" style="max-width: 100px; margin-top: 20px;">
+                    <h2 style="color: #0044cc;">Already Verified</h2>
+                    <p style="font-size: 16px;">This user has already been verified.</p>
+                    <a href="https://your-website.com/login" style="color: #0044cc;">Go to Login</a>
+                </div>
+            `);
         }
 
         user.isVerified = true;
@@ -118,10 +145,18 @@ exports.confirmation = (req, res, next) => {
 
         user.save((err) => {
             if (err) { return res.status(500).send({ msg: err.message }); }
-            res.status(200).send("The account has been verified. Please log in.");
+            res.status(200).send(`
+                <div style="max-width: 600px; margin: 0 auto; font-family: Arial, sans-serif; color: #333; text-align: center;">
+                    <img src="https://your-website.com/logo.png" alt="BrightMinds Research" style="max-width: 100px; margin-top: 20px;">
+                    <h2 style="color: #0044cc;">Verification Successful!</h2>
+                    <p style="font-size: 16px;">Your account has been verified. You can now log in.</p>
+                    <a href="https://your-website.com/login" style="background-color: #0044cc; color: #fff; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-size: 16px;">Go to Login</a>
+                </div>
+            `);
         });
     });
 };
+
 
 exports.login = (req, res, next) => {
     User.findOne({email: req.body.email}).then(
@@ -204,6 +239,8 @@ exports.getAllUser = async (req, res, next) => {
         virtual_labs: user.virtual_labs,
         castPublications: user.castPublications,
         articlePublications: user.articlePublications,
+        isVerified : user.isVerified,
+        verificationToken: user.verificationToken,
       };
   
       res.status(200).json(userWithPercentage);
