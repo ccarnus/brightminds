@@ -88,23 +88,94 @@ exports.signup = async (req, res, next) => {
                 <title>BrightMinds Research - Email Confirmation</title>
                 <style>
                     @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap');
+
+                    body {
+                        margin: 0;
+                        padding: 0;
+                        font-family: 'Montserrat', sans-serif;
+                        background-color: #f1f1f1;
+                        color: #1c1c1c;
+                    }
+
+                    .email-container {
+                        max-width: 600px;
+                        margin: 0 auto;
+                        background-color: #ffffff;
+                        border: 1px solid #b2b2b2;
+                        border-radius: 8px;
+                        padding: 20px;
+                    }
+
+                    .email-container .logo {
+                        text-align: center;
+                        margin-bottom: 20px;
+                    }
+
+                    .email-container .logo img {
+                        max-width: 500px;
+                    }
+
+                    .email-container h2 {
+                        text-align: center;
+                        color: #00407A;
+                        font-family: 'MontserratBold', sans-serif;
+                    }
+
+                    .email-container p {
+                        font-size: 16px;
+                        line-height: 1.5;
+                        text-align: center;
+                        color: #1c1c1c;
+                    }
+
+                    .email-container .button-container {
+                        text-align: center;
+                        margin: 30px 0;
+                    }
+
+                    .email-container .button-container a {
+                        background-color: #00407A;
+                        color: #ffffff;
+                        padding: 12px 24px;
+                        text-decoration: none;
+                        border-radius: 5px;
+                        font-size: 16px;
+                        font-family: 'MontserratBold', sans-serif;
+                    }
+
+                    .email-container .footer {
+                        text-align: center;
+                        margin-top: 20px;
+                    }
+
+                    .email-container .footer img {
+                        max-width: 100px;
+                        margin-top: 20px;
+                    }
+
+                    .email-container .footer p {
+                        font-size: 12px;
+                        line-height: 1.5;
+                        text-align: center;
+                        color: #b2b2b2;
+                    }
                 </style>
             </head>
-            <body style="margin: 0; padding: 0; font-family: 'Montserrat', sans-serif; background-color: #f1f1f1; color: #1c1c1c;">
-                <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border: 1px solid #b2b2b2; border-radius: 8px; padding: 20px;">
-                    <div style="text-align: center; margin-bottom: 20px;">
-                        <img src="http://${req.headers.host}/backend/media/verification_email/BrightMinds_research_icon.png" alt="BrightMinds Research" style="max-width: 500px;">
+            <body>
+                <div class="email-container">
+                    <div class="logo">
+                        <img src="../media/verification_email/BrightMinds_research_icon.png" alt="BrightMinds Research">
                     </div>
-                    <h2 style="text-align: center; color: #00407A; font-family: 'MontserratBold', sans-serif;">Welcome to BrightMinds Research!</h2>
-                    <p style="font-size: 16px; line-height: 1.5; text-align: center; color: #1c1c1c;">Thank you for signing up with us. To complete your registration, please confirm your email address by clicking the button below.</p>
-                    <div style="text-align: center; margin: 30px 0;">
-                        <a href="http://${req.headers.host}/user/confirmation/${token}" style="background-color: #00407A; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-size: 16px; font-family: 'MontserratBold', sans-serif;">Verify Email</a>
+                    <h2>Welcome to BrightMinds Research!</h2>
+                    <p>Thank you for signing up with us. To complete your registration, please confirm your email address by clicking the button below.</p>
+                    <div class="button-container">
+                        <a href="http://localhost/user/confirmation/token-placeholder">Verify Email</a>
                     </div>
-                    <p style="font-size: 14px; line-height: 1.5; text-align: center; color: #1c1c1c;">If you did not create an account with us, please ignore this email.</p>
-                    <div style="text-align: center; margin-top: 20px;">
-                        <img src="http://${req.headers.host}/backend/media/verification_email/brightminds_icon_resized.png" alt="BrightMinds Footer" style="max-width: 100px;">
+                    <p>If you did not create an account with us, please ignore this email.</p>
+                    <div class="footer">
+                        <img src="../media/verification_email/brightminds_icon_resized.png" alt="BrightMinds Footer">
+                        <p>&copy; 2024 BrightMinds Research. All rights reserved.</p>
                     </div>
-                    <p style="font-size: 12px; line-height: 1.5; text-align: center; color: #b2b2b2;">&copy; 2024 BrightMinds Research. All rights reserved.</p>
                 </div>
             </body>
             </html>
