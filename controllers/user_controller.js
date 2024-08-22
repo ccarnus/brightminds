@@ -255,7 +255,7 @@ exports.confirmation = (req, res, next) => {
                 <body>
                     <div class="container">
                         <div class="logo">
-                            <img src="../media/verification_email/BrightMinds_research_icon.png" alt="BrightMinds Research">
+                            <img src="http://${req.headers.host}/backend/media/verification_email/BrightMinds_research_icon.png" alt="BrightMinds Research">
                         </div>
                         <h2>Verification Failed</h2>
                         <p>We were unable to find a user for this token.</p>
@@ -323,7 +323,7 @@ exports.confirmation = (req, res, next) => {
                 <body>
                     <div class="container">
                         <div class="logo">
-                            <img src="../media/verification_email/BrightMinds_research_icon.png" alt="BrightMinds Research">
+                            <img src="http://${req.headers.host}/backend/media/verification_email/BrightMinds_research_icon.png" alt="BrightMinds Research">
                         </div>
                         <h2>Already Verified</h2>
                         <p>This user has already been verified.</p>
@@ -401,7 +401,7 @@ exports.confirmation = (req, res, next) => {
                 <body>
                     <div class="container">
                         <div class="logo">
-                            <img src="../media/verification_email/BrightMinds_research_icon.png" alt="BrightMinds Research">
+                            <img src="http://${req.headers.host}/backend/media/verification_email/BrightMinds_research_icon.png" alt="BrightMinds Research">
                         </div>
                         <h2>Verification Successful!</h2>
                         <p>Your account has been verified. You can now log in.</p>
