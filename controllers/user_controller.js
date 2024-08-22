@@ -205,22 +205,133 @@ exports.confirmation = (req, res, next) => {
     User.findOne({ verificationToken: req.params.token }, (err, user) => {
         if (!user) {
             return res.status(400).send(`
-                <div style="max-width: 600px; margin: 0 auto; font-family: Arial, sans-serif; color: #333; text-align: center;">
-                    <img src="https://your-website.com/logo.png" alt="BrightMinds Research" style="max-width: 100px; margin-top: 20px;">
-                    <h2 style="color: #cc0000;">Verification Failed</h2>
-                    <p style="font-size: 16px;">We were unable to find a user for this token.</p>
-                    <p style="font-size: 16px;">Please check the link or contact support.</p>
-                </div>
+                <!DOCTYPE html>
+                <html lang="en">
+                <head>
+                    <meta charset="UTF-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                    <title>Verification Failed - BrightMinds Research</title>
+                    <style>
+                        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap');
+                        
+                        body {
+                            margin: 0;
+                            padding: 0;
+                            font-family: 'Montserrat', sans-serif;
+                            background-color: #f1f1f1;
+                            color: #1c1c1c;
+                        }
+
+                        .container {
+                            max-width: 600px;
+                            margin: 0 auto;
+                            background-color: #f1f1f1;
+                            border: 1px solid #1c1c1c;
+                            border-radius: 8px;
+                            padding: 20px;
+                            text-align: center;
+                        }
+
+                        .container .logo {
+                            margin-bottom: 20px;
+                        }
+
+                        .container .logo img {
+                            max-width: 500px;
+                        }
+
+                        .container h2 {
+                            color: #cc0000;
+                            font-family: 'MontserratBold', sans-serif;
+                        }
+
+                        .container p {
+                            font-size: 16px;
+                            line-height: 1.5;
+                            color: #1c1c1c;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="container">
+                        <div class="logo">
+                            <img src="../media/verification_email/BrightMinds_research_icon.png" alt="BrightMinds Research">
+                        </div>
+                        <h2>Verification Failed</h2>
+                        <p>We were unable to find a user for this token.</p>
+                        <p>Please check the link or contact support.</p>
+                    </div>
+                </body>
+                </html>
             `);
         }
         if (user.isVerified) {
             return res.status(400).send(`
-                <div style="max-width: 600px; margin: 0 auto; font-family: Arial, sans-serif; color: #333; text-align: center;">
-                    <img src="https://your-website.com/logo.png" alt="BrightMinds Research" style="max-width: 100px; margin-top: 20px;">
-                    <h2 style="color: #0044cc;">Already Verified</h2>
-                    <p style="font-size: 16px;">This user has already been verified.</p>
-                    <a href="https://your-website.com/login" style="color: #0044cc;">Go to Login</a>
-                </div>
+                <!DOCTYPE html>
+                <html lang="en">
+                <head>
+                    <meta charset="UTF-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                    <title>Already Verified - BrightMinds Research</title>
+                    <style>
+                        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap');
+                        
+                        body {
+                            margin: 0;
+                            padding: 0;
+                            font-family: 'Montserrat', sans-serif;
+                            background-color: #f1f1f1;
+                            color: #1c1c1c;
+                        }
+
+                        .container {
+                            max-width: 600px;
+                            margin: 0 auto;
+                            background-color: #f1f1f1;
+                            border: 1px solid #1c1c1c;
+                            border-radius: 8px;
+                            padding: 20px;
+                            text-align: center;
+                        }
+
+                        .container .logo {
+                            margin-bottom: 20px;
+                        }
+
+                        .container .logo img {
+                            max-width: 500px;
+                        }
+
+                        .container h2 {
+                            color: #00407A;
+                            font-family: 'MontserratBold', sans-serif;
+                        }
+
+                        .container p {
+                            font-size: 16px;
+                            line-height: 1.5;
+                            color: #1c1c1c;
+                        }
+
+                        .container a {
+                            color: #00407A;
+                            text-decoration: none;
+                            font-weight: bold;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="container">
+                        <div class="logo">
+                            <img src="../media/verification_email/BrightMinds_research_icon.png" alt="BrightMinds Research">
+                        </div>
+                        <h2>Already Verified</h2>
+                        <p>This user has already been verified.</p>
+                        <a href="https://www.brightmindsresearch.com/">Visit our Site</a>
+                    </div>
+                </body>
+                </html>
+
             `);
         }
 
@@ -230,12 +341,74 @@ exports.confirmation = (req, res, next) => {
         user.save((err) => {
             if (err) { return res.status(500).send({ msg: err.message }); }
             res.status(200).send(`
-                <div style="max-width: 600px; margin: 0 auto; font-family: Arial, sans-serif; color: #333; text-align: center;">
-                    <img src="https://your-website.com/logo.png" alt="BrightMinds Research" style="max-width: 100px; margin-top: 20px;">
-                    <h2 style="color: #0044cc;">Verification Successful!</h2>
-                    <p style="font-size: 16px;">Your account has been verified. You can now log in.</p>
-                    <a href="https://your-website.com/login" style="background-color: #0044cc; color: #fff; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-size: 16px;">Go to Login</a>
-                </div>
+                <!DOCTYPE html>
+                <html lang="en">
+                <head>
+                    <meta charset="UTF-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                    <title>Verification Successful - BrightMinds Research</title>
+                    <style>
+                        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap');
+                        
+                        body {
+                            margin: 0;
+                            padding: 0;
+                            font-family: 'Montserrat', sans-serif;
+                            background-color: #f1f1f1;
+                            color: #1c1c1c;
+                        }
+
+                        .container {
+                            max-width: 600px;
+                            margin: 0 auto;
+                            background-color: #f1f1f1;
+                            border: 1px solid #1c1c1c;
+                            border-radius: 8px;
+                            padding: 20px;
+                            text-align: center;
+                        }
+
+                        .container .logo {
+                            margin-bottom: 20px;
+                        }
+
+                        .container .logo img {
+                            max-width: 500px;
+                        }
+
+                        .container h2 {
+                            color: #00407A;
+                            font-family: 'MontserratBold', sans-serif;
+                        }
+
+                        .container p {
+                            font-size: 16px;
+                            line-height: 1.5;
+                            color: #1c1c1c;
+                        }
+
+                        .container a {
+                            background-color: #00407A;
+                            color: #ffffff;
+                            padding: 12px 24px;
+                            text-decoration: none;
+                            border-radius: 5px;
+                            font-size: 16px;
+                            font-family: 'MontserratBold', sans-serif;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="container">
+                        <div class="logo">
+                            <img src="../media/verification_email/BrightMinds_research_icon.png" alt="BrightMinds Research">
+                        </div>
+                        <h2>Verification Successful!</h2>
+                        <p>Your account has been verified. You can now log in.</p>
+                        <a href="https://www.brightmindsresearch.com/">Visit our Site</a>
+                    </div>
+                </body>
+                </html>
             `);
         });
     });
