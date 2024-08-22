@@ -80,21 +80,34 @@ exports.signup = async (req, res, next) => {
             to: req.body.user.email,
             subject: 'Account Verification - BrightMinds Research',
             html: `
-            <div style="max-width: 600px; margin: 0 auto; font-family: Arial, sans-serif; color: #333; border: 1px solid #e0e0e0; border-radius: 8px; padding: 20px;">
-                <div style="text-align: center;">
-                    <img src="https://your-website.com/logo.png" alt="BrightMinds Research" style="max-width: 100px; margin-bottom: 20px;">
+            <!DOCTYPE html>
+            <html lang="en">
+            <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <title>BrightMinds Research - Email Confirmation</title>
+                <style>
+                    @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap');
+                </style>
+            </head>
+            <body style="margin: 0; padding: 0; font-family: 'Montserrat', sans-serif; background-color: #f1f1f1; color: #1c1c1c;">
+                <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border: 1px solid #b2b2b2; border-radius: 8px; padding: 20px;">
+                    <div style="text-align: center; margin-bottom: 20px;">
+                        <img src="http://${req.headers.host}/backend/media/verification_email/BrightMinds_research_icon.png" alt="BrightMinds Research" style="max-width: 500px;">
+                    </div>
+                    <h2 style="text-align: center; color: #00407A; font-family: 'MontserratBold', sans-serif;">Welcome to BrightMinds Research!</h2>
+                    <p style="font-size: 16px; line-height: 1.5; text-align: center; color: #1c1c1c;">Thank you for signing up with us. To complete your registration, please confirm your email address by clicking the button below.</p>
+                    <div style="text-align: center; margin: 30px 0;">
+                        <a href="http://${req.headers.host}/user/confirmation/${token}" style="background-color: #00407A; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-size: 16px; font-family: 'MontserratBold', sans-serif;">Verify Email</a>
+                    </div>
+                    <p style="font-size: 14px; line-height: 1.5; text-align: center; color: #1c1c1c;">If you did not create an account with us, please ignore this email.</p>
+                    <div style="text-align: center; margin-top: 20px;">
+                        <img src="http://${req.headers.host}/backend/media/verification_email/brightminds_icon_resized.png" alt="BrightMinds Footer" style="max-width: 100px;">
+                    </div>
+                    <p style="font-size: 12px; line-height: 1.5; text-align: center; color: #b2b2b2;">&copy; 2024 BrightMinds Research. All rights reserved.</p>
                 </div>
-                <h2 style="text-align: center; color: #0044cc;">Welcome to BrightMinds Research!</h2>
-                <p style="font-size: 16px; line-height: 1.5; text-align: center;">Thank you for signing up with us. To complete your registration, please confirm your email address by clicking the button below.</p>
-                <div style="text-align: center; margin: 30px 0;">
-                    <a href="http://${req.headers.host}/user/confirmation/${token}" style="background-color: #0044cc; color: #fff; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-size: 16px;">Verify Email</a>
-                </div>
-                <p style="font-size: 14px; line-height: 1.5; text-align: center;">If you did not create an account with us, please ignore this email.</p>
-                <div style="text-align: center; margin-top: 20px;">
-                    <img src="https://your-website.com/footer-image.png" alt="BrightMinds Footer" style="max-width: 100px; margin-top: 20px;">
-                </div>
-                <p style="font-size: 12px; line-height: 1.5; text-align: center; color: #999;">&copy; 2024 BrightMinds Research. All rights reserved.</p>
-            </div>
+            </body>
+            </html>
             `
         };
 
