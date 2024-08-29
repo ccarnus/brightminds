@@ -169,7 +169,7 @@ exports.signup = async (req, res, next) => {
                     <h2>Welcome to BrightMinds Research!</h2>
                     <p>Thank you for signing up with us. To complete your registration, please confirm your email address by clicking the button below.</p>
                     <div class="button-container">
-                        <a href="http://localhost/user/confirmation/token-placeholder">Verify Email</a>
+                        <a href="http://${req.headers.host}/user/confirmation/${token}">Verify Email</a>
                     </div>
                     <p>If you did not create an account with us, please ignore this email.</p>
                     <div class="footer">
