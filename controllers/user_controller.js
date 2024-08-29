@@ -93,15 +93,15 @@ exports.signup = async (req, res, next) => {
                         margin: 0;
                         padding: 0;
                         font-family: 'Montserrat', sans-serif;
-                        background-color: #f1f1f1;
-                        color: #1c1c1c;
+                        background-color: #1c1c1c;
+                        color: #f1f1f1;
                     }
 
                     .email-container {
                         max-width: 600px;
                         margin: 0 auto;
-                        background-color: #ffffff;
-                        border: 1px solid #b2b2b2;
+                        background-color: #1c1c1c;
+                        border: 1px solid #1c1c1c;
                         border-radius: 8px;
                         padding: 20px;
                     }
@@ -125,7 +125,7 @@ exports.signup = async (req, res, next) => {
                         font-size: 16px;
                         line-height: 1.5;
                         text-align: center;
-                        color: #1c1c1c;
+                        color: #f1f1f1;
                     }
 
                     .email-container .button-container {
@@ -135,7 +135,7 @@ exports.signup = async (req, res, next) => {
 
                     .email-container .button-container a {
                         background-color: #00407A;
-                        color: #ffffff;
+                        color: #f1f1f1;
                         padding: 12px 24px;
                         text-decoration: none;
                         border-radius: 5px;
@@ -157,24 +157,24 @@ exports.signup = async (req, res, next) => {
                         font-size: 12px;
                         line-height: 1.5;
                         text-align: center;
-                        color: #b2b2b2;
+                        color: #f1f1f1;
                     }
                 </style>
             </head>
             <body>
                 <div class="email-container">
                     <div class="logo">
-                        <img src="http://${req.headers.host}/backend/media/verification_email/BrightMinds_research_icon.png" alt="BrightMinds Research">
+                        <img src="http://${req.headers.host}/backend/media/verification_email/BrightMinds_research_icon_white.png" alt="BrightMinds Research">
                     </div>
                     <h2>Welcome to BrightMinds Research!</h2>
                     <p>Thank you for signing up with us. To complete your registration, please confirm your email address by clicking the button below.</p>
                     <div class="button-container">
-                        <a href="http://${req.headers.host}/user/confirmation/${token}">Verify Email</a>
+                        <a href="http://localhost/user/confirmation/token-placeholder">Verify Email</a>
                     </div>
                     <p>If you did not create an account with us, please ignore this email.</p>
                     <div class="footer">
                         <img src="http://${req.headers.host}/backend/media/verification_email/brightminds_icon_resized.png" alt="BrightMinds Footer">
-                        <p>&copy; 2024 BrightMinds Research. All rights reserved.</p>
+                        <p>&copy; 2024 BrightMinds Research LLC. All rights reserved.</p>
                     </div>
                 </div>
             </body>
@@ -255,7 +255,7 @@ exports.confirmation = (req, res, next) => {
                 <body>
                     <div class="container">
                         <div class="logo">
-                            <img src="../backend/media/verification_email/BrightMinds_research_icon_white.png" alt="BrightMinds Research">
+                            <img src="http://${req.headers.host}/backend/media/verification_email/BrightMinds_research_icon_white.png" alt="BrightMinds Research">
                         </div>
                         <h2>Verification Failed</h2>
                         <p>We were unable to find a user for this token.</p>
@@ -323,7 +323,7 @@ exports.confirmation = (req, res, next) => {
             <body>
                 <div class="container">
                     <div class="logo">
-                        <img src="../backend/media/verification_email/BrightMinds_research_icon_white.png" alt="BrightMinds Research">
+                        <img src="http://${req.headers.host}/backend/media/verification_email/BrightMinds_research_icon_white.png" alt="BrightMinds Research">
                     </div>
                     <h2>Already Verified</h2>
                     <p>This user has already been verified.</p>
@@ -400,7 +400,7 @@ exports.confirmation = (req, res, next) => {
                 <body>
                     <div class="container">
                         <div class="logo">
-                            <img src="../backend/media/verification_email/BrightMinds_research_icon.png" alt="BrightMinds Research">
+                            <img src="http://${req.headers.host}/backend/media/verification_email/BrightMinds_research_icon_white.png" alt="BrightMinds Research">
                         </div>
                         <h2>Verification Successful!</h2>
                         <p>Your account has been verified. You can now log in.</p>
