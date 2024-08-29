@@ -399,7 +399,7 @@ exports.confirmation = (req, res, next) => {
             <body>
                 <div class="container">
                     <div class="logo">
-                        <img src="../media/verification_email/BrightMinds_research_icon_white.png" alt="BrightMinds Research">
+                        <img src="http://${req.headers.host}/backend/media/verification_email/BrightMinds_research_icon_white.png" alt="BrightMinds Research">
                     </div>
                     <h2>Verification Successful!</h2>
                     <p>Your account has been verified. You can now log in.</p>
