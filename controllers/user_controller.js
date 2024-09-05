@@ -442,6 +442,7 @@ exports.login = (req, res, next) => {
                 res.status(500).json({
                     error: error
                 });
+                console.log(error);
             })
         }
     ).catch(
@@ -449,6 +450,7 @@ exports.login = (req, res, next) => {
             res.status(400).json({
                 error : error
             });
+            console.log(error);
         }
     );
 };
