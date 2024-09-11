@@ -4,7 +4,7 @@ const castSchema = mongoose.Schema({
     title: { type: String, required: true },
     description: { type: String, required: true },
     department: { type: String, required: true },
-    brightmindid: { type: String, required: true},
+    brightmindid: { type: String, required: true },
     casturl: { type: String, required: true },
     castimageurl: { type: String, required: false },
     university: { type: String, required: true },
@@ -15,12 +15,8 @@ const castSchema = mongoose.Schema({
     verificationStatus: {
         status: { type: String, required: false },
         approvals: { type: Number, required: false },
-        approvers_id: [
-            { type: String, required: false }
-        ],
-        disapprovers_id: [
-            { type: String, required: false }
-        ]
+        approvers_id: [{ type: String, required: false }],
+        disapprovers_id: [{ type: String, required: false }]
     },
     dateAdded: { type: Date, default: Date.now },
     grade: {
@@ -29,29 +25,21 @@ const castSchema = mongoose.Schema({
     },
     likes: {
         count: { type: Number, default: 0 },
-        user: [
-            { type: String, default: "" }
-        ]
+        user: [{ type: String, default: "" }]
     },
     comments: {
         count: { type: Number, default: 0 },
-        comment: [
-            {
-                author: { type: String, default: "" },
-                content: { type: String, default: "" }
-            }
-        ]
+        comment: [{
+            author: { type: String, default: "" },
+            content: { type: String, default: "" }
+        }]
     },
     evaluation: {
         question: { type: String, required: false },
-        responses: [
-            {
-                type: String, required: false
-            }
-        ],
+        responses: [{ type: String, required: false }],
         correct: { type: String, required: false }
     },
-    topicId: { type: mongoose.Schema.Types.ObjectId, ref: 'Topic', required: true }
+    topic: { type: String, required: true }, // Store the topic name directly
 });
 
 module.exports = mongoose.model('Cast', castSchema);

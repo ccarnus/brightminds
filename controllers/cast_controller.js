@@ -19,14 +19,12 @@ exports.createCast = async (req, res, next) => {
             });
         }
 
-        // Ensure the title is within character limit
         if (req.body.cast.title && req.body.cast.title.length > 65) {
             return res.status(400).json({
                 error: 'Title must be 65 characters or less'
             });
         }
 
-        // Check if the topic exists, if not create it
         let topic = await Topic.findOne({ name: req.body.cast.topic, departmentId: req.body.cast.department });
         if (!topic) {
             topic = new Topic({
@@ -55,7 +53,7 @@ exports.createCast = async (req, res, next) => {
             link: req.body.cast.link,
             evaluation: '',  // Placeholder for now
             duration: duration,
-            topicId: topic._id, // Link to the topic
+            topic: topic.name,  // Store the topic name directly
         });
 
         await cast.save();
@@ -134,8 +132,8 @@ exports.updateOneCast = async (req, res, next) => {
         }
 
         // If the topic has changed, update the old and new topic counts
-        if (String(cast.topicId) !== String(newTopic._id)) {
-            const oldTopic = await Topic.findById(cast.topicId);
+        if (cast.topic !== newTopic.name) {
+            const oldTopic = await Topic.findOne({ name: cast.topic });
             if (oldTopic) {
                 oldTopic.castsCount -= 1;
                 await oldTopic.save();
@@ -157,7 +155,7 @@ exports.updateOneCast = async (req, res, next) => {
         cast.comments = req.body.cast.comments;
         cast.visibility = req.body.cast.visibility;
         cast.link = req.body.cast.link;
-        cast.topicId = newTopic._id;
+        cast.topic = newTopic.name; // Update to the new topic name
 
         await cast.save();
 
@@ -167,7 +165,6 @@ exports.updateOneCast = async (req, res, next) => {
         res.status(500).json({ error: 'Internal server error' });
     }
 };
-
 
 const removeCastFromUsers = async (castId) => {
     try {
