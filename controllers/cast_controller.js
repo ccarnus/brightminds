@@ -13,23 +13,16 @@ exports.createCast = async (req, res, next) => {
         const url = req.protocol + "://" + req.get('host');
         req.body.cast = JSON.parse(req.body.cast);
 
-        if (!isValidDepartment(req.body.cast.department)) {
-            return res.status(400).json({
-                error: 'Invalid department'
-            });
-        }
+        // Ensure the department exists and get the department name
+        const departmentName = req.body.cast.department;
 
-        if (req.body.cast.title && req.body.cast.title.length > 65) {
-            return res.status(400).json({
-                error: 'Title must be 65 characters or less'
-            });
-        }
-
-        let topic = await Topic.findOne({ name: req.body.cast.topic, departmentId: req.body.cast.department });
+        // Check if the topic already exists, or create a new topic
+        let topic = await Topic.findOne({ name: req.body.cast.topic, departmentName: departmentName });
         if (!topic) {
+            // Create the new topic
             topic = new Topic({
                 name: req.body.cast.topic,
-                departmentId: req.body.cast.department
+                departmentName: departmentName,  // Store the department name
             });
             await topic.save();
         }
@@ -38,10 +31,11 @@ exports.createCast = async (req, res, next) => {
         const videoFilePath = './backend/media/cast_videos/' + req.file.filename;
         const duration = await getVideoDurationInSeconds(videoFilePath);
 
+        // Create the new cast
         const cast = new Cast({
             title: req.body.cast.title,
             description: req.body.cast.description,
-            department: req.body.cast.department,
+            department: departmentName,  // Store department name directly
             brightmindid: req.body.cast.brightmindid,
             casturl: url + '/backend/media/cast_videos/' + req.file.filename,
             castimageurl: '',  // Placeholder for now
@@ -114,26 +108,21 @@ exports.updateOneCast = async (req, res, next) => {
 
         req.body.cast = JSON.parse(req.body.cast);
 
-        // Validate department
-        if (!isValidDepartment(req.body.cast.department)) {
-            return res.status(400).json({
-                error: 'Invalid department'
-            });
-        }
+        const departmentName = req.body.cast.department;
 
         // Find or create the new topic if it's changed
-        let newTopic = await Topic.findOne({ name: req.body.cast.topic, departmentId: req.body.cast.department });
+        let newTopic = await Topic.findOne({ name: req.body.cast.topic, departmentName: departmentName });
         if (!newTopic) {
             newTopic = new Topic({
                 name: req.body.cast.topic,
-                departmentId: req.body.cast.department
+                departmentName: departmentName  // Store department name directly
             });
             await newTopic.save();
         }
 
         // If the topic has changed, update the old and new topic counts
         if (cast.topic !== newTopic.name) {
-            const oldTopic = await Topic.findOne({ name: cast.topic });
+            const oldTopic = await Topic.findOne({ name: cast.topic, departmentName: cast.department });
             if (oldTopic) {
                 oldTopic.castsCount -= 1;
                 await oldTopic.save();
@@ -145,7 +134,7 @@ exports.updateOneCast = async (req, res, next) => {
         // Update cast fields
         cast.title = req.body.cast.title;
         cast.description = req.body.cast.description;
-        cast.department = req.body.cast.department;
+        cast.department = departmentName;  // Store department name directly
         cast.brightmindid = req.body.cast.brightmindid;
         cast.casturl = req.body.cast.casturl;
         cast.castimageurl = req.body.cast.castimageurl;
@@ -155,7 +144,7 @@ exports.updateOneCast = async (req, res, next) => {
         cast.comments = req.body.cast.comments;
         cast.visibility = req.body.cast.visibility;
         cast.link = req.body.cast.link;
-        cast.topic = newTopic.name; // Update to the new topic name
+        cast.topic = newTopic.name;  // Update to the new topic name
 
         await cast.save();
 

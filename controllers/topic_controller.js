@@ -3,7 +3,7 @@ const Topic = require('../models/topic_model.js');
 exports.createTopic = async (req, res, next) => {
     const topic = new Topic({
         name: req.body.name,
-        departmentId: req.body.departmentId
+        departmentName: req.body.department
     });
 
     try {
@@ -16,7 +16,7 @@ exports.createTopic = async (req, res, next) => {
 
 exports.getTopicsByDepartment = async (req, res, next) => {
     try {
-        const topics = await Topic.find({ departmentId: req.params.departmentId });
+        const topics = await Topic.find({ departmentName: req.params.departmentName });
         res.status(200).json(topics);
     } catch (error) {
         res.status(500).json({ error: 'Error fetching topics.' });
@@ -25,8 +25,8 @@ exports.getTopicsByDepartment = async (req, res, next) => {
 
 exports.getAllTopics = async (req, res, next) => {
     try {
-        const topics = await Topic.find();  // Fetch all topics from the database
-        res.status(200).json(topics);  // Respond with the list of topics
+        const topics = await Topic.find();
+        res.status(200).json(topics);
     } catch (error) {
         console.error('Error fetching topics:', error);
         res.status(500).json({
