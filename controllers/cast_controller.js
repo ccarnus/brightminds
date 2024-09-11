@@ -4,6 +4,7 @@ const { getVideoDurationInSeconds } = require('../backend/videoUtils');
 const fs = require('fs');
 const departments = require('../lists/departments.js');
 const castQueue = require('../queues/castQueue.js');
+const Topic = require('../models/topic_model.js');
 
 const isValidDepartment = (department) => departments.includes(department);
 
@@ -18,14 +19,24 @@ exports.createCast = async (req, res, next) => {
             });
         }
 
-        // Check if the title exceeds 65 characters
-        if (req.body.title && req.body.title.length > 65) {
+        // Ensure the title is within character limit
+        if (req.body.cast.title && req.body.cast.title.length > 65) {
             return res.status(400).json({
                 error: 'Title must be 65 characters or less'
             });
         }
 
-        // Use the utility function to get the video duration
+        // Check if the topic exists, if not create it
+        let topic = await Topic.findOne({ name: req.body.cast.topic, departmentId: req.body.cast.department });
+        if (!topic) {
+            topic = new Topic({
+                name: req.body.cast.topic,
+                departmentId: req.body.cast.department
+            });
+            await topic.save();
+        }
+
+        // Use utility function to get video duration
         const videoFilePath = './backend/media/cast_videos/' + req.file.filename;
         const duration = await getVideoDurationInSeconds(videoFilePath);
 
@@ -44,9 +55,14 @@ exports.createCast = async (req, res, next) => {
             link: req.body.cast.link,
             evaluation: '',  // Placeholder for now
             duration: duration,
+            topicId: topic._id, // Link to the topic
         });
 
         await cast.save();
+
+        // Increment the casts count in the related topic
+        topic.castsCount += 1;
+        await topic.save();
 
         // Add cast ID to the user's castPublications
         const user = await User.findById(req.body.cast.brightmindid);
@@ -55,14 +71,7 @@ exports.createCast = async (req, res, next) => {
             await user.save();
         }
 
-        // Add job to the queue
-        castQueue.add({
-            castId: cast._id,
-            description: req.body.cast.description,
-            url: url
-        });
-
-        res.status(201).json({ response: 'Cast Created and processing in background.' });
+        res.status(201).json({ response: 'Cast created and topic updated.' });
     } catch (error) {
         console.error('Error creating cast:', error);
         res.status(500).json({
@@ -98,77 +107,67 @@ exports.getOneCast = (req, res, next) => {
 }
 
 
-exports.updateOneCast = (req, res, next) => {
-    let cast = new Cast({ _id: req.params._id });
-    if (req.file) {
-        const url = req.protocol + "://" + req.get('host');
+exports.updateOneCast = async (req, res, next) => {
+    try {
+        let cast = await Cast.findById(req.params.id);
+        if (!cast) {
+            return res.status(404).json({ message: 'Cast not found.' });
+        }
+
         req.body.cast = JSON.parse(req.body.cast);
 
+        // Validate department
         if (!isValidDepartment(req.body.cast.department)) {
             return res.status(400).json({
                 error: 'Invalid department'
             });
         }
 
-        cast = {
-            _id: req.params.id,
-            title: req.body.cast.title,
-            description: req.body.cast.description,
-            department: req.body.cast.department,
-            brightmindid: req.body.cast.brightmindid,
-            casturl: url + '/backend/media/user_images/' + req.file.filename,
-            castimageurl: req.body.cast.castimageurl,
-            category: req.body.cast.category,
-            university: req.body.cast.university,
-            likes: req.body.cast.likes,
-            comments: req.body.cast.comments,
-            evaluation: req.body.cast.evaluation,
-            visibility: req.body.cast.visibility,
-            link: req.body.cast.link,
-            university: req.body.cast.university,
-            dateAdded: req.body.cast.dateAdded,
-            verificationStatus: req.body.cast.verificationStatus,
-            duration: req.body.cast.duration,
-        };
-    } else {
-        if (!isValidDepartment(req.body.department)) {
-            return res.status(400).json({
-                error: 'Invalid department'
+        // Find or create the new topic if it's changed
+        let newTopic = await Topic.findOne({ name: req.body.cast.topic, departmentId: req.body.cast.department });
+        if (!newTopic) {
+            newTopic = new Topic({
+                name: req.body.cast.topic,
+                departmentId: req.body.cast.department
             });
+            await newTopic.save();
         }
 
-        cast = {
-            _id: req.params.id,
-            title: req.body.title,
-            description: req.body.description,
-            department: req.body.department,
-            brightmindid: req.body.brightmindid,
-            casturl: req.body.casturl,
-            castimageurl: req.body.castimageurl,
-            university: req.body.universitylogourl,
-            category: req.body.category,
-            likes: req.body.likes,
-            comments: req.body.comments,
-            question: req.body.question,
-            evaluation: req.body.evaluation,
-            university: req.body.university,
-            dateAdded: req.body.dateAdded,
-            verificationStatus: req.body.verificationStatus,
-            duration: req.body.duration,
-        };
+        // If the topic has changed, update the old and new topic counts
+        if (String(cast.topicId) !== String(newTopic._id)) {
+            const oldTopic = await Topic.findById(cast.topicId);
+            if (oldTopic) {
+                oldTopic.castsCount -= 1;
+                await oldTopic.save();
+            }
+            newTopic.castsCount += 1;
+            await newTopic.save();
+        }
+
+        // Update cast fields
+        cast.title = req.body.cast.title;
+        cast.description = req.body.cast.description;
+        cast.department = req.body.cast.department;
+        cast.brightmindid = req.body.cast.brightmindid;
+        cast.casturl = req.body.cast.casturl;
+        cast.castimageurl = req.body.cast.castimageurl;
+        cast.category = req.body.cast.category;
+        cast.university = req.body.cast.university;
+        cast.likes = req.body.cast.likes;
+        cast.comments = req.body.cast.comments;
+        cast.visibility = req.body.cast.visibility;
+        cast.link = req.body.cast.link;
+        cast.topicId = newTopic._id;
+
+        await cast.save();
+
+        res.status(200).json({ message: 'Cast updated successfully and topic adjusted.' });
+    } catch (error) {
+        console.error('Error updating cast:', error);
+        res.status(500).json({ error: 'Internal server error' });
     }
-    Cast.updateOne({ _id: req.params.id }, cast)
-        .then(() => {
-            res.status(201).json({
-                response: "message updated"
-            })
-        })
-        .catch((error) => {
-            res.status(400).json({
-                error: error
-            });
-        });
 };
+
 
 const removeCastFromUsers = async (castId) => {
     try {

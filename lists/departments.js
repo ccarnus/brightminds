@@ -3,6 +3,7 @@ const departments = [
   'Chemistry',
   'Robotics',
   'Biology',
+  'CitiesoftheFuture',
   'EarthSciences',
   'Geology',
   'Oceanography',

@@ -10,6 +10,7 @@ const articleRoutes = require('./routes/article_route.js');
 const userRoutes = require('./routes/user_route.js');
 const virtualLabRoutes = require('./routes/virtual_lab_route.js');
 const universityRoutes = require('./routes/university_route.js');
+const topicRoutes = require('./routes/topic_route.js');
 const app = express();
 const path = require('path');
 
@@ -44,5 +45,6 @@ app.use('/article', articleRoutes);
 app.use('/user', userRoutes);
 app.use('/university', universityRoutes);
 app.use('/virtual/lab', virtualLabRoutes);
+app.use('/topic', topicRoutes);
 
 module.exports = app;

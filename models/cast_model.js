@@ -50,7 +50,8 @@ const castSchema = mongoose.Schema({
             }
         ],
         correct: { type: String, required: false }
-    }
+    },
+    topicId: { type: mongoose.Schema.Types.ObjectId, ref: 'Topic', required: true }
 });
 
 module.exports = mongoose.model('Cast', castSchema);
