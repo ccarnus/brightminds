@@ -20,9 +20,10 @@ exports.createCast = async (req, res, next) => {
         let topic = await Topic.findOne({ name: req.body.cast.topic, departmentName: departmentName });
         if (!topic) {
             // Create the new topic
+            console.log("creating a new Topic");
             topic = new Topic({
                 name: req.body.cast.topic,
-                departmentName: departmentName,  // Store the department name
+                departmentName: departmentName,
             });
             await topic.save();
         }
