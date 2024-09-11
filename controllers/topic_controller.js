@@ -23,6 +23,18 @@ exports.getTopicsByDepartment = async (req, res, next) => {
     }
 };
 
+exports.getAllTopics = async (req, res, next) => {
+    try {
+        const topics = await Topic.find();  // Fetch all topics from the database
+        res.status(200).json(topics);  // Respond with the list of topics
+    } catch (error) {
+        console.error('Error fetching topics:', error);
+        res.status(500).json({
+            error: 'Internal server error'
+        });
+    }
+};
+
 exports.getOneTopic = async (req, res, next) => {
     try {
         const topic = await Topic.findById(req.params.id);
