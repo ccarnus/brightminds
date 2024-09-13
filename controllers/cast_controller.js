@@ -13,22 +13,33 @@ exports.createCast = async (req, res, next) => {
         const url = req.protocol + "://" + req.get('host');
         req.body.cast = JSON.parse(req.body.cast);
 
-        // Ensure the department exists and get the department name
-        const departmentName = req.body.cast.department;
+        // Validate the department
+        if (!isValidDepartment(req.body.cast.department)) {
+            return res.status(400).json({
+                error: 'Invalid department'
+            });
+        }
 
-        // Check if the topic already exists, or create a new topic
-        let topic = await Topic.findOne({ name: req.body.cast.topic, departmentName: departmentName });
+        // Check if the title exceeds 65 characters
+        if (req.body.cast.title && req.body.cast.title.length > 65) {
+            return res.status(400).json({
+                error: 'Title must be 65 characters or less'
+            });
+        }
+
+        // Check if the topic exists; if not, create it
+        let topic = await Topic.findOne({ name: req.body.cast.topic, departmentName: req.body.cast.department });
         if (!topic) {
             // Create the new topic
-            console.log("creating a new Topic");
+            console.log("Creating a new topic");
             topic = new Topic({
                 name: req.body.cast.topic,
-                departmentName: departmentName,
+                departmentName: req.body.cast.department,
             });
             await topic.save();
         }
 
-        // Use utility function to get video duration
+        // Use the utility function to get the video duration
         const videoFilePath = './backend/media/cast_videos/' + req.file.filename;
         const duration = await getVideoDurationInSeconds(videoFilePath);
 
@@ -36,7 +47,7 @@ exports.createCast = async (req, res, next) => {
         const cast = new Cast({
             title: req.body.cast.title,
             description: req.body.cast.description,
-            department: departmentName,  // Store department name directly
+            department: req.body.cast.department,
             brightmindid: req.body.cast.brightmindid,
             casturl: url + '/backend/media/cast_videos/' + req.file.filename,
             castimageurl: '',  // Placeholder for now
@@ -64,6 +75,13 @@ exports.createCast = async (req, res, next) => {
             await user.save();
         }
 
+        // Add job to the queue for background processing
+        castQueue.add({
+            castId: cast._id,
+            description: req.body.cast.description,
+            url: url
+        });
+
         res.status(201).json({ response: 'Cast created and topic updated.' });
     } catch (error) {
         console.error('Error creating cast:', error);
@@ -72,6 +90,7 @@ exports.createCast = async (req, res, next) => {
         });
     }
 };
+
 
 exports.getAllCast = (req, res, next) => {
     Cast.find().sort({ _id: 1 }).then(
@@ -109,11 +128,19 @@ exports.updateOneCast = async (req, res, next) => {
 
         req.body.cast = JSON.parse(req.body.cast);
 
+        // Validate the department
+        if (!isValidDepartment(req.body.cast.department)) {
+            return res.status(400).json({
+                error: 'Invalid department'
+            });
+        }
+
         const departmentName = req.body.cast.department;
 
         // Find or create the new topic if it's changed
         let newTopic = await Topic.findOne({ name: req.body.cast.topic, departmentName: departmentName });
         if (!newTopic) {
+            // Create the new topic if it doesn't exist
             newTopic = new Topic({
                 name: req.body.cast.topic,
                 departmentName: departmentName  // Store department name directly
@@ -132,12 +159,21 @@ exports.updateOneCast = async (req, res, next) => {
             await newTopic.save();
         }
 
-        // Update cast fields
+        // If a new file is uploaded, update the cast URL and duration
+        if (req.file) {
+            const url = req.protocol + "://" + req.get('host');
+            const videoFilePath = './backend/media/cast_videos/' + req.file.filename;
+            const duration = await getVideoDurationInSeconds(videoFilePath);
+
+            cast.casturl = url + '/backend/media/cast_videos/' + req.file.filename;
+            cast.duration = duration;
+        }
+
+        // Update the remaining fields
         cast.title = req.body.cast.title;
         cast.description = req.body.cast.description;
         cast.department = departmentName;  // Store department name directly
         cast.brightmindid = req.body.cast.brightmindid;
-        cast.casturl = req.body.cast.casturl;
         cast.castimageurl = req.body.cast.castimageurl;
         cast.category = req.body.cast.category;
         cast.university = req.body.cast.university;
