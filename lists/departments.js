@@ -37,7 +37,6 @@ const departments = [
   'PoliticalScience',
   'Psychology',
   'MedicalImaging',
-  'Religion',
   'Robotics',
   'Sociology',
   'EarthScience',
