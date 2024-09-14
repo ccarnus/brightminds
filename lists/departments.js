@@ -38,7 +38,7 @@ const departments = [
   'MedicalImaging',
   'Robotics',
   'Sociology',
-  'EarthScience',
+  'EarthSciences',
   'SportSciences',
   'Statistics',
   'Transportation',
