@@ -231,30 +231,38 @@ exports.deleteOneCast = async (req, res, next) => {
         let imageDeleteError = false;
 
         // Delete video file if it exists
-        const videoFilename = cast.casturl.split('/media/cast_videos/')[1];
-        try {
-            await fs.access('./backend/media/cast_videos/' + videoFilename);  // Check if the video file exists
-            await fs.unlink('./backend/media/cast_videos/' + videoFilename);  // Delete video file
-        } catch (videoErr) {
-            if (videoErr.code !== 'ENOENT') {
-                console.error('Error deleting video file:', videoErr);
-                videoDeleteError = true;
-            } else {
-                console.log('Video file does not exist, skipping deletion:', videoFilename);
+        if (cast.casturl) {
+            const videoFilename = cast.casturl.split('/media/cast_videos/')[1];
+            if (videoFilename) {
+                try {
+                    await fs.access('./backend/media/cast_videos/' + videoFilename);  // Check if the video file exists
+                    await fs.unlink('./backend/media/cast_videos/' + videoFilename);  // Delete video file
+                } catch (videoErr) {
+                    if (videoErr.code !== 'ENOENT') {
+                        console.error('Error deleting video file:', videoErr);
+                        videoDeleteError = true;
+                    } else {
+                        console.log('Video file does not exist, skipping deletion:', videoFilename);
+                    }
+                }
             }
         }
 
         // Delete image file if it exists
-        const imageFilename = cast.castimageurl.split('/media/cast_images/')[1];
-        try {
-            await fs.access('./backend/media/cast_images/' + imageFilename);  // Check if the image file exists
-            await fs.unlink('./backend/media/cast_images/' + imageFilename);  // Delete image file
-        } catch (imageErr) {
-            if (imageErr.code !== 'ENOENT') {
-                console.error('Error deleting image file:', imageErr);
-                imageDeleteError = true;
-            } else {
-                console.log('Image file does not exist, skipping deletion:', imageFilename);
+        if (cast.castimageurl) {
+            const imageFilename = cast.castimageurl.split('/media/cast_images/')[1];
+            if (imageFilename) {
+                try {
+                    await fs.access('./backend/media/cast_images/' + imageFilename);  // Check if the image file exists
+                    await fs.unlink('./backend/media/cast_images/' + imageFilename);  // Delete image file
+                } catch (imageErr) {
+                    if (imageErr.code !== 'ENOENT') {
+                        console.error('Error deleting image file:', imageErr);
+                        imageDeleteError = true;
+                    } else {
+                        console.log('Image file does not exist, skipping deletion:', imageFilename);
+                    }
+                }
             }
         }
 
