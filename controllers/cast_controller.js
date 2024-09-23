@@ -568,3 +568,22 @@ exports.getAllCastByDepartment = (req, res, next) => {
         });
 };
 
+exports.getPopularDepartment = async (req, res, next) => {
+    try {
+        const departments = await Cast.aggregate([
+            {
+                $group: {
+                    _id: "$department",
+                    count: { $sum: 1 }
+                }
+            },
+            {
+                $sort: { count: -1 }
+            }
+        ]);
+        res.status(200).json(departments);
+    } catch (error) {
+        console.error('Error fetching popular departments:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+};

@@ -26,5 +26,7 @@ router.post('/:id/grade', cast_controller.updateCastGrade);
 router.get('/trending/right/now', cast_controller.getCastTrending);
 //by department
 router.get('/department/:id', cast_controller.getAllCastByDepartment);
+//Most popular departments
+router.get('/popular/department', cast_controller.getPopularDepartment);
 
 module.exports = router;
