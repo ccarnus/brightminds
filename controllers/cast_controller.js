@@ -137,7 +137,6 @@ exports.updateOneCast = async (req, res, next) => {
 
         const departmentName = req.body.cast.department;
 
-        // Find or create the new topic if it's changed
         let newTopic = await Topic.findOne({ name: req.body.cast.topic, departmentName: departmentName });
         if (!newTopic) {
             // Create the new topic if it doesn't exist
@@ -148,7 +147,6 @@ exports.updateOneCast = async (req, res, next) => {
             await newTopic.save();
         }
 
-        // If the topic has changed, update the old and new topic counts
         if (cast.topic !== newTopic.name) {
             const oldTopic = await Topic.findOne({ name: cast.topic, departmentName: cast.department });
             if (oldTopic) {
