@@ -30,7 +30,7 @@ async function generateCastImage(description) {
             model: "dall-e-3",
             prompt: modifiedDescription,
             n: 1,
-            size: "1792x1024"
+            size: "980x560"
         });
 
         // Check if the response has the expected structure
