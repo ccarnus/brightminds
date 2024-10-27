@@ -49,7 +49,8 @@ const articleSchema = mongoose.Schema({
             }
         ],
         correct: { type: String, required: false }
-    }
+    },
+    topic: { type: mongoose.Schema.Types.ObjectId, ref: 'Topic', required: true },
 });
 
 module.exports = mongoose.model('Article', articleSchema);
