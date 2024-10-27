@@ -27,17 +27,13 @@ exports.createCast = async (req, res, next) => {
             });
         }
 
-        // Check if the topic exists; if not, create it
-        let topic = await Topic.findOne({ name: req.body.cast.topic, departmentName: req.body.cast.department });
-        if (!topic) {
-            // Create the new topic
-            console.log("Creating a new topic");
-            topic = new Topic({
-                name: req.body.cast.topic,
-                departmentName: req.body.cast.department,
-            });
-            await topic.save();
-        }
+        // Always create a new topic
+        console.log("Creating a new topic");
+        let topic = new Topic({
+            name: req.body.cast.topic,
+            departmentName: req.body.cast.department,
+        });
+        await topic.save();
 
         // Use the utility function to get the video duration
         const videoFilePath = './backend/media/cast_videos/' + req.file.filename;
@@ -59,13 +55,13 @@ exports.createCast = async (req, res, next) => {
             link: req.body.cast.link,
             evaluation: '',  // Placeholder for now
             duration: duration,
-            topic: topic.name,  // Store the topic name directly
+            topic: topic._id, // Store the topic ID
         });
 
         await cast.save();
 
-        // Increment the casts count in the related topic
-        topic.castsCount += 1;
+        // Update topic's contentId to the cast's ID
+        topic.contentId = cast._id;
         await topic.save();
 
         // Add cast ID to the user's castPublications
@@ -137,24 +133,21 @@ exports.updateOneCast = async (req, res, next) => {
 
         const departmentName = req.body.cast.department;
 
+        // Find or create the new topic based on the provided name and department
         let newTopic = await Topic.findOne({ name: req.body.cast.topic, departmentName: departmentName });
         if (!newTopic) {
-            // Create the new topic if it doesn't exist
             newTopic = new Topic({
                 name: req.body.cast.topic,
-                departmentName: departmentName  // Store department name directly
+                departmentName: departmentName,
+                contentId: cast._id
             });
             await newTopic.save();
         }
 
-        if (cast.topic !== newTopic.name) {
-            const oldTopic = await Topic.findOne({ name: cast.topic, departmentName: cast.department });
-            if (oldTopic) {
-                oldTopic.castsCount -= 1;
-                await oldTopic.save();
-            }
-            newTopic.castsCount += 1;
-            await newTopic.save();
+        // Check if the topic has changed
+        if (!cast.topic.equals(newTopic._id)) {
+            // Remove the old topic if it's different from the new one
+            await Topic.findByIdAndDelete(cast.topic);
         }
 
         // If a new file is uploaded, update the cast URL and duration
@@ -170,7 +163,7 @@ exports.updateOneCast = async (req, res, next) => {
         // Update the remaining fields
         cast.title = req.body.cast.title;
         cast.description = req.body.cast.description;
-        cast.department = departmentName;  // Store department name directly
+        cast.department = departmentName;
         cast.brightmindid = req.body.cast.brightmindid;
         cast.castimageurl = req.body.cast.castimageurl;
         cast.category = req.body.cast.category;
@@ -179,7 +172,7 @@ exports.updateOneCast = async (req, res, next) => {
         cast.comments = req.body.cast.comments;
         cast.visibility = req.body.cast.visibility;
         cast.link = req.body.cast.link;
-        cast.topic = newTopic.name;  // Update to the new topic name
+        cast.topic = newTopic._id;
 
         await cast.save();
 
@@ -266,6 +259,7 @@ exports.deleteOneCast = async (req, res, next) => {
 
         // Delete the cast document from the database
         await Cast.deleteOne({ _id: req.params.id });
+        await Topic.findByIdAndDelete(cast.topic);
 
         // Remove the cast from users' bookmarked elements and evaluation list
         await removeCastFromUsers(req.params.id);
