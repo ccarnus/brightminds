@@ -39,7 +39,7 @@ const castSchema = mongoose.Schema({
         responses: [{ type: String, required: false }],
         correct: { type: String, required: false }
     },
-    topic: { type: mongoose.Schema.Types.ObjectId, ref: 'Topic', required: true },
+    topic: { type: String, required: true }, // Store the topic name directly
 });
 
 module.exports = mongoose.model('Cast', castSchema);
