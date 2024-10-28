@@ -47,6 +47,15 @@ exports.createArticle = async (req, res, next) => {
 
         await article.save();
 
+        // Create or update the topic association
+        await createTopicIfNotExist({
+            body: {
+                name: req.body.topic,
+                departmentName: req.body.department,
+                contentId: article._id
+            }
+        }, res, next);
+
         // Add article ID to the user's articlePublications
         const user = await User.findById(req.body.brightmindid);
         if (user) {
@@ -54,12 +63,10 @@ exports.createArticle = async (req, res, next) => {
             await user.save();
         }
 
-        res.status(201).json({ response: 'Article Created.' });
+        res.status(201).json({ response: 'Article created and topic updated.' });
     } catch (error) {
         console.error('Error creating article:', error);
-        res.status(500).json({
-            error: 'Internal server error'
-        });
+        res.status(500).json({ error: 'Internal server error' });
     }
 };
 
@@ -89,29 +96,48 @@ exports.getOneArticle = (req, res, next) => {
     });
 };
 
-exports.updateOneArticle = (req, res, next) => {
-    if (!isValidDepartment(req.body.department)) {
-        return res.status(400).json({
-            error: 'Invalid department'
-        });
+exports.updateOneArticle = async (req, res, next) => {
+    try {
+        let article = await Article.findById(req.params.id);
+        if (!article) {
+            return res.status(404).json({ message: 'Article not found.' });
+        }
+
+        if (!isValidDepartment(req.body.department)) {
+            return res.status(400).json({ error: 'Invalid department' });
+        }
+
+        // Handle the old topic if the topic is being changed
+        if (article.topic !== req.body.topic) {
+            await removeExistingTopic({
+                body: {
+                    name: article.topic,
+                    departmentName: article.department,
+                    contentId: article._id
+                }
+            }, res, next);
+        }
+
+        // Ensure the new topic exists or create it
+        await createTopicIfNotExist({
+            body: {
+                name: req.body.topic,
+                departmentName: req.body.department,
+                contentId: article._id
+            }
+        }, res, next);
+
+        // Update article details
+        article = Object.assign(article, req.body);
+
+        await article.save();
+        res.status(201).json({ response: 'Article updated and topic adjusted.' });
+    } catch (error) {
+        console.error('Error updating article:', error);
+        res.status(500).json({ error: 'Internal server error' });
     }
-
-    const article = {
-        _id: req.params.id,
-        ...req.body
-    };
-
-    Article.updateOne({ _id: req.params.id }, article)
-    .then(() => {
-        res.status(201).json({
-            response: "Article updated"
-        })})
-    .catch((error) => {
-        res.status(400).json({
-            error: error
-        });
-    });
 };
+
 
 const removeArticleFromUsers = async (articleId) => {
     try {
@@ -173,6 +199,15 @@ exports.deleteOneArticle = async (req, res, next) => {
                         await user.save();
                     }
 
+                    // Update or remove topic association
+                    await removeExistingTopic({
+                        body: {
+                            name: article.topic,
+                            departmentName: article.department,
+                            contentId: article._id
+                        }
+                    }, res, next);
+
                     let responseMessage = 'Article deleted and references removed from users.';
                     if (imageDeleteError) {
                         responseMessage += ' However, there was an error deleting the associated article image.';
@@ -198,6 +233,15 @@ exports.deleteOneArticle = async (req, res, next) => {
                     user.articlePublications = user.articlePublications.filter(pubId => !pubId.equals(article._id));
                     await user.save();
                 }
+
+                // Update or remove topic association
+                await removeExistingTopic({
+                    body: {
+                        name: article.topic,
+                        departmentName: article.department,
+                        contentId: article._id
+                    }
+                }, res, next);
 
                 res.status(200).json({ response: 'Article deleted and references removed from users.' });
             } catch (error) {

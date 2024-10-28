@@ -22,21 +22,7 @@ exports.createCast = async (req, res, next) => {
 
         // Check if the title exceeds 65 characters
         if (req.body.cast.title && req.body.cast.title.length > 65) {
-            return res.status(400).json({
-                error: 'Title must be 65 characters or less'
-            });
-        }
-
-        // Check if the topic exists; if not, create it
-        let topic = await Topic.findOne({ name: req.body.cast.topic, departmentName: req.body.cast.department });
-        if (!topic) {
-            // Create the new topic
-            console.log("Creating a new topic");
-            topic = new Topic({
-                name: req.body.cast.topic,
-                departmentName: req.body.cast.department,
-            });
-            await topic.save();
+            return res.status(400).json({ error: 'Title must be 65 characters or less' });
         }
 
         // Use the utility function to get the video duration
@@ -50,23 +36,27 @@ exports.createCast = async (req, res, next) => {
             department: req.body.cast.department,
             brightmindid: req.body.cast.brightmindid,
             casturl: url + '/backend/media/cast_videos/' + req.file.filename,
-            castimageurl: '',  // Placeholder for now
+            castimageurl: '', // Placeholder for now
             category: req.body.cast.category,
             university: req.body.cast.university,
             likes: req.body.cast.likes,
             comments: req.body.cast.comments,
             visibility: req.body.cast.visibility,
             link: req.body.cast.link,
-            evaluation: '',  // Placeholder for now
+            evaluation: '', // Placeholder for now
             duration: duration,
-            topic: topic.name,  // Store the topic name directly
+            topic: req.body.cast.topic
         });
 
         await cast.save();
 
-        // Increment the casts count in the related topic
-        topic.castsCount += 1;
-        await topic.save();
+        await createTopicIfNotExist({
+            body: {
+                name: req.body.cast.topic,
+                departmentName: req.body.cast.department,
+                contentId: cast._id
+            }
+        }, res, next);
 
         // Add cast ID to the user's castPublications
         const user = await User.findById(req.body.cast.brightmindid);
@@ -137,27 +127,27 @@ exports.updateOneCast = async (req, res, next) => {
 
         const departmentName = req.body.cast.department;
 
-        let newTopic = await Topic.findOne({ name: req.body.cast.topic, departmentName: departmentName });
-        if (!newTopic) {
-            // Create the new topic if it doesn't exist
-            newTopic = new Topic({
+        // Handle the old topic if the topic is being changed
+        if (cast.topic !== req.body.cast.topic) {
+            await exports.removeExistingTopic({
+                body: {
+                    name: cast.topic,
+                    departmentName: cast.department,
+                    contentId: cast._id
+                }
+            }, res, next);
+        }
+
+        // Ensure the new topic exists or create it
+        await exports.createTopicIfNotExist({
+            body: {
                 name: req.body.cast.topic,
-                departmentName: departmentName  // Store department name directly
-            });
-            await newTopic.save();
-        }
-
-        if (cast.topic !== newTopic.name) {
-            const oldTopic = await Topic.findOne({ name: cast.topic, departmentName: cast.department });
-            if (oldTopic) {
-                oldTopic.castsCount -= 1;
-                await oldTopic.save();
+                departmentName,
+                contentId: cast._id
             }
-            newTopic.castsCount += 1;
-            await newTopic.save();
-        }
+        }, res, next);
 
-        // If a new file is uploaded, update the cast URL and duration
+        // Update the cast details
         if (req.file) {
             const url = req.protocol + "://" + req.get('host');
             const videoFilePath = './backend/media/cast_videos/' + req.file.filename;
@@ -267,26 +257,16 @@ exports.deleteOneCast = async (req, res, next) => {
         // Delete the cast document from the database
         await Cast.deleteOne({ _id: req.params.id });
 
-        // Remove the cast from users' bookmarked elements and evaluation list
-        await removeCastFromUsers(req.params.id);
+        // Use removeExistingTopic to update or remove the topic association
+        await exports.removeExistingTopic({
+            body: {
+                name: cast.topic,
+                departmentName: cast.department,
+                contentId: cast._id
+            }
+        }, res, next);
 
-        // Remove cast ID from the user's castPublications
-        const user = await User.findById(cast.brightmindid);
-        if (user) {
-            user.castPublications = user.castPublications.filter(pubId => !pubId.equals(cast._id));
-            await user.save();
-        }
-
-        let responseMessage = 'Cast deleted and references removed from users.';
-        if (videoDeleteError && imageDeleteError) {
-            responseMessage += ' However, there were errors deleting both the video and image files.';
-        } else if (videoDeleteError) {
-            responseMessage += ' However, there was an error deleting the video file.';
-        } else if (imageDeleteError) {
-            responseMessage += ' However, there was an error deleting the image file.';
-        }
-
-        res.status(200).json({ response: responseMessage });
+        res.status(200).json({ message: 'Cast and associated topic updated successfully.' });
     } catch (error) {
         console.error('Error deleting cast:', error);
         res.status(500).json({ error: 'Error deleting cast.' });
