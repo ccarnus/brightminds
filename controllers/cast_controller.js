@@ -5,6 +5,7 @@ const fs = require('fs').promises;
 const departments = require('../lists/departments.js');
 const castQueue = require('../queues/castQueue.js');
 const Topic = require('../models/topic_model.js');
+const { createTopicIfNotExist } = require('../controllers/topic_controller.js');
 
 const isValidDepartment = (department) => departments.includes(department);
 
@@ -50,13 +51,19 @@ exports.createCast = async (req, res, next) => {
 
         await cast.save();
 
-        await createTopicIfNotExist({
-            body: {
-                name: req.body.cast.topic,
-                departmentName: req.body.cast.department,
-                contentId: cast._id
-            }
-        }, res, next);
+        // Call createTopicIfNotExist with the required fields
+         const topicResult = await createTopicIfNotExist({
+            name: req.body.cast.topic,
+            departmentName: req.body.cast.department,
+            contentId: cast._id
+        });
+
+        // Send topicResult status and message
+        if (topicResult.status === 201) {
+            console.log(topicResult.message);
+        } else if (topicResult.status === 200) {
+            console.log(topicResult.message);
+        }
 
         // Add cast ID to the user's castPublications
         const user = await User.findById(req.body.cast.brightmindid);

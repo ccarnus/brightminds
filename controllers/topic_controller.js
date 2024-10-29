@@ -1,9 +1,7 @@
 const Topic = require('../models/topic_model.js');
 
-exports.createTopicIfNotExist = async (req, res, next) => {
+exports.createTopicIfNotExist = async ({ name, departmentName, contentId }) => {
     try {
-        const { name, departmentName, contentId } = req.body;
-
         // Search for an existing topic with the same name and departmentName
         let topic = await Topic.findOne({ name, departmentName });
 
@@ -14,7 +12,7 @@ exports.createTopicIfNotExist = async (req, res, next) => {
                 topic.contentCount += 1;
             }
             await topic.save();
-            res.status(200).json({ message: 'Topic updated successfully.', topic });
+            return { message: 'Topic updated successfully.', topic, status: 200 };
         } else {
             // If topic does not exist, create a new one
             topic = new Topic({
@@ -24,10 +22,11 @@ exports.createTopicIfNotExist = async (req, res, next) => {
                 content_ids: [contentId]
             });
             await topic.save();
-            res.status(201).json({ message: 'Topic created successfully.', topic });
+            return { message: 'Topic created successfully.', topic, status: 201 };
         }
     } catch (error) {
-        res.status(500).json({ error: 'Error creating or updating topic.' });
+        console.error('Error creating or updating topic:', error);
+        throw new Error('Error creating or updating topic.');
     }
 };
 
