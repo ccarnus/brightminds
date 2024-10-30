@@ -5,7 +5,7 @@ const fs = require('fs').promises;
 const departments = require('../lists/departments.js');
 const castQueue = require('../queues/castQueue.js');
 const Topic = require('../models/topic_model.js');
-const { createTopicIfNotExist } = require('../controllers/topic_controller.js');
+const { createTopicIfNotExist, removeExistingTopic  } = require('../controllers/topic_controller.js');
 
 const isValidDepartment = (department) => departments.includes(department);
 
@@ -265,15 +265,20 @@ exports.deleteOneCast = async (req, res, next) => {
         await Cast.deleteOne({ _id: req.params.id });
 
         // Use removeExistingTopic to update or remove the topic association
-        await exports.removeExistingTopic({
-            body: {
-                name: cast.topic,
-                departmentName: cast.department,
-                contentId: cast._id
-            }
-        }, res, next);
+        const topicResult = await removeExistingTopic({
+            name: cast.topic,
+            departmentName: cast.department,
+            contentId: cast._id
+        });
 
-        res.status(200).json({ message: 'Cast and associated topic updated successfully.' });
+        let responseMessage = 'Cast and associated topic updated successfully.';
+        if (videoDeleteError || imageDeleteError) {
+            responseMessage += ' However, there was an error deleting associated media files.';
+        }
+
+        responseMessage += ` ${topicResult.message}`;
+
+        res.status(topicResult.status).json({ message: responseMessage });
     } catch (error) {
         console.error('Error deleting cast:', error);
         res.status(500).json({ error: 'Error deleting cast.' });

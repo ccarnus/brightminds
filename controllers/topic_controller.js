@@ -69,14 +69,12 @@ exports.updateTopic = async (req, res, next) => {
     }
 };
 
-exports.removeExistingTopic = async (req, res, next) => {
+exports.removeExistingTopic = async ({ name, departmentName, contentId }) => {
     try {
-        const { name, departmentName, contentId } = req.body;
-
         // Find the topic with matching name and departmentName
         const topic = await Topic.findOne({ name, departmentName });
         if (!topic) {
-            return res.status(404).json({ message: 'Topic not found.' });
+            return { status: 404, message: 'Topic not found.' };
         }
 
         // Remove the contentId and decrement the contentCount
@@ -84,14 +82,15 @@ exports.removeExistingTopic = async (req, res, next) => {
         topic.contentCount -= 1;
 
         if (topic.contentCount <= 0) {
-            // If no more casts are associated, delete the topic
+            // If no more content is associated, delete the topic
             await Topic.deleteOne({ _id: topic._id });
-            res.status(200).json({ message: 'Topic removed as no more casts are associated.' });
+            return { status: 200, message: 'Topic removed as no more content is associated.' };
         } else {
             await topic.save();
-            res.status(200).json({ message: 'Content removed from topic successfully.', topic });
+            return { status: 200, message: 'Content removed from topic successfully.', topic };
         }
     } catch (error) {
-        res.status(500).json({ error: 'Error removing content from topic.' });
+        console.error('Error removing content from topic:', error);
+        throw new Error('Error removing content from topic.');
     }
 };
