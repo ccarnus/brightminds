@@ -136,23 +136,27 @@ exports.updateOneCast = async (req, res, next) => {
 
         // Handle the old topic if the topic is being changed
         if (cast.topic !== req.body.cast.topic) {
-            await exports.removeExistingTopic({
-                body: {
-                    name: cast.topic,
-                    departmentName: cast.department,
-                    contentId: cast._id
-                }
-            }, res, next);
+            const topicRemovalResult = await removeExistingTopic({
+                name: cast.topic,
+                departmentName: cast.department,
+                contentId: cast._id
+            });
+
+            if (topicRemovalResult.status === 404) {
+                console.warn('Old topic not found; skipping removal.');
+            } else {
+                console.log(topicRemovalResult.message);
+            }
         }
 
         // Ensure the new topic exists or create it
-        await exports.createTopicIfNotExist({
-            body: {
-                name: req.body.cast.topic,
-                departmentName,
-                contentId: cast._id
-            }
-        }, res, next);
+        const topicCreationResult = await createTopicIfNotExist({
+            name: req.body.cast.topic,
+            departmentName,
+            contentId: cast._id
+        });
+
+        console.log(topicCreationResult.message);
 
         // Update the cast details
         if (req.file) {

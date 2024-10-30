@@ -75,7 +75,7 @@ exports.removeExistingTopic = async ({ name, departmentName, contentId }) => {
         const topic = await Topic.findOne({ name, departmentName });
         if (!topic) {
             return { status: 404, message: 'Topic not found.' };
-        }
+        }   
 
         // Remove the contentId and decrement the contentCount
         topic.content_ids = topic.content_ids.filter(id => id !== contentId);
