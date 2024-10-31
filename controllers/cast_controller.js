@@ -137,9 +137,9 @@ exports.updateOneCast = async (req, res, next) => {
         // Handle the old topic if the topic is being changed
         if (cast.topic !== req.body.cast.topic) {
             const topicRemovalResult = await removeExistingTopic({
-                name: req.body.cast.topic,
-                departmentName: req.body.cast.department,
-                contentId: req.body.cast._id
+                name: cast.topic,
+                departmentName: cast.department,
+                contentId: cast.cast._id
             });
 
             if (topicRemovalResult.status === 404) {
@@ -180,7 +180,7 @@ exports.updateOneCast = async (req, res, next) => {
         cast.comments = req.body.cast.comments;
         cast.visibility = req.body.cast.visibility;
         cast.link = req.body.cast.link;
-        cast.topic = req.body.cast.topic;  // Update to the new topic name
+        //cast.topic = req.body.cast.topic;  // Update to the new topic name
 
         await cast.save();
 
