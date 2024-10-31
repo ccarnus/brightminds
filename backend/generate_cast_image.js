@@ -1,8 +1,8 @@
 const openai = require('openai');
 const fs = require('fs');
 const path = require('path');
-const axios = require('axios'); // To download the image
-const sharp = require('sharp'); // To resize the image
+const axios = require('axios');
+const sharp = require('sharp');
 
 const apikey = process.env.OPENAI_API_KEY;
 const client = new openai({apikey});
@@ -30,6 +30,7 @@ async function resizeImage(inputPath, outputPath, width, height) {
             .resize(width, height)
             .toFile(outputPath);
         console.log('Image resized successfully');
+        fs.unlinkSync(inputPath); // Delete the original file after resizing
     } catch (error) {
         console.error('Error resizing image:', error);
     }
@@ -42,7 +43,7 @@ async function generateCastImage(description) {
             model: "dall-e-3",
             prompt: modifiedDescription,
             n: 1,
-            size: "1024x1024" // Generate in closest available format
+            size: "1024x1024"
         });
 
         if (!response.data || response.data.length === 0) {
