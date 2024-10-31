@@ -73,6 +73,8 @@ exports.removeExistingTopic = async ({ name, departmentName, contentId }) => {
     try {
         // Find the topic with matching name and departmentName
         const topic = await Topic.findOne({ name, departmentName });
+        console.log("name"+name);
+        console.log("department"+departmentName);
         if (!topic) {
             return { status: 404, message: 'Topic not found.' };
         }   
