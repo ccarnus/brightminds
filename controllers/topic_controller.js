@@ -73,15 +73,19 @@ exports.removeExistingTopic = async ({ name, departmentName, contentId }) => {
     try {
         // Find the topic with matching name and departmentName
         const topic = await Topic.findOne({ name, departmentName });
+        console.log("Decrementing the following topic:");
         console.log("name"+name);
         console.log("department"+departmentName);
+        console.log("ID of the cast "+contentId)
         if (!topic) {
             return { status: 404, message: 'Topic not found.' };
         }   
 
         // Remove the contentId and decrement the contentCount
+        console.log("list before: "+topic.content_ids)
         topic.content_ids = topic.content_ids.filter(id => id !== contentId);
         topic.contentCount -= 1;
+        console.log("list after: "+topic.content_ids)
 
         if (topic.contentCount <= 0) {
             // If no more content is associated, delete the topic
