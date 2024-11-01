@@ -136,7 +136,7 @@ exports.updateOneCast = async (req, res, next) => {
 
         // Handle the old topic if the topic is being changed
         if (cast.topic !== req.body.cast.topic) {
-            let oldTopic = cast.Topic; 
+            let oldTopic = cast.topic; 
             const topicRemovalResult = await removeExistingTopic({
                 name: oldTopic,
                 departmentName: cast.department,
