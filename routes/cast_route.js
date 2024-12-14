@@ -12,16 +12,10 @@ router.delete('/:id',  cast_controller.deleteOneCast);
 router.get('/category/:id', cast_controller.getAllCastByCategory);
 router.get('/department/:id', cast_controller.getAllCastByDepartment);
 router.get("/brightmindid/:id", cast_controller.getAllCastByBrightmindid);
-router.post("/comment/:id",cast_controller.updateCastAddComment);
-router.post("/like/:id",cast_controller.updateCastAddLike);
 router.get("/evaluation/:id",cast_controller.getEvaluationForCast);
-//verified status
-router.get("/verification/:id",cast_controller.getCastVerification);
-router.post("/verification/:id/decrement",cast_controller.DecrementCastVerification);
-router.post("/verification/:id/increment",cast_controller.IncrementCastVerification);
-//grading
-router.get('/:id/grade', cast_controller.getCastGrade);
-router.post('/:id/grade', cast_controller.updateCastGrade);
+//rating
+router.get('/:id/rating', cast_controller.getCastRating);
+router.post('/:id/rating', cast_controller.updateCastRating);
 //trending
 router.get('/trending/right/now', cast_controller.getCastTrending);
 //by department
