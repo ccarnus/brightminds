@@ -1,7 +1,6 @@
 const Cast = require('../models/cast_model.js');
 const User = require('../models/user_model.js');
 const { getVideoDurationInSeconds } = require('../backend/videoUtils');
-const transcribeVideo = require('../backend/transcription');
 const fs = require('fs').promises;
 const departments = require('../lists/departments.js');
 const castQueue = require('../queues/castQueue.js');
@@ -29,19 +28,10 @@ exports.createCast = async (req, res, next) => {
         const videoFilePath = './backend/media/cast_videos/' + req.file.filename;
         const duration = await getVideoDurationInSeconds(videoFilePath);
 
-        // Transcribe video to generate a description
-        let transcript = '';
-        try {
-            transcript = await transcribeVideo(videoFilePath);
-        } catch (transcriptionError) {
-            console.error('Error during transcription:', transcriptionError);
-        return res.status(500).json({ error: 'Failed to transcribe video' });
-        }
-
         // Create the new cast
         const cast = new Cast({
             title: req.body.cast.title,
-            description: transcript,
+            description: "", // Will be filled after transcription in the queue
             department: req.body.cast.department,
             brightmindid: req.body.cast.brightmindid,
             casturl: url + '/backend/media/cast_videos/' + req.file.filename,
@@ -81,8 +71,8 @@ exports.createCast = async (req, res, next) => {
         // Add job to the queue for background processing
         castQueue.add({
             castId: cast._id,
-            description: transcript,
-            url: url,
+            videoFilePath: videoFilePath,
+            url: url
         });
 
         res.status(201).json({ response: 'Cast created and topic updated.' });
