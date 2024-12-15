@@ -1,5 +1,4 @@
 const User = require('../models/user_model.js');
-const VirtualLab = require('../models/virtual_lab_model.js');
 const bcrypt = require('bcrypt');
 const emailVerificator = require('../backend/email_verificator.js');
 const jwt = require('jsonwebtoken');
@@ -53,7 +52,6 @@ exports.signup = async (req, res, next) => {
             password: hash,
             username: req.body.user.username,
             role: req.body.user.role,
-            score: 0,
             profilePictureUrl: url + '/backend/media/profile_pictures/' + req.file.filename,
             verificationToken: token,
             tracking: {
@@ -458,8 +456,7 @@ exports.login = (req, res, next) => {
 exports.getAllUser = async (req, res, next) => {
     try {
       const users = await User.find()
-        .select('_id email username role department score profilePictureUrl evaluation_list virtual_labs preferences tracking castPublications articlePublications university verificationToken isVerified')
-        .sort({ score: -1 }); 
+        .select('_id email username role department profilePictureUrl evaluation_list preferences tracking castPublications articlePublications university verificationToken isVerified'); 
   
       res.status(200).json(users);
     } catch (error) {
@@ -476,31 +473,25 @@ exports.getAllUser = async (req, res, next) => {
         return res.status(404).json({ message: 'User not found.' });
       }
   
-      const userScore = user.score;
-      const countBelowScore = await User.countDocuments({ score: { $lt: userScore } });
-      const totalUsers = await User.countDocuments();
-      const percentage = Math.round((countBelowScore / (totalUsers-1)) * 100);
-      const userWithPercentage = {
+      const User = {
         _id: user._id,
         email: user.email,
         username: user.username,
         role: user.role,
         department: user.department,
         university: user.university,
-        score: user.score,
         profilePictureUrl: user.profilePictureUrl,
         evaluation_list: user.evaluation_list,
         percentage: percentage,
         preferences: user.preferences,
         tracking: user.tracking,
-        virtual_labs: user.virtual_labs,
         castPublications: user.castPublications,
         articlePublications: user.articlePublications,
         isVerified : user.isVerified,
         verificationToken: user.verificationToken,
       };
   
-      res.status(200).json(userWithPercentage);
+      res.status(200).json(User);
     } catch (error) {
       res.status(500).json({ error: 'An error occurred.' });
     }
@@ -518,12 +509,10 @@ exports.updateOneUser = (req, res, next) => {
             username: req.body.user.username,
             role: req.body.user.role,
             department: req.body.user.department,
-            score: req.body.user.score,
             profilePictureUrl: url + '/backend/media/profile_pictures/' + req.file.filename,
             evaluation_list: req.body.user.evaluation_list,
             preferences: req.body.user.preferences,
             tracking: req.body.user.tracking,
-            virtual_labs: req.body.user.virtual_labs,
             castPublications: req.body.user.castPublications,
             articlePublications: req.body.user.articlePublications,
             university: req.body.user.university
@@ -535,12 +524,10 @@ exports.updateOneUser = (req, res, next) => {
             username: req.body.username,
             role: req.body.role,
             department: req.body.department,
-            score: req.body.score,
             profilePictureUrl: req.body.profilePictureUrl,
             evaluation_list: req.body.evaluation_list,
             preferences: req.body.preferences,
             tracking: req.body.tracking,
-            virtual_labs: req.body.virtual_labs,
             castPublications: req.body.castPublications,
             articlePublications: req.body.articlePublications,
             university: req.body.university
@@ -580,20 +567,6 @@ exports.deleteOneUser = (req, res, next) => {
             })
         }
     )
-}
-
-exports.getAllByScore = (req, res, next) => {
-    User.find().select('_id email username role department score profilePictureUrl evaluation_list preferences tracking').sort({score: 1}).then(
-        (users) => {
-            res.status(200).json(users);
-        }
-    ).catch(
-        (error) => {
-            res.status(400).json({
-                error: error
-            });
-        }
-    );
 }
 
 exports.updateUserAddContentToList = async (req, res, next) => {
@@ -652,56 +625,6 @@ exports.updateUserAddContentToList = async (req, res, next) => {
     }
 };
 
-exports.updateUserAddPoints = (req, res, next) => {
-    const userId = req.params.id;
-    const points = req.body.Points;
-
-    User.findById(userId)
-        .then((user) => {
-            if (!user) {
-                return res.status(404).json({ message: 'User not found.' });
-            }
-            if (typeof points !== 'number') {
-                return res.status(400).json({ message: 'Points must be a valid number' });
-            }
-        
-            user.score += points;
-
-            return user.save();
-        })
-        .then(() => {
-            res.status(200).json({ message: 'Points added.' });
-        })
-        .catch((error) => {
-            res.status(500).json({ error: 'An error occurred.' });
-        });
-}
-
-exports.updateUserRemovePoints = (req, res, next) => {
-    const userId = req.params.id;
-    const points = req.body.Points;
-
-    User.findById(userId)
-        .then((user) => {
-            if (!user) {
-                return res.status(404).json({ message: 'User not found.' });
-            }
-            if (typeof points !== 'number') {
-                return res.status(400).json({ message: 'Points must be a valid number' });
-            }
-        
-            user.score -= points;
-
-            return user.save();
-        })
-        .then(() => {
-            res.status(200).json({ message: 'Points removed.' });
-        })
-        .catch((error) => {
-            res.status(500).json({ error: 'An error occurred.' });
-        });
-}
-
 exports.updateUserRemoveContentFromList = (req, res, next) => {
     const userId = req.params.id;
     const contentId = req.body.contentId;
@@ -737,7 +660,7 @@ exports.getUserBookmarks = async (req, res, next) => {
             return res.status(404).json({ message: 'User not found.' });
         }
 
-        const bookmarks = user.bookmarked_elements;
+        const bookmarks = user.bookmarkedcontent;
         res.status(200).json(bookmarks);
     } catch (error) {
         res.status(500).json({ error: 'An error occurred.' });
@@ -756,12 +679,12 @@ exports.addUserBookmark = async (req, res, next) => {
         }
 
         // Check if the castId is already in the user's bookmarks
-        if (user.bookmarked_elements.some((bookmark) => bookmark.castId === castId)) {
+        if (user.bookmarkedcontent.some((bookmark) => bookmark.contentid === castId)) {
             return res.status(400).json({ message: 'Element is already bookmarked.' });
         }
 
         // Add the castId to the user's bookmarks
-        user.bookmarked_elements.push({ castId });
+        user.bookmarkedcontent.push({ castId });
         await user.save();
 
         res.status(201).json({ message: 'Element bookmarked.' });
@@ -782,8 +705,8 @@ exports.removeUserBookmark = async (req, res, next) => {
         }
 
         // Filter out the bookmarked element with the specified castId
-        user.bookmarked_elements = user.bookmarked_elements.filter(
-            (bookmark) => bookmark.castId !== castId
+        user.bookmarkedcontent = user.bookmarkedcontent.filter(
+            (bookmark) => bookmark.contentid !== castId
         );
 
         await user.save();
@@ -980,130 +903,6 @@ exports.getUserTracking = async (req, res) => {
         }
 
         res.status(200).json({ tracking: user.tracking, target: user.tracking.target});
-    } catch (error) {
-        res.status(500).json({ error: 'An error occurred.' });
-    }
-};
-
-
-exports.getVirtualLabs = async (req, res) => {
-    try {
-        const user = await User.findById(req.params.id).select('virtual_labs');
-        if (!user) {
-            return res.status(404).json({ message: 'User not found.' });
-        }
-        res.status(200).json({ virtualLabs: user.virtual_labs });
-    } catch (error) {
-        res.status(500).json({ error: 'An error occurred.' });
-    }
-};
-
-exports.addVirtualLabMember = async (req, res) => {
-    const userId = req.params.id;
-    const labId = req.body.labId;
-    
-    try {
-        const user = await User.findById(userId);
-        const virtualLab = await VirtualLab.findById(labId);
-
-        if (!user || !virtualLab) {
-            return res.status(404).json({ message: 'User or Virtual Lab not found.' });
-        }
-
-        if (!virtualLab.members.some(member => member.brightmindsID === userId)) {
-            virtualLab.members.push({ brightmindsID: userId });
-            await virtualLab.save();
-        }
-
-        if (!user.virtual_labs.member.some(lab => lab.labId === labId)) {
-            user.virtual_labs.member.push({ labId });
-            await user.save();
-        }
-
-        res.status(200).json({ message: 'Member added to the virtual lab and vice versa.' });
-    } catch (error) {
-        res.status(500).json({ error: 'An error occurred.' });
-    }
-};
-
-exports.removeVirtualLabMember = async (req, res) => {
-    const userId = req.params.id;
-    const labId = req.body.labId;
-
-    try {
-        const user = await User.findById(userId);
-        const virtualLab = await VirtualLab.findById(labId);
-
-        if (!user || !virtualLab) {
-            return res.status(404).json({ message: 'User or Virtual Lab not found.' });
-        }
-
-        // Remove user from virtual lab's member list
-        virtualLab.members = virtualLab.members.filter(member => member.brightmindsID !== userId);
-        await virtualLab.save();
-
-        // Remove virtual lab from user's member list
-        user.virtual_labs.member = user.virtual_labs.member.filter(member => member.labId !== labId);
-        await user.save();
-
-        res.status(200).json({ message: 'Member removed from the virtual lab and vice versa.' });
-    } catch (error) {
-        res.status(500).json({ error: 'An error occurred.' });
-    }
-};
-
-exports.addVirtualLabFollower = async (req, res) => {
-    const userId = req.params.id;
-    const labId = req.body.labId;
-
-    try {
-        const user = await User.findById(userId);
-        const virtualLab = await VirtualLab.findById(labId);
-
-        if (!user || !virtualLab) {
-            return res.status(404).json({ message: 'User or Virtual Lab not found.' });
-        }
-
-        // Add user to virtual lab's follower list
-        if (!virtualLab.followers.some(follower => follower.userID === userId)) {
-            virtualLab.followers.push({ userID: userId });
-            await virtualLab.save();
-        }
-
-        // Add virtual lab to user's follower list
-        if (!user.virtual_labs.follower.some(lab => lab.labId === labId)) {
-            user.virtual_labs.follower.push({ labId });
-            await user.save();
-        }
-
-        res.status(200).json({ message: 'Follower added to the virtual lab and vice versa.' });
-    } catch (error) {
-        res.status(500).json({ error: 'An error occurred.' });
-    }
-};
-
-
-exports.removeVirtualLabFollower = async (req, res) => {
-    const userId = req.params.id;
-    const labId = req.body.labId;
-
-    try {
-        const user = await User.findById(userId);
-        const virtualLab = await VirtualLab.findById(labId);
-
-        if (!user || !virtualLab) {
-            return res.status(404).json({ message: 'User or Virtual Lab not found.' });
-        }
-
-        // Remove user from virtual lab's follower list
-        virtualLab.followers = virtualLab.followers.filter(follower => follower.userID !== userId);
-        await virtualLab.save();
-
-        // Remove virtual lab from user's follower list
-        user.virtual_labs.follower = user.virtual_labs.follower.filter(follower => follower.labId !== labId);
-        await user.save();
-
-        res.status(200).json({ message: 'Follower removed from the virtual lab and vice versa.' });
     } catch (error) {
         res.status(500).json({ error: 'An error occurred.' });
     }
