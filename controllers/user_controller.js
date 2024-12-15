@@ -467,7 +467,7 @@ exports.getAllUser = async (req, res, next) => {
   exports.getOneUser = async (req, res, next) => {
     try {
       const user = await User.findById(req.params.id);
-      console.log(req.params.id);
+      console.log(user.tracking);
   
       if (!user) {
         return res.status(404).json({ message: 'User not found.' });
