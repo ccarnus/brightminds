@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 const castSchema = mongoose.Schema({
     title: { type: String, required: true },
-    description: { type: String, required: true },
+    description: { type: String, required: false },
     department: { type: String, required: true },
     brightmindid: { type: String, required: true },
     casturl: { type: String, required: true },
