@@ -1,14 +1,14 @@
 const ffmpeg = require('fluent-ffmpeg');
 const { PassThrough } = require('stream');
-const openai = require('openai');
+const axios = require('axios');
 const ffmpegPath = require('@ffmpeg-installer/ffmpeg').path;
 
 // Set the path to the FFmpeg binary
 ffmpeg.setFfmpegPath(ffmpegPath);
 
-// Set OpenAI API Key
-const apikey = process.env.OPENAI_API_KEY;
-const client = new openai({ apikey });
+// OpenAI API configuration
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+const OPENAI_API_URL = 'https://api.openai.com/v1/audio/transcriptions';
 
 /**
  * Extracts audio from a video file as a stream and transcribes it using Whisper API.
@@ -25,16 +25,25 @@ const transcribeVideo = (videoPath) => {
       .format('mp3') // Ensure the format is compatible with Whisper API
       .audioCodec('libmp3lame')
       .on('error', (err) => reject(`Error extracting audio: ${err.message}`))
-      .on('end', () => console.log('Audio extraction completed.'))
       .run();
 
-    // Send audio stream to Whisper API
-    client.audio
-      .transcribe({
-        model: 'whisper-1',
-        file: audioStream,
+    // Prepare form data for Whisper API
+    const formData = new FormData();
+    formData.append('file', audioStream, {
+      filename: 'audio.mp3',
+      contentType: 'audio/mpeg',
+    });
+    formData.append('model', 'whisper-1');
+
+    // Make the API request
+    axios
+      .post(OPENAI_API_URL, formData, {
+        headers: {
+          ...formData.getHeaders(),
+          Authorization: `Bearer ${OPENAI_API_KEY}`,
+        },
       })
-      .then((response) => resolve(response.text))
+      .then((response) => resolve(response.data.text))
       .catch((err) => reject(`Error transcribing audio: ${err.message}`));
   });
 };
