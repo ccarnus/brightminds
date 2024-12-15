@@ -10,16 +10,10 @@ router.delete('/:id',  article_controller.deleteOneArticle);
 router.get('/category/:id', article_controller.getAllArticleByCategory);
 router.get('/department/:id', article_controller.getAllArticleByDepartment);
 router.get("/brightmindid/:id", article_controller.getAllArticleByBrightmindid);
-router.post("/comment/:id",article_controller.updateArticleAddComment);
-router.post("/like/:id",article_controller.updateArticleAddLike);
 router.get("/evaluation/:id",article_controller.getEvaluationForArticle);
-//verified status
-router.get("/verification/:id",article_controller.getArticleVerification);
-router.post("/verification/:id/decrement",article_controller.DecrementArticleVerification);
-router.post("/verification/:id/increment",article_controller.IncrementArticleVerification);
 //grading
-router.get('/:id/grade', article_controller.getArticleGrade);
-router.post('/:id/grade', article_controller.updateArticleGrade);
+router.get('/:id/rating', article_controller.getArticleRating);
+router.post('/:id/rating', article_controller.updateArticleRating);
 //trending
 router.get('/trending/right/now', article_controller.getArticleTrending);
 

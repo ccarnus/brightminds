@@ -9,7 +9,6 @@ exports.createUniversity = (req, res, next) => {
             name: req.body.university.name,
             displayedName: req.body.university.displayedName,
             iconurl: url + '/backend/media/university_icon/' + req.file.filename,
-            score: req.body.university.score
         });
         university.save().then(
             () => {
@@ -24,8 +23,7 @@ exports.createUniversity = (req, res, next) => {
 
 exports.getAllUniversity = async (req, res, next) => {
     try {
-      const universities = await University.find()
-        .sort({ score: -1 });
+      const universities = await University.find();
   
       res.status(200).json(universities);
     } catch (error) {
@@ -58,13 +56,11 @@ exports.updateOneUniversity = (req, res, next) => {
             _id:req.params.id,
             name:req.body.university.name,
             iconurl: url + '/backend/media/university_icon/' + req.file.filename,
-            score: req.body.university.score,
             displayedName: req.body.university.displayedName
         };
     } else {university = {
             _id:req.params.id,
             name: req.body.name,
-            score: req.body.score,
             iconurl: req.body.iconurl,
             displayedName: req.body.displayedName
         };

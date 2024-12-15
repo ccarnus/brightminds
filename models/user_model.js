@@ -10,9 +10,7 @@ const userSchema = mongoose.Schema({
         required: true,
         enum: ['College Student', 'Professor', 'Researcher', 'Learning Enthusiast', 'PhD Student']
     },
-    department: { type: String, required: false },
     university: { type: String, required: false },
-    score: { type: Number, required: true, default: 0 },
     profilePictureUrl: { type: String, required: true },
     isVerified: { type: Boolean, default: false },
     verificationToken: { type: String, required: false },
@@ -22,8 +20,8 @@ const userSchema = mongoose.Schema({
         watched: { type: Boolean, required: false },
         answered: { type: Boolean, required: false }
     }],
-    bookmarked_elements: [{
-        castId: { type: String, required: false }
+    bookmarkedcontent: [{
+        contentid: { type: String, required: false }
     }],
     preferences: [{
         category: { type: String, required: true },
@@ -37,14 +35,6 @@ const userSchema = mongoose.Schema({
         history: [{
             category: { type: String, required: true },
             count: { type: Number, default: 0 }
-        }]
-    },
-    virtual_labs: {
-        member: [{
-            labId: { type: String, required: false }
-        }],
-        follower: [{
-            labId: { type: String, required: false }
         }]
     },
     castPublications: [{ 
