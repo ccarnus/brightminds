@@ -464,8 +464,6 @@ exports.getAllUser = async (req, res, next) => {
     }
   };
 
-
-
   exports.getOneUser = async (req, res, next) => {
     try {
       const user = await User.findById(req.params.id);
@@ -475,9 +473,9 @@ exports.getAllUser = async (req, res, next) => {
         return res.status(404).json({ message: 'User not found.' });
       }
   
-      const User = {
+      const userObject = {
         _id: user._id,
-        email: user.email,
+        /* email: user.email,
         username: user.username,
         role: user.role,
         university: user.university,
@@ -488,12 +486,12 @@ exports.getAllUser = async (req, res, next) => {
         castPublications: user.castPublications,
         articlePublications: user.articlePublications,
         isVerified : user.isVerified,
-        verificationToken: user.verificationToken,
+        verificationToken: user.verificationToken, */
       };
   
-      res.status(200).json(User);
+      res.status(200).json(userObject);
     } catch (error) {
-      res.status(500).json(error);
+      res.status(500).json({ error: 'Internal server error' });
     }
 };
 
