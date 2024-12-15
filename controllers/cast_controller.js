@@ -1,6 +1,7 @@
 const Cast = require('../models/cast_model.js');
 const User = require('../models/user_model.js');
 const { getVideoDurationInSeconds } = require('../backend/videoUtils');
+const transcribeVideo = require('../backend/transcription');
 const fs = require('fs').promises;
 const departments = require('../lists/departments.js');
 const castQueue = require('../queues/castQueue.js');
@@ -11,14 +12,12 @@ const isValidDepartment = (department) => departments.includes(department);
 
 exports.createCast = async (req, res, next) => {
     try {
-        const url = req.protocol + "://" + req.get('host');
+        const url = req.protocol + '://' + req.get('host');
         req.body.cast = JSON.parse(req.body.cast);
 
         // Validate the department
         if (!isValidDepartment(req.body.cast.department)) {
-            return res.status(400).json({
-                error: 'Invalid department'
-            });
+            return res.status(400).json({ error: 'Invalid department' });
         }
 
         // Check if the title exceeds 65 characters
@@ -30,32 +29,39 @@ exports.createCast = async (req, res, next) => {
         const videoFilePath = './backend/media/cast_videos/' + req.file.filename;
         const duration = await getVideoDurationInSeconds(videoFilePath);
 
+        // Transcribe video to generate a description
+        let transcript = '';
+        try {
+            transcript = await transcribeVideo(videoFilePath);
+        } catch (transcriptionError) {
+            console.error('Error during transcription:', transcriptionError);
+        return res.status(500).json({ error: 'Failed to transcribe video' });
+        }
+
         // Create the new cast
         const cast = new Cast({
             title: req.body.cast.title,
-            description: req.body.cast.description,
+            description: transcript,
             department: req.body.cast.department,
             brightmindid: req.body.cast.brightmindid,
             casturl: url + '/backend/media/cast_videos/' + req.file.filename,
             castimageurl: '', // Placeholder for now
             category: req.body.cast.category,
             university: req.body.cast.university,
-            likes: req.body.cast.likes,
-            comments: req.body.cast.comments,
             visibility: req.body.cast.visibility,
             link: req.body.cast.link,
             evaluation: '', // Placeholder for now
             duration: duration,
-            topic: req.body.cast.topic
+            topic: req.body.cast.topic,
         });
 
         await cast.save();
 
         // Call createTopicIfNotExist with the required fields
-         const topicResult = await createTopicIfNotExist({
-            name: req.body.cast.topic,
-            departmentName: req.body.cast.department,
-            contentId: cast._id
+        const topicResult = await createTopicIfNotExist({
+        name: req.body.cast.topic,
+        departmentName: req.body.cast.department,
+        contentId: cast._id,
         });
 
         // Send topicResult status and message
@@ -75,16 +81,14 @@ exports.createCast = async (req, res, next) => {
         // Add job to the queue for background processing
         castQueue.add({
             castId: cast._id,
-            description: req.body.cast.description,
-            url: url
+            description: transcript,
+            url: url,
         });
 
         res.status(201).json({ response: 'Cast created and topic updated.' });
     } catch (error) {
         console.error('Error creating cast:', error);
-        res.status(500).json({
-            error: 'Internal server error'
-        });
+        res.status(500).json({ error: 'Internal server error' });
     }
 };
 
