@@ -483,7 +483,6 @@ exports.getAllUser = async (req, res, next) => {
         university: user.university,
         profilePictureUrl: user.profilePictureUrl,
         evaluation_list: user.evaluation_list,
-        percentage: percentage,
         preferences: user.preferences,
         tracking: user.tracking,
         castPublications: user.castPublications,
