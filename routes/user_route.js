@@ -7,7 +7,7 @@ router.post('/signup', multer, userCtrl.signup);
 router.get('/confirmation/:token', userCtrl.confirmation);
 router.post('/login', userCtrl.login);
 router.get('/',userCtrl.getAllUser);
-router.get('/:id/find',userCtrl.getOneUser);
+router.get('/:id',userCtrl.getOneUser);
 router.delete('/:id', userCtrl.deleteOneUser);
 router.put('/:id', multer, userCtrl.updateOneUser);
 //add remove content

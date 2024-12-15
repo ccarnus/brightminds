@@ -475,18 +475,18 @@ exports.getAllUser = async (req, res, next) => {
   
       const userObject = {
         _id: user._id,
-        /* email: user.email,
+        email: user.email,
         username: user.username,
         role: user.role,
         university: user.university,
         profilePictureUrl: user.profilePictureUrl,
         evaluation_list: user.evaluation_list,
         preferences: user.preferences,
-        tracking: user.tracking,
+        //tracking: user.tracking,
         castPublications: user.castPublications,
         articlePublications: user.articlePublications,
         isVerified : user.isVerified,
-        verificationToken: user.verificationToken, */
+        verificationToken: user.verificationToken,
       };
   
       res.status(200).json(userObject);
