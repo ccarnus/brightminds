@@ -4,6 +4,8 @@ const generateArticleImage = require('../backend/generate_article_image');
 const fs = require('fs');
 const User = require('../models/user_model.js');
 const departments = require('../lists/departments.js');
+const Topic = require('../models/topic_model.js');
+const { createTopicIfNotExist, removeExistingTopic  } = require('../controllers/topic_controller.js');
 
 const isValidDepartment = (department) => departments.includes(department);
 
@@ -47,14 +49,19 @@ exports.createArticle = async (req, res, next) => {
 
         await article.save();
 
-        // Create or update the topic association
-        await createTopicIfNotExist({
-            body: {
-                name: req.body.topic,
-                departmentName: req.body.department,
-                contentId: article._id
-            }
-        }, res, next);
+        // Call createTopicIfNotExist with the required fields
+        const topicResult = await createTopicIfNotExist({
+            name: req.body.topic,
+            departmentName: req.body.department,
+            contentId: article._id
+        });
+
+        // Send topicResult status and message
+        if (topicResult.status === 201) {
+            console.log(topicResult.message);
+        } else if (topicResult.status === 200) {
+            console.log(topicResult.message);
+        }
 
         // Add article ID to the user's articlePublications
         const user = await User.findById(req.body.brightmindid);
@@ -297,57 +304,6 @@ exports.getAllArticleByBrightmindid = (req, res, next) => {
     );
 };
 
-exports.updateArticleAddComment = (req, res, next) => {
-    const author = req.body.author;
-    const content = req.body.content;
-
-    if (!author || !content) {
-        return res.status(400).json({
-            error: "Both 'author' and 'content' fields are required."
-        });
-    }
-
-    Article.updateOne(
-        { _id: req.params.id },
-        {
-            $inc: { "comments.count": 1 },
-            $push: {
-                "comments.comment": {
-                    author: author,
-                    content: content
-                }
-            }
-        }
-    )
-    .then(() => {
-        res.status(201).json({
-            response: "comment added"
-        })})
-    .catch((error) => {
-        res.status(400).json({
-            error: error
-        });
-    });
-};
-
-exports.updateArticleAddLike = (req, res, next) => {
-    const userID = req.body.email;
-    Article.updateOne(
-        { _id: req.params.id },
-        { $inc: { "likes.count": 1 },
-          $push: {"likes.user": userID}}
-      )
-    .then(() => {
-        res.status(201).json({
-            response: "like added"
-        })})
-    .catch((error) => {
-        res.status(400).json({
-            error: error
-        });
-    });
-};
-
 exports.getEvaluationForArticle = (req, res, next) => {
     const articleId = req.params.id;
 
@@ -365,89 +321,20 @@ exports.getEvaluationForArticle = (req, res, next) => {
         });
 };
 
-exports.getArticleVerification = (req, res, next) => {
+exports.getArticleRating = (req, res, next) => {
     Article.findById(req.params.id)
         .then(article => {
             if (!article) {
                 return res.status(404).json({ message: 'Article not found.' });
             }
-            res.status(200).json({ 
-                verificationStatus: article.verificationStatus.status,
-                approvals: article.verificationStatus.approvals,
-                approvers_id: article.verificationStatus.approvers_id,
-                disapprovers_id: article.verificationStatus.disapprovers_id
-            });
+            res.status(200).json({ rating: article.rating });
         })
         .catch(error => {
             res.status(500).json({ error: 'An error occurred.' });
         });
 };
 
-exports.IncrementArticleVerification = (req, res, next) => {
-    const userId = req.body.userId;
-    Article.findById(req.params.id)
-        .then(article => {
-            if (!article) {
-                return res.status(404).json({ message: 'Article not found.' });
-            }
-            if (!article.verificationStatus.approvers_id.includes(userId)) {
-                if (article.verificationStatus.disapprovers_id.includes(userId)) {
-                    article.verificationStatus.disapprovers_id.pull(userId);
-                    article.verificationStatus.approvals += 1;
-                }
-                article.verificationStatus.approvals += 1;
-                article.verificationStatus.approvers_id.push(userId);
-                article.save()
-                    .then(() => res.status(200).json({ message: 'Verification incremented.' }))
-                    .catch(error => res.status(400).json({ error: 'Unable to update verification.' }));
-            } else {
-                res.status(400).json({ message: 'User has already approved this article.' });
-            }
-        })
-        .catch(error => {
-            res.status(500).json({ error: 'An error occurred.' });
-        });
-};
-
-exports.DecrementArticleVerification = (req, res, next) => {
-    const userId = req.body.userId;
-    Article.findById(req.params.id)
-        .then(article => {
-            if (!article) {
-                return res.status(404).json({ message: 'Article not found.' });
-            }
-            if (!article.verificationStatus.disapprovers_id.includes(userId)) {
-                if (article.verificationStatus.approvers_id.includes(userId)) {
-                    article.verificationStatus.approvers_id.pull(userId);
-                    article.verificationStatus.approvals -= 1;
-                }
-                article.verificationStatus.disapprovers_id.push(userId);
-                article.save()
-                    .then(() => res.status(200).json({ message: 'Disapproval recorded.' }))
-                    .catch(error => res.status(400).json({ error: 'Unable to update disapproval.' }));
-            } else {
-                res.status(400).json({ message: 'User has already disapproved this article.' });
-            }
-        })
-        .catch(error => {
-            res.status(500).json({ error: 'An error occurred.' });
-        });
-};
-
-exports.getArticleGrade = (req, res, next) => {
-    Article.findById(req.params.id)
-        .then(article => {
-            if (!article) {
-                return res.status(404).json({ message: 'Article not found.' });
-            }
-            res.status(200).json({ grade: article.grade });
-        })
-        .catch(error => {
-            res.status(500).json({ error: 'An error occurred.' });
-        });
-};
-
-exports.updateArticleGrade = (req, res, next) => {
+exports.updateArticleRating = (req, res, next) => {
     const action = req.body.action;
 
     if (action !== '+' && action !== '-') {
@@ -461,15 +348,15 @@ exports.updateArticleGrade = (req, res, next) => {
             }
 
             if (action === '+') {
-                article.grade.value = ((article.grade.value * article.grade.count) + 10) / (article.grade.count + 1);
+                article.rating.value = ((article.rating.value * article.rating.count) + 10) / (article.rating.count + 1);
             } else {
-                article.grade.value = ((article.grade.value * article.grade.count)) / (article.grade.count + 1);
+                article.rating.value = ((article.rating.value * article.rating.count)) / (article.rating.count + 1);
             }
-            article.grade.count += 1;
+            article.rating.count += 1;
 
             article.save()
-                .then(() => res.status(200).json({ message: 'Grade updated.', grade: article.grade }))
-                .catch(error => res.status(400).json({ error: 'Unable to update grade.' }));
+                .then(() => res.status(200).json({ message: 'Rating updated.', rating: article.rating }))
+                .catch(error => res.status(400).json({ error: 'Unable to update rating.' }));
 
         })
         .catch(error => {
@@ -482,7 +369,7 @@ exports.getArticleTrending = (req, res, next) => {
     twoWeeksAgo.setDate(twoWeeksAgo.getDate() - 14);
 
     Article.find({ dateAdded: { $gte: twoWeeksAgo } })
-        .sort({ 'grade.value': -1 })
+        .sort({ 'rating.value': -1 })
         .then(
             (articles) => {
                 res.status(200).json(articles);

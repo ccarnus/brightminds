@@ -181,8 +181,6 @@ exports.updateOneCast = async (req, res, next) => {
         cast.castimageurl = req.body.cast.castimageurl;
         cast.category = req.body.cast.category;
         cast.university = req.body.cast.university;
-        cast.likes = req.body.cast.likes;
-        cast.comments = req.body.cast.comments;
         cast.visibility = req.body.cast.visibility;
         cast.link = req.body.cast.link;
         cast.topic = req.body.cast.topic;
@@ -345,57 +343,6 @@ exports.getAllCastByBrightmindid = (req, res, next) => {
     );
 }
 
-exports.updateCastAddLike = (req, res, next) => {
-    const userID = req.body.email;
-    Cast.updateOne(
-        { _id: req.params.id },
-        { $inc: { "likes.count": 1 },
-          $push: {"likes.user": userID}}
-      )
-    .then(() => {
-        res.status(201).json({
-            response: "like added"
-        })})
-    .catch((error) => {
-        res.status(400).json({
-            error: error
-        });
-    });
-}
-
-exports.updateCastAddComment = (req, res, next) => {
-    const author = req.body.author;
-    const content = req.body.content;
-
-    if (!author || !content) {
-        return res.status(400).json({
-            error: "Both 'author' and 'content' fields are required."
-        });
-    }
-
-    Cast.updateOne(
-        { _id: req.params.id },
-        {
-            $inc: { "comments.count": 1 },
-            $push: {
-              "comments.comment": {
-                author: author,
-                content: content
-              }
-            }
-          }
-      )
-    .then(() => {
-        res.status(201).json({
-            response: "comment added"
-        })})
-    .catch((error) => {
-        res.status(400).json({
-            error: error
-        });
-    });
-}
-
 exports.getEvaluationForCast = (req, res, next) => {
     const castId = req.params.id;
 
@@ -413,96 +360,21 @@ exports.getEvaluationForCast = (req, res, next) => {
         });
 };
 
-exports.getCastVerification = (req, res, next) => {
+
+exports.getCastRating = (req, res, next) => {
     Cast.findById(req.params.id)
         .then(cast => {
             if (!cast) {
                 return res.status(404).json({ message: 'Cast not found.' });
             }
-            res.status(200).json({ 
-                verificationStatus: cast.verificationStatus.status,
-                approvals: cast.verificationStatus.approvals,
-                approvers_id: cast.verificationStatus.approvers_id,
-                disapprovers_id: cast.verificationStatus.disapprovers_id
-            });
+            res.status(200).json({ rating: cast.rating });
         })
         .catch(error => {
             res.status(500).json({ error: 'An error occurred.' });
         });
 };
 
-
-exports.IncrementCastVerification = (req, res, next) => {
-    const userId = req.body.userId; // Assuming the user's ID is passed in the request body
-    Cast.findById(req.params.id)
-        .then(cast => {
-            if (!cast) {
-                return res.status(404).json({ message: 'Cast not found.' });
-            }
-            if (!cast.verificationStatus.approvers_id.includes(userId)) {
-                if (cast.verificationStatus.disapprovers_id.includes(userId)) {
-                    cast.verificationStatus.disapprovers_id.pull(userId);
-                    cast.verificationStatus.approvals += 1; // Adjust approval count since switching sides
-                }
-                cast.verificationStatus.approvals += 1;
-                cast.verificationStatus.approvers_id.push(userId);
-                cast.save()
-                    .then(() => res.status(200).json({ message: 'Verification incremented and disapproval reversed.' }))
-                    .catch(error => res.status(400).json({ error: 'Unable to update verification.' }));
-            } else {
-                res.status(400).json({ message: 'User has already approved this cast.' });
-            }
-        })
-        .catch(error => {
-            res.status(500).json({ error: 'An error occurred.' });
-        });
-};
-
-
-exports.DecrementCastVerification = (req, res, next) => {
-    const userId = req.body.userId; // Assuming the user's ID is passed in the request body
-    Cast.findById(req.params.id)
-        .then(cast => {
-            if (!cast) {
-                return res.status(404).json({ message: 'Cast not found.' });
-            }
-            const isApprover = cast.verificationStatus.approvers_id.includes(userId);
-            const isDisapprover = cast.verificationStatus.disapprovers_id.includes(userId);
-
-            if (!isDisapprover) {
-                if (isApprover) {
-                    cast.verificationStatus.approvers_id.pull(userId);
-                    cast.verificationStatus.approvals -= 1;
-                }
-                cast.verificationStatus.disapprovers_id.push(userId);
-                cast.save()
-                    .then(() => res.status(200).json({ message: 'Disapproval recorded.' }))
-                    .catch(error => res.status(400).json({ error: 'Unable to update disapproval.' }));
-            } else {
-                res.status(400).json({ message: 'User has already disapproved this cast.' });
-            }
-        })
-        .catch(error => {
-            res.status(500).json({ error: 'An error occurred.' });
-        });
-};
-
-
-
-exports.getCastGrade = (req, res, next) => {
-    Cast.findById(req.params.id)
-        .then(cast => {
-            if (!cast) {
-                return res.status(404).json({ message: 'Cast not found.' });
-            }
-            res.status(200).json({ grade: cast.grade });
-        })
-        .catch(error => {
-            res.status(500).json({ error: 'An error occurred.' });
-        });
-};
-
-exports.updateCastGrade = (req, res, next) => {
+exports.updateCastRating = (req, res, next) => {
     const action = req.body.action;
 
     if (action !== '+' && action !== '-') {
@@ -517,16 +389,16 @@ exports.updateCastGrade = (req, res, next) => {
 
             // Update logic
             if (action === '+') {
-                cast.grade.value = ((cast.grade.value * cast.grade.count) + 10) / (cast.grade.count + 1);
+                cast.rating.value = ((cast.rating.value * cast.rating.count) + 10) / (cast.rating.count + 1);
             } else {
-                cast.grade.value = ((cast.grade.value * cast.grade.count)) / (cast.grade.count + 1);
+                cast.rating.value = ((cast.rating.value * cast.rating.count)) / (cast.rating.count + 1);
             }
-            cast.grade.count += 1;
+            cast.rating.count += 1;
 
             // Save the updated cast
             cast.save()
-                .then(() => res.status(200).json({ message: 'Grade updated.', grade: cast.grade }))
-                .catch(error => res.status(400).json({ error: 'Unable to update grade.' }));
+                .then(() => res.status(200).json({ message: 'Rating updated.', rating: cast.rating }))
+                .catch(error => res.status(400).json({ error: 'Unable to update rating.' }));
 
         })
         .catch(error => {
@@ -537,7 +409,7 @@ exports.updateCastGrade = (req, res, next) => {
 exports.getCastTrending = (req, res, next) => {
 
     Cast.find()
-        .sort({ dateAdded: -1 })
+        .sort({ dateadded: -1 })
         .then(
             (casts) => {
                 res.status(200).json(casts);
