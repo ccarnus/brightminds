@@ -456,18 +456,20 @@ exports.login = (req, res, next) => {
 exports.getAllUser = async (req, res, next) => {
     try {
       const users = await User.find()
-        .select('_id email username role department profilePictureUrl evaluation_list preferences tracking castPublications articlePublications university verificationToken isVerified'); 
+        .select('_id email username role profilePictureUrl evaluation_list preferences tracking castPublications articlePublications university verificationToken isVerified'); 
   
       res.status(200).json(users);
     } catch (error) {
       res.status(500).json({ error: 'An error occurred.' });
     }
   };
-  
+
+
 
   exports.getOneUser = async (req, res, next) => {
     try {
       const user = await User.findById(req.params.id);
+      console.log(req.params.id);
   
       if (!user) {
         return res.status(404).json({ message: 'User not found.' });
@@ -492,10 +494,10 @@ exports.getAllUser = async (req, res, next) => {
   
       res.status(200).json(User);
     } catch (error) {
-      res.status(500).json({ error: 'An error occurred.' });
+      res.status(500).json(error);
     }
 };
-  
+
 
 exports.updateOneUser = (req, res, next) => {
     let user = new User({_id: req.params._id});
