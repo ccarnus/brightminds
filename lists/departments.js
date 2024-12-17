@@ -1,6 +1,7 @@
 const departments = [
   'Agriculture',
   'ArtificialIntelligence',
+  'SpaceExploration',
   'Archaeology',
   'Art',
   'Astronomy',
