@@ -22,7 +22,7 @@ exports.createCast = async (req, res, next) => {
         // Check if the title exceeds 65 characters
         if (req.body.cast.title && req.body.cast.title.length > 65) {
             return res.status(400).json({ error: 'Title must be 65 characters or less' });
-        }
+        }  
 
         // Use the utility function to get the video duration
         const videoFilePath = './backend/media/cast_videos/' + req.file.filename;
@@ -33,6 +33,7 @@ exports.createCast = async (req, res, next) => {
             title: req.body.cast.title,
             description: "", // Will be filled after transcription in the queue
             department: req.body.cast.department,
+            dateadded: req.body.cast.dateadded,
             brightmindid: req.body.cast.brightmindid,
             casturl: url + '/backend/media/cast_videos/' + req.file.filename,
             castimageurl: '', // Placeholder for now
@@ -174,7 +175,7 @@ exports.updateOneCast = async (req, res, next) => {
         cast.visibility = req.body.cast.visibility;
         cast.link = req.body.cast.link;
         cast.topic = req.body.cast.topic;
-
+        cast.dateadded = req.body.cast.dateadded;
         await cast.save();
 
         res.status(200).json({ message: 'Cast updated successfully and topic adjusted.' });
