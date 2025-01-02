@@ -14,6 +14,8 @@ const userSchema = mongoose.Schema({
     profilePictureUrl: { type: String, required: true },
     isVerified: { type: Boolean, default: false },
     verificationToken: { type: String, required: false },
+    resetPasswordToken: { type: String, required: false },
+    resetPasswordExpires: { type: Date, required: false },
     evaluation_list: [{
         contentid: { type: String, required: false },
         type: { type: String, required: false },

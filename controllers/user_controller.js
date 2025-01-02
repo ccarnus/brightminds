@@ -903,3 +903,160 @@ exports.getUserTracking = async (req, res) => {
         res.status(500).json({ error: 'An error occurred.' });
     }
 };
+
+exports.requestPasswordResetEmail = async (req, res) => {
+    try {
+      const { email } = req.body;
+      const user = await User.findOne({ email });
+  
+      // If user doesn't exist or is not verified, handle accordingly:
+      if (!user) {
+        return res.status(404).json({ message: 'No user found with that email address.' });
+      }
+      if (!user.isVerified) {
+        return res.status(400).json({ message: 'Your email has not been verified.' });
+      }
+  
+      // Generate reset token
+      const token = crypto.randomBytes(20).toString('hex');
+  
+      // Set token and expiration (1 hour from now, for example)
+      user.resetPasswordToken = token;
+      user.resetPasswordExpires = Date.now() + 3600000; // 1 hour
+      await user.save();
+  
+      // Send the reset link via email
+      const transporter = nodemailer.createTransport({
+        service: 'Gmail',
+        auth: {
+          user: 'clement.carnus@brightmindsresearch.com',
+          pass: EMAIL_PWD,
+        },
+      });
+  
+      // You can customize your email's text or HTML
+      const mailOptions = {
+        from: 'clement.carnus@brightmindsresearch.com',
+        to: user.email,
+        subject: 'Password Reset - BrightMinds Research',
+        html: `
+          <p>Hello ${user.username},</p>
+          <p>You requested a password reset for your BrightMinds Research account.</p>
+          <p>Please click the link below to set a new password (valid for 1 hour):</p>
+          <p><a href="http://${req.headers.host}/user/reset-password/${token}">
+            Reset Your Password
+          </a></p>
+          <p>If you did not request this, please ignore this email.</p>
+        `,
+      };
+  
+      await transporter.sendMail(mailOptions);
+  
+      res.status(200).json({ message: 'Password reset link sent to your email.' });
+    } catch (error) {
+      console.error('Error sending reset email:', error);
+      res.status(500).json({ message: 'Error sending reset email.' });
+    }
+  };  
+
+
+  exports.showResetPasswordForm = async (req, res) => {
+    try {
+      const { token } = req.params;
+      // Ensure token corresponds to a valid user and is not expired
+      const user = await User.findOne({
+        resetPasswordToken: token,
+        resetPasswordExpires: { $gt: Date.now() }, // $gt => must be greater than current time
+      });
+  
+      if (!user) {
+        return res.status(400).send(`
+          <!DOCTYPE html>
+          <html>
+          <head><title>Password Reset - BrightMinds Research</title></head>
+          <body>
+            <h2>Invalid or Expired Link</h2>
+            <p>The password reset link is invalid or has expired.</p>
+          </body>
+          </html>
+        `);
+      }
+  
+      // If token is valid, render the form
+      // This example includes a simple HTML form
+      return res.status(200).send(`
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8" />
+            <title>Reset Your Password</title>
+        </head>
+        <body>
+            <h2>Reset Your Password</h2>
+            <form action="/user/reset-password/${token}" method="POST">
+                <label for="password">New Password:</label>
+                <input type="password" name="password" required />
+                <br /><br />
+                <button type="submit">Reset Password</button>
+            </form>
+        </body>
+        </html>
+      `);
+    } catch (error) {
+      console.error('Error rendering password reset form:', error);
+      res.status(500).send('<p>Server error.</p>');
+    }
+  };
+  
+
+  exports.resetPassword = async (req, res) => {
+    try {
+      const { token } = req.params;
+      const { password } = req.body;
+  
+      // Find user with matching token and check expiration
+      const user = await User.findOne({
+        resetPasswordToken: token,
+        resetPasswordExpires: { $gt: Date.now() },
+      });
+  
+      if (!user) {
+        return res.status(400).send(`
+          <!DOCTYPE html>
+          <html>
+          <head><title>Password Reset - BrightMinds Research</title></head>
+          <body>
+            <h2>Invalid or Expired Link</h2>
+            <p>The link is invalid or has expired.</p>
+          </body>
+          </html>
+        `);
+      }
+  
+      // Hash the new password
+      const hash = await bcrypt.hash(password, 10);
+  
+      // Update user's password and clear the reset token fields
+      user.password = hash;
+      user.resetPasswordToken = undefined;
+      user.resetPasswordExpires = undefined;
+      await user.save();
+  
+      // Optionally send a confirmation email here
+  
+      // Return a success message (or redirect)
+      return res.status(200).send(`
+        <!DOCTYPE html>
+        <html>
+        <head><title>Password Reset - BrightMinds Research</title></head>
+        <body>
+          <h2>Password Successfully Reset</h2>
+          <p>Your password has been updated. You can now <a href="/login">log in</a> with your new credentials.</p>
+        </body>
+        </html>
+      `);
+    } catch (error) {
+      console.error('Error resetting password:', error);
+      return res.status(500).send('<p>Server error.</p>');
+    }
+  };  
