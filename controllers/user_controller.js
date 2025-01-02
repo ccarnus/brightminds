@@ -162,16 +162,16 @@ exports.signup = async (req, res, next) => {
             <body>
                 <div class="email-container">
                     <div class="logo">
-                        <img src="../media/verification_email/BrightMinds_title.png" alt="BrightMinds Research">
+                        <img src="http://${req.headers.host}/backend/media/verification_email/BrightMinds_title.png" alt="BrightMinds Research">
                     </div>
                     <h2>Welcome!</h2>
                     <p>Thank you for signing up with us. To complete your registration, please confirm your email address by clicking the button below.</p>
                     <div class="button-container">
-                        <a href="http://localhost/user/confirmation/token-placeholder">Verify Email</a>
+                        <a href="http://${req.headers.host}/user/confirmation/${token}">Verify Email</a>
                     </div>
                     <p>If you did not create an account with us, please ignore this email.</p>
                     <div class="footer">
-                        <img src="../media/verification_email/brightminds_icon.png" alt="BrightMinds Footer">
+                        <img src="http://${req.headers.host}/backend/media/verification_email/brightminds_icon.png" alt="BrightMinds Footer">
                         <p>&copy; 2024 BrightMinds Research LLC. All rights reserved.</p>
                     </div>
                 </div>
