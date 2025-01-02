@@ -110,7 +110,7 @@ exports.signup = async (req, res, next) => {
                     }
 
                     .email-container .logo img {
-                        max-width: 500px;
+                        max-width: 230px;
                     }
 
                     .email-container h2 {
@@ -162,16 +162,16 @@ exports.signup = async (req, res, next) => {
             <body>
                 <div class="email-container">
                     <div class="logo">
-                        <img src="http://${req.headers.host}/backend/media/verification_email/BrightMinds_research_icon_white.png" alt="BrightMinds Research">
+                        <img src="../media/verification_email/BrightMinds_title.png" alt="BrightMinds Research">
                     </div>
-                    <h2>Welcome to BrightMinds Research!</h2>
+                    <h2>Welcome!</h2>
                     <p>Thank you for signing up with us. To complete your registration, please confirm your email address by clicking the button below.</p>
                     <div class="button-container">
-                        <a href="http://${req.headers.host}/user/confirmation/${token}">Verify Email</a>
+                        <a href="http://localhost/user/confirmation/token-placeholder">Verify Email</a>
                     </div>
                     <p>If you did not create an account with us, please ignore this email.</p>
                     <div class="footer">
-                        <img src="http://${req.headers.host}/backend/media/verification_email/brightminds_icon_resized.png" alt="BrightMinds Footer">
+                        <img src="../media/verification_email/brightminds_icon.png" alt="BrightMinds Footer">
                         <p>&copy; 2024 BrightMinds Research LLC. All rights reserved.</p>
                     </div>
                 </div>
@@ -235,7 +235,7 @@ exports.confirmation = (req, res, next) => {
                         }
 
                         .container .logo img {
-                            max-width: 500px;
+                            max-width: 230px;
                         }
 
                         .container h2 {
@@ -253,7 +253,7 @@ exports.confirmation = (req, res, next) => {
                 <body>
                     <div class="container">
                         <div class="logo">
-                            <img src="http://${req.headers.host}/backend/media/verification_email/BrightMinds_research_icon_white.png" alt="BrightMinds Research">
+                            <img src="http://${req.headers.host}/backend/media/verification_email/BrightMinds_title.png" alt="BrightMinds Research">
                         </div>
                         <h2>Verification Failed</h2>
                         <p>We were unable to find a user for this token.</p>
@@ -297,7 +297,7 @@ exports.confirmation = (req, res, next) => {
                     }
 
                     .container .logo img {
-                        max-width: 500px;
+                        max-width: 230px;
                     }
 
                     .container h2 {
@@ -321,7 +321,7 @@ exports.confirmation = (req, res, next) => {
             <body>
                 <div class="container">
                     <div class="logo">
-                        <img src="http://${req.headers.host}/backend/media/verification_email/BrightMinds_research_icon_white.png" alt="BrightMinds Research">
+                        <img src="http://${req.headers.host}/backend/media/verification_email/BrightMinds_title.png" alt="BrightMinds Research">
                     </div>
                     <h2>Already Verified</h2>
                     <p>This user has already been verified.</p>
@@ -369,7 +369,7 @@ exports.confirmation = (req, res, next) => {
                     }
 
                     .container .logo img {
-                        max-width: 500px;
+                        max-width: 230px;
                     }
 
                     .container h2 {
@@ -397,7 +397,7 @@ exports.confirmation = (req, res, next) => {
             <body>
                 <div class="container">
                     <div class="logo">
-                        <img src="http://${req.headers.host}/backend/media/verification_email/BrightMinds_research_icon_white.png" alt="BrightMinds Research">
+                        <img src="http://${req.headers.host}/backend/media/verification_email/BrightMinds_title.png" alt="BrightMinds Research">
                     </div>
                     <h2>Verification Successful!</h2>
                     <p>Your account has been verified. You can now log in.</p>
