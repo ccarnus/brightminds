@@ -10,6 +10,7 @@ router.get('/',userCtrl.getAllUser);
 router.get('/:id',userCtrl.getOneUser);
 router.delete('/:id', userCtrl.deleteOneUser);
 router.put('/:id', multer, userCtrl.updateOneUser);
+router.post('/updatePassword', userCtrl.updatePassword);
 //add remove content
 router.post('/add/content/:id',userCtrl.updateUserAddContentToList);
 router.post('/remove/content/:id',userCtrl.updateUserRemoveContentFromList);
