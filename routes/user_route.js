@@ -10,7 +10,10 @@ router.get('/',userCtrl.getAllUser);
 router.get('/:id',userCtrl.getOneUser);
 router.delete('/:id', userCtrl.deleteOneUser);
 router.put('/:id', multer, userCtrl.updateOneUser);
-router.post('/updatePassword', userCtrl.updatePassword);
+//password update
+router.post('/reset-password-request', userCtrl.requestPasswordResetEmail);
+router.get('/reset-password/:token', userCtrl.showResetPasswordForm);
+router.post('/reset-password/:token', userCtrl.resetPassword);
 //add remove content
 router.post('/add/content/:id',userCtrl.updateUserAddContentToList);
 router.post('/remove/content/:id',userCtrl.updateUserRemoveContentFromList);
