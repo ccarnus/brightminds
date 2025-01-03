@@ -144,11 +144,11 @@ exports.signup = async (req, res, next) => {
                     .email-container .footer {
                         text-align: center;
                         margin-top: 20px;
+                        margin-bottom: 20px;
                     }
 
                     .email-container .footer img {
                         max-width: 100px;
-                        margin-top: 20px;
                     }
 
                     .email-container .footer p {
