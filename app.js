@@ -41,8 +41,13 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 // Static routes
-app.use('/backend/media/cast_videos', express.static(path.join(__dirname, '/backend/media/cast_videos')));
-// ... (other static routes)
+app.use('/backend/media/cast_videos', express.static(path.join(__dirname,'/backend/media/cast_videos')));
+app.use('/backend/media/cast_images', express.static(path.join(__dirname,'/backend/media/cast_images')));
+app.use('/backend/media/article_images', express.static(path.join(__dirname,'/backend/media/article_images')));
+app.use('/backend/media/profile_pictures', express.static(path.join(__dirname,'/backend/media/profile_pictures')));
+app.use('/backend/media/university_icon', express.static(path.join(__dirname,'/backend/media/university_icon')));
+app.use('/backend/media/virtuallab_icon', express.static(path.join(__dirname,'/backend/media/virtuallab_icon')));
+app.use('/backend/media/verification_email', express.static(path.join(__dirname,'/backend/media/verification_email')));
 
 // Route definitions
 app.use('/cast', castRoutes);
