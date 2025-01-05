@@ -33,7 +33,6 @@ exports.createCast = async (req, res, next) => {
             title: req.body.cast.title,
             description: "", // Will be filled after transcription in the queue
             department: req.body.cast.department,
-            dateadded: new Date(req.body.cast.dateadded),
             brightmindid: req.body.cast.brightmindid,
             casturl: url + '/backend/media/cast_videos/' + req.file.filename,
             castimageurl: '', // Placeholder for now
@@ -45,6 +44,10 @@ exports.createCast = async (req, res, next) => {
             duration: duration,
             topic: req.body.cast.topic,
         });
+
+        if (req.body.cast.dateadded) {
+            castData.dateadded = new Date(req.body.cast.dateadded);
+          }
 
         await cast.save();
 
