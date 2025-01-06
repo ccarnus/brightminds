@@ -218,73 +218,81 @@ const removeCastFromUsers = async (castId) => {
 
 exports.deleteOneCast = async (req, res, next) => {
     try {
-        const cast = await Cast.findOne({ _id: req.params.id });
+        const cast = await Cast.findById(req.params.id);
         if (!cast) {
             return res.status(404).json({ error: 'Cast not found.' });
         }
-
+  
+        // 1) Find the user who owns this cast (by brightmindid)
+        const user = await User.findById(cast.brightmindid);
+        if (user) {
+            // Remove the cast ID from the user's castPublications
+            user.castPublications = user.castPublications.filter(
+            (pubId) => pubId.toString() !== cast._id.toString()
+            );
+            await user.save();
+        }
+  
+        // 2) Delete associated video file if it exists
         let videoDeleteError = false;
-        let imageDeleteError = false;
-
-        // Delete video file if it exists
         if (cast.casturl) {
             const videoFilename = cast.casturl.split('/media/cast_videos/')[1];
             if (videoFilename) {
                 try {
-                    await fs.access('./backend/media/cast_videos/' + videoFilename);  // Check if the video file exists
-                    await fs.unlink('./backend/media/cast_videos/' + videoFilename);  // Delete video file
+                    await fs.access('./backend/media/cast_videos/' + videoFilename); 
+                    await fs.unlink('./backend/media/cast_videos/' + videoFilename);
                 } catch (videoErr) {
                     if (videoErr.code !== 'ENOENT') {
-                        console.error('Error deleting video file:', videoErr);
-                        videoDeleteError = true;
+                    console.error('Error deleting video file:', videoErr);
+                    videoDeleteError = true;
                     } else {
-                        console.log('Video file does not exist, skipping deletion:', videoFilename);
+                    console.log('Video file not found, skipping deletion:', videoFilename);
                     }
                 }
             }
         }
-
-        // Delete image file if it exists
+  
+        // 3) Delete associated image file if it exists
+        let imageDeleteError = false;
         if (cast.castimageurl) {
             const imageFilename = cast.castimageurl.split('/media/cast_images/')[1];
             if (imageFilename) {
                 try {
-                    await fs.access('./backend/media/cast_images/' + imageFilename);  // Check if the image file exists
-                    await fs.unlink('./backend/media/cast_images/' + imageFilename);  // Delete image file
+                    await fs.access('./backend/media/cast_images/' + imageFilename); 
+                    await fs.unlink('./backend/media/cast_images/' + imageFilename);
                 } catch (imageErr) {
                     if (imageErr.code !== 'ENOENT') {
                         console.error('Error deleting image file:', imageErr);
                         imageDeleteError = true;
                     } else {
-                        console.log('Image file does not exist, skipping deletion:', imageFilename);
+                        console.log('Image file not found, skipping deletion:', imageFilename);
                     }
                 }
             }
         }
-
-        // Delete the cast document from the database
-        await Cast.deleteOne({ _id: req.params.id });
-
-        // Use removeExistingTopic to update or remove the topic association
+  
+      // 4) Delete the Cast document
+    await Cast.deleteOne({ _id: cast._id });
+  
+      // 5) Remove topic association from DB
         const topicResult = await removeExistingTopic({
             name: cast.topic,
             departmentName: cast.department,
             contentId: cast._id
         });
-
-        let responseMessage = 'Cast and associated topic updated successfully.';
+    
+        let responseMessage = 'Cast deleted successfully.';
         if (videoDeleteError || imageDeleteError) {
-            responseMessage += ' However, there was an error deleting associated media files.';
+            responseMessage += ' However, there was an error removing media files.';
         }
-
         responseMessage += ` ${topicResult.message}`;
-
-        res.status(topicResult.status).json({ message: responseMessage });
-    } catch (error) {
+    
+        res.status(200).json({ message: responseMessage });
+        } catch (error) {
         console.error('Error deleting cast:', error);
         res.status(500).json({ error: 'Error deleting cast.' });
-    }
-};
+        }
+  };  
 
 
 exports.getAllNewCast = (req, res, next) => {
