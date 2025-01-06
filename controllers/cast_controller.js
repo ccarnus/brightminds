@@ -46,7 +46,7 @@ exports.createCast = async (req, res, next) => {
         });
 
         if (req.body.cast.dateadded) {
-            castData.dateadded = new Date(req.body.cast.dateadded);
+            cast.dateadded = new Date(req.body.cast.dateadded);
           }
 
         await cast.save();

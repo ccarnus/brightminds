@@ -47,6 +47,10 @@ exports.createArticle = async (req, res, next) => {
             evaluation: evaluation
         });
 
+        if (req.body.dateadded) {
+            article.dateadded = new Date(req.body.dateadded);
+          }
+
         await article.save();
 
         // Call createTopicIfNotExist with the required fields
@@ -368,7 +372,7 @@ exports.getArticleTrending = (req, res, next) => {
     const twoWeeksAgo = new Date();
     twoWeeksAgo.setDate(twoWeeksAgo.getDate() - 14);
 
-    Article.find({ dateAdded: { $gte: twoWeeksAgo } })
+    Article.find({ dateadded: { $gte: twoWeeksAgo } })
         .sort({ 'rating.value': -1 })
         .then(
             (articles) => {

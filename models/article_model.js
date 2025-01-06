@@ -11,7 +11,7 @@ const articleSchema = mongoose.Schema({
     visibility: { type: String, required: true },
     link: { type: String, required: false },
     duration: { type: Number, required: true },
-    dateAdded: { type: Date, default: Date.now },
+    dateadded: { type: Date, default: Date.now },
     rating: {
         value: { type: Number, min: 0, max: 10, default: 5 },
         count: { type: Number, default: 1 }
