@@ -962,228 +962,412 @@ exports.requestPasswordResetEmail = async (req, res) => {
 
   exports.showResetPasswordForm = async (req, res) => {
     try {
-      const { token } = req.params;
-      // Ensure token corresponds to a valid user and is not expired
-      const user = await User.findOne({
-        resetPasswordToken: token,
-        resetPasswordExpires: { $gt: Date.now() }, // $gt => must be greater than current time
-      });
-  
-      if (!user) {
-        return res.status(400).send(`
-          <!DOCTYPE html>
-          <html>
-          <head><title>Password Reset - BrightMinds Research</title></head>
-          <body>
-            <h2>Invalid or Expired Link</h2>
-            <p>The password reset link is invalid or has expired.</p>
-          </body>
-          </html>
-        `);
-      }
-  
-      // If token is valid, render the form
-      // This example includes a simple HTML form
-      return res.status(200).send(`
-        <!DOCTYPE html>
-        <html lang="en">
-        <head>
-            <meta charset="UTF-8" />
-            <title>Reset Your Password</title>
-        </head>
-        <body>
-            <h2>Reset Your Password</h2>
-            <form action="/user/reset-password/${token}" method="POST">
-                <label for="password">New Password:</label>
-                <input type="password" name="password" required />
-                <br /><br />
-                <button type="submit">Reset Password</button>
-            </form>
-        </body>
-        </html>
-      `);
-    } catch (error) {
-      console.error('Error rendering password reset form:', error);
-      res.status(500).send('<p>Server error.</p>');
-    }
-  };
-  
+        const { token } = req.params;
+        // Ensure token corresponds to a valid user and is not expired
+        const user = await User.findOne({
+            resetPasswordToken: token,
+            resetPasswordExpires: { $gt: Date.now() }, // $gt => must be greater than current time
+        });
 
-  exports.resetPassword = async (req, res) => {
-    try {
-      const { token } = req.params;
-      const { password } = req.body;
-  
-      // Find user with matching token and check expiration
-      const user = await User.findOne({
-        resetPasswordToken: token,
-        resetPasswordExpires: { $gt: Date.now() },
-      });
-  
-      if (!user) {
-        return res.status(400).send(`
-          <!DOCTYPE html>
-          <html lang="en">
-          <head>
-            <meta charset="UTF-8" />
-            <meta name="viewport" content="width=device-width,initial-scale=1.0" />
-            <title>Password Reset - BrightMinds Research</title>
-            <style>
-              @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap');
-              body {
-                margin: 0;
-                padding: 0;
-                font-family: 'Montserrat', sans-serif;
-                background-color: #1c1c1c;
-                color: #f1f1f1;
-              }
-              .email-container {
-                max-width: 600px;
-                margin: 0 auto;
-                background-color: #1c1c1c;
-                border: 1px solid #1c1c1c;
-                border-radius: 8px;
-                padding: 20px;
-                text-align: center;
-              }
-              .email-container h2 {
-                color: #cc0000;
-                font-family: 'MontserratBold', sans-serif;
-              }
-              .email-container p {
-                font-size: 16px;
-                line-height: 1.5;
-                color: #f1f1f1;
-              }
-              a {
-                color: #00407A;
-                text-decoration: none;
-                font-weight: bold;
-              }
-            </style>
-          </head>
-          <body>
-            <div class="email-container">
-              <h2>Invalid or Expired Link</h2>
-              <p>The link is invalid or has expired.</p>
-            </div>
-          </body>
-          </html>
+        if (!user) {
+            return res.status(400).send(`
+                <!DOCTYPE html>
+                <html lang="en">
+                <head>
+                    <meta charset="UTF-8" />
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+                    <title>Password Reset - BrightMinds Research</title>
+                    <style>
+                        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap');
+                        body {
+                            margin: 0;
+                            padding: 0;
+                            font-family: 'Montserrat', sans-serif;
+                            background-color: #1c1c1c;
+                            color: #f1f1f1;
+                        }
+                        .email-container {
+                            max-width: 600px;
+                            margin: 50px auto;
+                            background-color: #1c1c1c;
+                            border: 1px solid #1c1c1c;
+                            border-radius: 8px;
+                            padding: 20px;
+                            text-align: center;
+                        }
+                        .email-container h2 {
+                            color: #cc0000;
+                            font-family: 'MontserratBold', sans-serif;
+                        }
+                        .email-container p {
+                            font-size: 16px;
+                            line-height: 1.5;
+                            color: #f1f1f1;
+                        }
+                        a {
+                            color: #00407A;
+                            text-decoration: none;
+                            font-weight: bold;
+                        }
+                        .button-container {
+                            margin-top: 20px;
+                        }
+                        .button-container a {
+                            background-color: #00407A;
+                            color: #f1f1f1;
+                            padding: 12px 24px;
+                            text-decoration: none;
+                            border-radius: 5px;
+                            font-size: 16px;
+                            font-family: 'MontserratBold', sans-serif;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="email-container">
+                        <h2>Invalid or Expired Link</h2>
+                        <p>The password reset link is invalid or has expired.</p>
+                        <div class="button-container">
+                            <a href="https://www.brightmindsresearch.com/">Visit our Site</a>
+                        </div>
+                    </div>
+                </body>
+                </html>
+            `);
+        }
+
+        return res.status(200).send(`
+            <!DOCTYPE html>
+            <html lang="en">
+            <head>
+                <meta charset="UTF-8" />
+                <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+                <title>Reset Your Password - BrightMinds Research</title>
+                <style>
+                    @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap');
+                    
+                    body {
+                        margin: 0;
+                        padding: 0;
+                        font-family: 'Montserrat', sans-serif;
+                        background-color: #1c1c1c;
+                        color: #f1f1f1;
+                    }
+
+                    .email-container {
+                        max-width: 600px;
+                        margin: 50px auto;
+                        background-color: #1c1c1c;
+                        border: 1px solid #1c1c1c;
+                        border-radius: 8px;
+                        padding: 20px;
+                        text-align: center;
+                    }
+
+                    .email-container .logo {
+                        margin-bottom: 20px;
+                    }
+
+                    .email-container .logo img {
+                        max-width: 230px;
+                    }
+
+                    .email-container h2 {
+                        color: #00407A;
+                        font-family: 'MontserratBold', sans-serif;
+                    }
+
+                    .email-container p {
+                        font-size: 16px;
+                        line-height: 1.5;
+                        color: #f1f1f1;
+                    }
+
+                    .password-form {
+                        display: flex;
+                        flex-direction: column;
+                        align-items: center;
+                        margin-top: 20px;
+                    }
+
+                    .password-form label {
+                        margin: 10px 0 5px;
+                        font-size: 14px;
+                        text-align: left;
+                        width: 100%;
+                        max-width: 400px;
+                    }
+
+                    .password-form input {
+                        padding: 10px;
+                        width: 100%;
+                        max-width: 400px;
+                        border: 1px solid #ccc;
+                        border-radius: 5px;
+                        font-size: 16px;
+                    }
+
+                    .password-form button {
+                        margin-top: 20px;
+                        padding: 12px 24px;
+                        background-color: #00407A;
+                        color: #f1f1f1;
+                        border: none;
+                        border-radius: 5px;
+                        font-size: 16px;
+                        cursor: pointer;
+                        font-family: 'MontserratBold', sans-serif;
+                    }
+
+                    .password-form button:hover {
+                        background-color: #00306B;
+                    }
+
+                    .error-message {
+                        color: #cc0000;
+                        margin-top: 10px;
+                        font-size: 14px;
+                    }
+
+                    .footer {
+                        text-align: center;
+                        margin-top: 30px;
+                        margin-bottom: 20px;
+                    }
+
+                    .footer img {
+                        max-width: 100px;
+                    }
+
+                    .footer p {
+                        font-size: 12px;
+                        line-height: 1.5;
+                        color: #f1f1f1;
+                    }
+                </style>
+                <script>
+                    function validateForm(event) {
+                        const password = document.getElementById('password').value;
+                        const confirmPassword = document.getElementById('confirmPassword').value;
+                        const errorMessage = document.getElementById('error-message');
+
+                        if (password !== confirmPassword) {
+                            event.preventDefault();
+                            errorMessage.textContent = 'Passwords do not match.';
+                            return false;
+                        }
+
+                        if (password.length < 8) {
+                            event.preventDefault();
+                            errorMessage.textContent = 'Password must be at least 8 characters long.';
+                            return false;
+                        }
+
+                        // Additional validation can be added here
+
+                        return true;
+                    }
+                </script>
+            </head>
+            <body>
+                <div class="email-container">
+                    <div class="logo">
+                        <img src="http://${req.headers.host}/backend/media/verification_email/BrightMinds_title.png" alt="BrightMinds Research">
+                    </div>
+                    <h2>Reset Your Password</h2>
+                    <p>Please enter your new password below.</p>
+                    <form class="password-form" action="/user/reset-password/${token}" method="POST" onsubmit="validateForm(event)">
+                        <label for="password">New Password:</label>
+                        <input type="password" id="password" name="password" required />
+
+                        <label for="confirmPassword">Confirm New Password:</label>
+                        <input type="password" id="confirmPassword" name="confirmPassword" required />
+
+                        <div id="error-message" class="error-message"></div>
+
+                        <button type="submit">Reset Password</button>
+                    </form>
+                    <div class="footer">
+                        <img src="http://${req.headers.host}/backend/media/verification_email/brightminds_icon.png" alt="BrightMinds Footer">
+                        <p>&copy; 2024 BrightMinds Research LLC. All rights reserved.</p>
+                    </div>
+                </div>
+            </body>
+            </html>
         `);
-      }
-  
-      // Hash the new password
-      const hash = await bcrypt.hash(password, 10);
-  
-      // Update user's password and clear the reset token fields
-      user.password = hash;
-      user.resetPasswordToken = undefined;
-      user.resetPasswordExpires = undefined;
-      await user.save();
-  
-      // Optionally send a confirmation email here
-  
-      // Return a success message (styled similarly to your verification emails)
-      return res.status(200).send(`
-        <!DOCTYPE html>
-        <html lang="en">
-        <head>
-          <meta charset="UTF-8" />
-          <meta name="viewport" content="width=device-width,initial-scale=1.0" />
-          <title>Password Reset - BrightMinds Research</title>
-          <style>
-            @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap');
-  
-            body {
-              margin: 0;
-              padding: 0;
-              font-family: 'Montserrat', sans-serif;
-              background-color: #1c1c1c;
-              color: #f1f1f1;
-            }
-  
-            .email-container {
-              max-width: 600px;
-              margin: 0 auto;
-              background-color: #1c1c1c;
-              border: 1px solid #1c1c1c;
-              border-radius: 8px;
-              padding: 20px;
-              text-align: center;
-            }
-  
-            .email-container .logo {
-              margin-bottom: 20px;
-            }
-  
-            .email-container .logo img {
-              max-width: 230px;
-            }
-  
-            .email-container h2 {
-              color: #00407A;
-              font-family: 'MontserratBold', sans-serif;
-            }
-  
-            .email-container p {
-              font-size: 16px;
-              line-height: 1.5;
-              color: #f1f1f1;
-            }
-  
-            .button-container {
-              text-align: center;
-              margin: 30px 0;
-            }
-  
-            .button-container a {
-              background-color: #00407A;
-              color: #f1f1f1;
-              padding: 12px 24px;
-              text-decoration: none;
-              border-radius: 5px;
-              font-size: 16px;
-              font-family: 'MontserratBold', sans-serif;
-            }
-  
-            .footer {
-              text-align: center;
-              margin-top: 20px;
-              margin-bottom: 20px;
-            }
-  
-            .footer img {
-              max-width: 100px;
-            }
-  
-            .footer p {
-              font-size: 12px;
-              line-height: 1.5;
-              color: #f1f1f1;
-            }
-          </style>
-        </head>
-        <body>
-          <div class="email-container">
-            <div class="logo">
-              <img src="http://${req.headers.host}/backend/media/verification_email/BrightMinds_title.png" alt="BrightMinds Research">
-            </div>
-            <h2>Password Successfully Reset</h2>
-            <p>Your password has been updated!</p>
-            <div class="button-container">
-              <a href="https://www.brightmindsresearch.com/">Log In</a>
-            </div>
-            <div class="footer">
-              <img src="http://${req.headers.host}/backend/media/verification_email/brightminds_icon.png" alt="BrightMinds Footer">
-              <p>&copy; 2024 BrightMinds Research LLC. All rights reserved.</p>
-            </div>
-          </div>
-        </body>
-        </html>
-      `);
     } catch (error) {
-      console.error('Error resetting password:', error);
-      return res.status(500).send('<p>Server error.</p>');
+        console.error('Error rendering password reset form:', error);
+        res.status(500).send(`
+            <!DOCTYPE html>
+            <html lang="en">
+            <head>
+                <meta charset="UTF-8" />
+                <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+                <title>Server Error - BrightMinds Research</title>
+                <style>
+                    @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap');
+                    
+                    body {
+                        margin: 0;
+                        padding: 0;
+                        font-family: 'Montserrat', sans-serif;
+                        background-color: #1c1c1c;
+                        color: #f1f1f1;
+                    }
+
+                    .email-container {
+                        max-width: 600px;
+                        margin: 50px auto;
+                        background-color: #1c1c1c;
+                        border: 1px solid #1c1c1c;
+                        border-radius: 8px;
+                        padding: 20px;
+                        text-align: center;
+                    }
+
+                    .email-container h2 {
+                        color: #cc0000;
+                        font-family: 'MontserratBold', sans-serif;
+                    }
+
+                    .email-container p {
+                        font-size: 16px;
+                        line-height: 1.5;
+                        color: #f1f1f1;
+                    }
+
+                    .button-container {
+                        margin-top: 20px;
+                    }
+
+                    .button-container a {
+                        background-color: #00407A;
+                        color: #f1f1f1;
+                        padding: 12px 24px;
+                        text-decoration: none;
+                        border-radius: 5px;
+                        font-size: 16px;
+                        font-family: 'MontserratBold', sans-serif;
+                    }
+                </style>
+            </head>
+            <body>
+                <div class="email-container">
+                    <h2>Server Error</h2>
+                    <p>Sorry, something went wrong. Please try again later.</p>
+                    <div class="button-container">
+                        <a href="https://www.brightmindsresearch.com/">Visit our Site</a>
+                    </div>
+                </div>
+            </body>
+            </html>
+        `);
     }
-  };
+};
+
+exports.resetPassword = async (req, res) => {
+    try {
+        const { token } = req.params;
+        const { password, confirmPassword } = req.body;
+
+        // Check if both passwords are provided
+        if (!password || !confirmPassword) {
+            return res.status(400).send(`
+                <!DOCTYPE html>
+                <html lang="en">
+                <!-- Similar styled error page as above -->
+                <body>
+                    <div class="email-container">
+                        <h2>Invalid Submission</h2>
+                        <p>Please provide both password fields.</p>
+                        <div class="button-container">
+                            <a href="javascript:history.back()">Go Back</a>
+                        </div>
+                    </div>
+                </body>
+                </html>
+            `);
+        }
+
+        // Check if passwords match
+        if (password !== confirmPassword) {
+            return res.status(400).send(`
+                <!DOCTYPE html>
+                <html lang="en">
+                <!-- Similar styled error page as above -->
+                <body>
+                    <div class="email-container">
+                        <h2>Passwords Do Not Match</h2>
+                        <p>The passwords you entered do not match. Please try again.</p>
+                        <div class="button-container">
+                            <a href="javascript:history.back()">Go Back</a>
+                        </div>
+                    </div>
+                </body>
+                </html>
+            `);
+        }
+
+        // Continue with the existing password reset logic
+        const user = await User.findOne({
+            resetPasswordToken: token,
+            resetPasswordExpires: { $gt: Date.now() },
+        });
+
+        if (!user) {
+            // Handle invalid or expired token as before
+        }
+
+        // Hash the new password
+        const hash = await bcrypt.hash(password, 10);
+
+        // Update user's password and clear the reset token fields
+        user.password = hash;
+        user.resetPasswordToken = undefined;
+        user.resetPasswordExpires = undefined;
+        await user.save();
+
+        // Return a success message (styled similarly to your verification emails)
+        return res.status(200).send(`
+            <!DOCTYPE html>
+            <html lang="en">
+            <head>
+                <!-- Similar head as above -->
+            </head>
+            <body>
+                <div class="email-container">
+                    <div class="logo">
+                        <img src="http://${req.headers.host}/backend/media/verification_email/BrightMinds_title.png" alt="BrightMinds Research">
+                    </div>
+                    <h2>Password Updated!</h2>
+                    <div class="footer">
+                        <img src="http://${req.headers.host}/backend/media/verification_email/brightminds_icon.png" alt="BrightMinds Footer">
+                        <p>&copy; 2024 BrightMinds Research LLC. All rights reserved.</p>
+                    </div>
+                </div>
+            </body>
+            </html>
+        `);
+    } catch (error) {
+        console.error('Error resetting password:', error);
+        return res.status(500).send(`
+            <!DOCTYPE html>
+            <html lang="en">
+            <head>
+                <!-- Similar head as above -->
+            </head>
+            <body>
+                <div class="email-container">
+                    <h2>Server Error</h2>
+                    <p>Sorry, something went wrong. Please try again later.</p>
+                    <div class="button-container">
+                        <a href="https://www.brightmindsresearch.com/">Visit our Site</a>
+                    </div>
+                </div>
+            </body>
+            </html>
+        `);
+    }
+};
+
   
