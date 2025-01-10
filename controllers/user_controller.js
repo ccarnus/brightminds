@@ -171,7 +171,7 @@ exports.signup = async (req, res, next) => {
                     </div>
                     <p>If you did not create an account with us, please ignore this email.</p>
                     <div class="footer">
-                        <img src="http://${req.headers.host}/backend/media/verification_email/brightminds_icon.png" alt="BrightMinds Footer">
+                        <img src="http://${req.headers.host}/backend/media/verification_email/BrightMinds_icon.png" alt="BrightMinds Footer">
                         <p>&copy; 2024 BrightMinds Research LLC. All rights reserved.</p>
                     </div>
                 </div>
@@ -1188,7 +1188,7 @@ exports.requestPasswordResetEmail = async (req, res) => {
                         <button type="submit">Reset Password</button>
                     </form>
                     <div class="footer">
-                        <img src="http://${req.headers.host}/backend/media/verification_email/brightminds_icon.png" alt="BrightMinds Footer">
+                        <img src="http://${req.headers.host}/backend/media/verification_email/BrightMinds_icon.png" alt="BrightMinds Footer">
                         <p>&copy; 2024 BrightMinds Research LLC. All rights reserved.</p>
                     </div>
                 </div>
@@ -1337,7 +1337,7 @@ exports.resetPassword = async (req, res) => {
                             <a href="javascript:history.back()">Go Back</a>
                         </div>
                         <div class="footer">
-                            <img src="http://${req.headers.host}/backend/media/verification_email/brightminds_icon.png" alt="BrightMinds Footer">
+                            <img src="http://${req.headers.host}/backend/media/verification_email/BrightMinds_icon.png" alt="BrightMinds Footer">
                             <p>&copy; 2024 BrightMinds Research LLC. All rights reserved.</p>
                         </div>
                     </div>
@@ -1413,7 +1413,7 @@ exports.resetPassword = async (req, res) => {
                             <a href="javascript:history.back()">Go Back</a>
                         </div>
                         <div class="footer">
-                            <img src="http://${req.headers.host}/backend/media/verification_email/brightminds_icon.png" alt="BrightMinds Footer">
+                            <img src="http://${req.headers.host}/backend/media/verification_email/BrightMinds_icon.png" alt="BrightMinds Footer">
                             <p>&copy; 2024 BrightMinds Research LLC. All rights reserved.</p>
                         </div>
                     </div>
@@ -1491,11 +1491,8 @@ exports.resetPassword = async (req, res) => {
                         </div>
                         <h2>Invalid or Expired Link</h2>
                         <p>The password reset link is invalid or has expired.</p>
-                        <div class="button-container">
-                            <a href="https://www.brightmindsresearch.com/">Visit Our Site</a>
-                        </div>
                         <div class="footer">
-                            <img src="http://${req.headers.host}/backend/media/verification_email/brightminds_icon.png" alt="BrightMinds Footer">
+                            <img src="http://${req.headers.host}/backend/media/verification_email/BrightMinds_icon.png" alt="BrightMinds Footer">
                             <p>&copy; 2024 BrightMinds Research LLC. All rights reserved.</p>
                         </div>
                     </div>
@@ -1577,7 +1574,7 @@ exports.resetPassword = async (req, res) => {
                     <h2>Password Updated!</h2>
                     <p>Your password has been successfully updated. You can now log in with your new password.</p>
                     <div class="footer">
-                        <img src="http://${req.headers.host}/backend/media/verification_email/brightminds_icon.png" alt="BrightMinds Footer">
+                        <img src="http://${req.headers.host}/backend/media/verification_email/BrightMinds_icon.png" alt="BrightMinds Footer">
                         <p>&copy; 2024 BrightMinds Research LLC. All rights reserved.</p>
                     </div>
                 </div>
