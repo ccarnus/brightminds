@@ -1482,6 +1482,21 @@ exports.resetPassword = async (req, res) => {
                             font-size: 16px;
                             font-family: 'MontserratBold', sans-serif;
                         }
+                        .footer {
+                            text-align: center;
+                            margin-top: 30px;
+                            margin-bottom: 20px;
+                        }
+
+                        .footer img {
+                            max-width: 100px;
+                        }
+
+                        .footer p {
+                            font-size: 12px;
+                            line-height: 1.5;
+                            color: #f1f1f1;
+                        }
                     </style>
                 </head>
                 <body>
