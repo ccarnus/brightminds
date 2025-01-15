@@ -11,7 +11,7 @@ const isValidDepartment = (department) => departments.includes(department);
 
 exports.createCast = async (req, res, next) => {
     try {
-        const url = req.protocol + '://' + req.get('host');
+        const url = 'https://api.brightmindsresearch.com';
         req.body.cast = JSON.parse(req.body.cast);
 
         // Validate the department
@@ -159,7 +159,7 @@ exports.updateOneCast = async (req, res, next) => {
 
         // Update the cast details
         if (req.file) {
-            const url = req.protocol + "://" + req.get('host');
+            const url = "https://api.brightmindsresearch.com"
             const videoFilePath = './backend/media/cast_videos/' + req.file.filename;
             const duration = await getVideoDurationInSeconds(videoFilePath);
 
@@ -190,27 +190,23 @@ exports.updateOneCast = async (req, res, next) => {
 
 const removeCastFromUsers = async (castId) => {
     try {
-        // Find users with the cast in their bookmarked elements or evaluation list
+        // Find all users who have this cast in their evaluation_list
         const users = await User.find({
-            $or: [
-                { 'bookmarked_elements.castId': castId },
-                { 'evaluation_list.contentid': castId }
-            ]
+            'evaluation_list.contentid': castId
         });
 
+        // Update each user
         for (let user of users) {
-            // Remove cast from bookmarked elements
-            user.bookmarked_elements = user.bookmarked_elements.filter(
-                bookmark => bookmark.castId !== castId
-            );
-
+            // Filter out the deleted cast from the evaluation_list
             user.evaluation_list = user.evaluation_list.filter(
-                evaluation => !(evaluation.contentid === castId && !evaluation.answered)
+                evaluation => evaluation.contentid !== castId
             );
 
-            // Save the updated user
+            // Save the updated user document
             await user.save();
         }
+
+        console.log(`Removed cast ${castId} from all users' evaluation_list.`);
     } catch (error) {
         console.error('Error removing cast from users:', error);
     }
@@ -223,7 +219,8 @@ exports.deleteOneCast = async (req, res, next) => {
             return res.status(404).json({ error: 'Cast not found.' });
         }
   
-        // 1) Find the user who owns this cast (by brightmindid)
+        await removeCastFromUsers(req.params.id);
+
         const user = await User.findById(cast.brightmindid);
         if (user) {
             // Remove the cast ID from the user's castPublications

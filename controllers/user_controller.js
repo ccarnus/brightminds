@@ -10,6 +10,7 @@ const crypto = require('crypto');
 const nodemailer = require('nodemailer');
 
 const EMAIL_PWD = process.env.EMAIL_PWD;
+const API_BASE_URL = 'https://api.brightmindsresearch.com'
 
 const getTargetValue = (objective) => {
     switch (objective) {
@@ -162,16 +163,16 @@ exports.signup = async (req, res, next) => {
             <body>
                 <div class="email-container">
                     <div class="logo">
-                        <img src="http://${req.headers.host}/backend/media/verification_email/BrightMinds_title.png" alt="BrightMinds Research">
+                        <img src="${API_BASE_URL}/backend/media/verification_email/BrightMinds_title.png" alt="BrightMinds Research">
                     </div>
                     <h2>Welcome!</h2>
                     <p>Thank you for signing up with us. To complete your registration, please confirm your email address by clicking the button below.</p>
                     <div class="button-container">
-                        <a href="http://${req.headers.host}/user/confirmation/${token}">Verify Email</a>
+                        <a href="${API_BASE_URL}/user/confirmation/${token}">Verify Email</a>
                     </div>
                     <p>If you did not create an account with us, please ignore this email.</p>
                     <div class="footer">
-                        <img src="http://${req.headers.host}/backend/media/verification_email/BrightMinds_icon.png" alt="BrightMinds Footer">
+                        <img src="${API_BASE_URL}/backend/media/verification_email/BrightMinds_icon.png" alt="BrightMinds Footer">
                         <p>&copy; 2024 BrightMinds Research LLC. All rights reserved.</p>
                     </div>
                 </div>
@@ -253,7 +254,7 @@ exports.confirmation = (req, res, next) => {
                 <body>
                     <div class="container">
                         <div class="logo">
-                            <img src="http://${req.headers.host}/backend/media/verification_email/BrightMinds_title.png" alt="BrightMinds Research">
+                            <img src="${API_BASE_URL}/backend/media/verification_email/BrightMinds_title.png" alt="BrightMinds Research">
                         </div>
                         <h2>Verification Failed</h2>
                         <p>We were unable to find a user for this token.</p>
@@ -321,7 +322,7 @@ exports.confirmation = (req, res, next) => {
             <body>
                 <div class="container">
                     <div class="logo">
-                        <img src="http://${req.headers.host}/backend/media/verification_email/BrightMinds_title.png" alt="BrightMinds Research">
+                        <img src="${API_BASE_URL}/backend/media/verification_email/BrightMinds_title.png" alt="BrightMinds Research">
                     </div>
                     <h2>Already Verified</h2>
                     <p>This user has already been verified.</p>
@@ -397,7 +398,7 @@ exports.confirmation = (req, res, next) => {
             <body>
                 <div class="container">
                     <div class="logo">
-                        <img src="http://${req.headers.host}/backend/media/verification_email/BrightMinds_title.png" alt="BrightMinds Research">
+                        <img src="${API_BASE_URL}/backend/media/verification_email/BrightMinds_title.png" alt="BrightMinds Research">
                     </div>
                     <h2>Verification Successful!</h2>
                     <p>Your account has been verified. You can now log in.</p>
@@ -943,7 +944,7 @@ exports.requestPasswordResetEmail = async (req, res) => {
           <p>Hello ${user.username},</p>
           <p>You requested a password reset for your BrightMinds Research account.</p>
           <p>Please click the link below to set a new password (valid for 1 hour):</p>
-          <p><a href="http://${req.headers.host}/user/reset-password/${token}">
+          <p><a href="${API_BASE_URL}/user/reset-password/${token}">
             Reset Your Password
           </a></p>
           <p>If you did not request this, please ignore this email.</p>
@@ -1172,7 +1173,7 @@ exports.requestPasswordResetEmail = async (req, res) => {
             <body>
                 <div class="email-container">
                     <div class="logo">
-                        <img src="http://${req.headers.host}/backend/media/verification_email/BrightMinds_title.png" alt="BrightMinds Research">
+                        <img src="${API_BASE_URL}/backend/media/verification_email/BrightMinds_title.png" alt="BrightMinds Research">
                     </div>
                     <h2>Reset Your Password</h2>
                     <p>Please enter your new password below.</p>
@@ -1188,7 +1189,7 @@ exports.requestPasswordResetEmail = async (req, res) => {
                         <button type="submit">Reset Password</button>
                     </form>
                     <div class="footer">
-                        <img src="http://${req.headers.host}/backend/media/verification_email/BrightMinds_icon.png" alt="BrightMinds Footer">
+                        <img src="${API_BASE_URL}/backend/media/verification_email/BrightMinds_icon.png" alt="BrightMinds Footer">
                         <p>&copy; 2024 BrightMinds Research LLC. All rights reserved.</p>
                     </div>
                 </div>
@@ -1329,7 +1330,7 @@ exports.resetPassword = async (req, res) => {
                 <body>
                     <div class="email-container">
                         <div class="logo">
-                            <img src="http://${req.headers.host}/backend/media/verification_email/BrightMinds_title.png" alt="BrightMinds Research">
+                            <img src="${API_BASE_URL}/backend/media/verification_email/BrightMinds_title.png" alt="BrightMinds Research">
                         </div>
                         <h2>Invalid Submission</h2>
                         <p>Please provide both password fields.</p>
@@ -1337,7 +1338,7 @@ exports.resetPassword = async (req, res) => {
                             <a href="javascript:history.back()">Go Back</a>
                         </div>
                         <div class="footer">
-                            <img src="http://${req.headers.host}/backend/media/verification_email/BrightMinds_icon.png" alt="BrightMinds Footer">
+                            <img src="${API_BASE_URL}/backend/media/verification_email/BrightMinds_icon.png" alt="BrightMinds Footer">
                             <p>&copy; 2024 BrightMinds Research LLC. All rights reserved.</p>
                         </div>
                     </div>
@@ -1405,7 +1406,7 @@ exports.resetPassword = async (req, res) => {
                 <body>
                     <div class="email-container">
                         <div class="logo">
-                            <img src="http://${req.headers.host}/backend/media/verification_email/BrightMinds_title.png" alt="BrightMinds Research">
+                            <img src="${API_BASE_URL}/backend/media/verification_email/BrightMinds_title.png" alt="BrightMinds Research">
                         </div>
                         <h2>Passwords Do Not Match</h2>
                         <p>The passwords you entered do not match. Please try again.</p>
@@ -1413,7 +1414,7 @@ exports.resetPassword = async (req, res) => {
                             <a href="javascript:history.back()">Go Back</a>
                         </div>
                         <div class="footer">
-                            <img src="http://${req.headers.host}/backend/media/verification_email/BrightMinds_icon.png" alt="BrightMinds Footer">
+                            <img src="${API_BASE_URL}/backend/media/verification_email/BrightMinds_icon.png" alt="BrightMinds Footer">
                             <p>&copy; 2024 BrightMinds Research LLC. All rights reserved.</p>
                         </div>
                     </div>
@@ -1502,12 +1503,12 @@ exports.resetPassword = async (req, res) => {
                 <body>
                     <div class="email-container">
                         <div class="logo">
-                            <img src="http://${req.headers.host}/backend/media/verification_email/BrightMinds_title.png" alt="BrightMinds Research">
+                            <img src="${API_BASE_URL}/backend/media/verification_email/BrightMinds_title.png" alt="BrightMinds Research">
                         </div>
                         <h2>Invalid or Expired Link</h2>
                         <p>The password reset link is invalid or has expired.</p>
                         <div class="footer">
-                            <img src="http://${req.headers.host}/backend/media/verification_email/BrightMinds_icon.png" alt="BrightMinds Footer">
+                            <img src="${API_BASE_URL}/backend/media/verification_email/BrightMinds_icon.png" alt="BrightMinds Footer">
                             <p>&copy; 2024 BrightMinds Research LLC. All rights reserved.</p>
                         </div>
                     </div>
@@ -1584,12 +1585,12 @@ exports.resetPassword = async (req, res) => {
             <body>
                 <div class="email-container">
                     <div class="logo">
-                        <img src="http://${req.headers.host}/backend/media/verification_email/BrightMinds_title.png" alt="BrightMinds Research">
+                        <img src="${API_BASE_URL}/backend/media/verification_email/BrightMinds_title.png" alt="BrightMinds Research">
                     </div>
                     <h2>Password Updated!</h2>
                     <p>Your password has been successfully updated. You can now log in with your new password.</p>
                     <div class="footer">
-                        <img src="http://${req.headers.host}/backend/media/verification_email/BrightMinds_icon.png" alt="BrightMinds Footer">
+                        <img src="${API_BASE_URL}/backend/media/verification_email/BrightMinds_icon.png" alt="BrightMinds Footer">
                         <p>&copy; 2024 BrightMinds Research LLC. All rights reserved.</p>
                     </div>
                 </div>

@@ -11,7 +11,7 @@ const isValidDepartment = (department) => departments.includes(department);
 
 exports.createArticle = async (req, res, next) => {
     try {
-        const url = req.protocol + "://" + req.get('host');
+        const url = "https://api.brightmindsresearch.com";
 
         if (!isValidDepartment(req.body.department)) {
             return res.status(400).json({
@@ -26,7 +26,7 @@ exports.createArticle = async (req, res, next) => {
             });
         }
 
-        const evaluation = await generateEvaluation(req.body.articleDescription); // Directly use req.body.articleDescription
+        const evaluation = await generateEvaluation(req.body.articleDescription);
         if (!evaluation) {
             return res.status(400).json({
                 error: 'Failed to generate evaluation'
@@ -152,27 +152,21 @@ exports.updateOneArticle = async (req, res, next) => {
 
 const removeArticleFromUsers = async (articleId) => {
     try {
+        // Find all users who have this article in their evaluation_list
         const users = await User.find({
-            $or: [
-                { 'bookmarked_elements.castId': articleId },
-                { 'evaluation_list.contentid': articleId }
-            ]
+            'evaluation_list.contentid': articleId
         });
 
         // Update each user
         for (let user of users) {
-            // Remove article from bookmarked elements
-            user.bookmarked_elements = user.bookmarked_elements.filter(
-                bookmark => bookmark.castId !== articleId
-            );
-
             user.evaluation_list = user.evaluation_list.filter(
-                evaluation => !(evaluation.contentid === articleId && !evaluation.answered)
+                evaluation => evaluation.contentid !== articleId
             );
 
-            // Save the updated user
             await user.save();
         }
+
+        console.log(`Removed article ${articleId} from all users' evaluation_list.`);
     } catch (error) {
         console.error('Error removing article from users:', error);
     }
