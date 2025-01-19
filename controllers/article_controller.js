@@ -194,7 +194,7 @@ exports.deleteOneArticle = async (req, res, next) => {
 
         let imageDeleteError = false;
 
-        // Delete associated image file
+        // If there's an associated image, delete it
         const imagePath = article.articleimageurl.split('/backend/media/article_images/')[1];
         if (imagePath) {
             fs.unlink(`./backend/media/article_images/${imagePath}`, async (err) => {
@@ -204,74 +204,60 @@ exports.deleteOneArticle = async (req, res, next) => {
                 }
 
                 try {
-                    // Proceed to delete the article record after attempting to delete the image
-                    await Article.deleteOne({ _id: req.params.id });
-
-                    // Remove the article from users' bookmarked elements and evaluation list
-                    await removeArticleFromUsers(req.params.id);
-
-                    // Remove article ID from the user's articlePublications
-                    const user = await User.findById(article.brightmindid);
-                    if (user) {
-                        user.articlePublications = user.articlePublications.filter(pubId => !pubId.equals(article._id));
-                        await user.save();
-                    }
-
-                    // Update or remove topic association
-                    await removeExistingTopic({
-                        body: {
-                            name: article.topic,
-                            departmentName: article.department,
-                            contentId: article._id
-                        }
-                    }, res, next);
-
-                    let responseMessage = 'Article deleted and references removed from users.';
-                    if (imageDeleteError) {
-                        responseMessage += ' However, there was an error deleting the associated article image.';
-                    }
-
-                    res.status(200).json({ response: responseMessage });
+                    // Proceed with article cleanup after attempting to delete the image
+                    await performArticleCleanup(article, imageDeleteError, req, res);
                 } catch (error) {
                     console.error('Error deleting article:', error);
                     res.status(500).json({ error: 'Error deleting article.' });
                 }
             });
         } else {
-            // No image path found, directly delete the article
-            try {
-                await Article.deleteOne({ _id: req.params.id });
-
-                // Remove the article from users' bookmarked elements and evaluation list
-                await removeArticleFromUsers(req.params.id);
-
-                // Remove article ID from the user's articlePublications
-                const user = await User.findById(article.brightmindid);
-                if (user) {
-                    user.articlePublications = user.articlePublications.filter(pubId => !pubId.equals(article._id));
-                    await user.save();
-                }
-
-                // Update or remove topic association
-                await removeExistingTopic({
-                    body: {
-                        name: article.topic,
-                        departmentName: article.department,
-                        contentId: article._id
-                    }
-                }, res, next);
-
-                res.status(200).json({ response: 'Article deleted and references removed from users.' });
-            } catch (error) {
-                console.error('Error deleting article:', error);
-                res.status(500).json({ error: 'Error deleting article.' });
-            }
+            // No image path found; just proceed with final cleanup
+            await performArticleCleanup(article, imageDeleteError, req, res);
         }
     } catch (error) {
         console.error('Error finding article:', error);
         res.status(500).json({ error: 'Error finding article.' });
     }
 };
+
+/**
+ * This function encapsulates the final "cleanup" steps after
+ * the article's image has been handled (or if there was no image).
+ */
+async function performArticleCleanup(article, imageDeleteError, req, res) {
+    // 1) Delete the Article document
+    await Article.deleteOne({ _id: article._id });
+
+    // 2) Remove the article from users' evaluation_list (and possibly bookmarks)
+    await removeArticleFromUsers(article._id);
+
+    // 3) Remove article ID from the user's articlePublications
+    const user = await User.findById(article.brightmindid);
+    if (user) {
+        user.articlePublications = user.articlePublications.filter(pubId => !pubId.equals(article._id));
+        await user.save();
+    }
+
+    // 4) Remove or decrement the topic
+    const topicResult = await removeExistingTopic({
+        name: article.topic,
+        departmentName: article.department,
+        contentId: article._id
+    });
+
+    // Construct a final response message
+    let responseMessage = 'Article deleted successfully.';
+    if (imageDeleteError) {
+        responseMessage += ' However, there was an error deleting the associated article image.';
+    }
+    if (topicResult && topicResult.message) {
+        responseMessage += ` ${topicResult.message}`;
+    }
+
+    res.status(200).json({ response: responseMessage });
+}
+
 
 exports.getAllArticleByCategory = (req, res, next) => {
     Article.find({ category: { $exists: true, $eq: req.params.id } }).sort({ _id: 1 }).then(
