@@ -20,7 +20,7 @@ const generateEvaluation = async (description) => {
   try {
 
     const response = await client.chat.completions.create({
-    model: 'gpt-3.5-turbo',
+    model: 'gpt-4',
     messages: [
         { role: 'system', content: 'You are a helpful assistant.' },
         { role: 'user', content: `Generate a multiple-choice question based on the following description (place the correct answer first). The question should aim to see if the user understood what was described. The user will answer the question after seeing many different description, so the question should not expect the user to know what description it refers to. Here is the description: ${description}\nQuestion:` },

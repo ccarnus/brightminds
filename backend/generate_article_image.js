@@ -37,7 +37,7 @@ async function resizeImage(inputPath, outputPath, width, height) {
 }
 
 async function generateArticleImage(description) {
-    const modifiedDescription = `Create an engaging and visually appealing landscape cover image for an article. The design should be slick, simple, and user-friendly, inviting viewers without being too detailed. Focus on a few key components that accurately depict the article's subject matter, ensuring the image is clean, attractive, and uncluttered. The image should be vibrant and eye-catching to attract readers. Do not include any text or writing in the image. The content of the image should align with the theme of this description: ${description}`;
+    const modifiedDescription = `Create a simple, realistic academic illustration with no text. The image should be clean and minimal, focusing only on the most essential elements to illustrate the main idea. Use neutral or light-colored backgrounds that do not distract from the subject. The overall style should be realistic and clear, suitable for an educational or academic context. Do not include any additional text or decorative elements. The illustration should effectively convey the following concept: ${description}.`;
     try {
         const response = await client.images.generate({
             model: "dall-e-3",
