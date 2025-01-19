@@ -6,6 +6,7 @@ const User = require('../models/user_model.js');
 const departments = require('../lists/departments.js');
 const Topic = require('../models/topic_model.js');
 const { createTopicIfNotExist, removeExistingTopic  } = require('../controllers/topic_controller.js');
+const computeDuration = require('../backend/computeDuration');
 
 const isValidDepartment = (department) => departments.includes(department);
 
@@ -26,6 +27,7 @@ exports.createArticle = async (req, res, next) => {
             });
         }
 
+        // Generate the evaluation
         const evaluation = await generateEvaluation(req.body.articleDescription);
         if (!evaluation) {
             return res.status(400).json({
@@ -33,7 +35,8 @@ exports.createArticle = async (req, res, next) => {
             });
         }
 
-        const imagePath = await generateArticleImage(req.body.articleDescription); // Directly use req.body.articleDescription
+        // Generate the article image
+        const imagePath = await generateArticleImage(req.body.articleDescription);
         if (!imagePath) {
             return res.status(400).json({
                 error: 'Failed to generate article image'
@@ -41,26 +44,36 @@ exports.createArticle = async (req, res, next) => {
         }
         const articleImageURL = url + imagePath.replace(/^.*\/backend/, '/backend');
 
+        // Compute duration if it was NOT provided by client
+        let durationToUse;
+        if (typeof req.body.duration === 'number') {
+            durationToUse = req.body.duration;
+        } else {
+            durationToUse = computeDuration(req.body.articleDescription);
+        }
+
         const article = new Article({
             ...req.body,
             articleimageurl: articleImageURL,
-            evaluation: evaluation
+            evaluation,
+            duration: durationToUse  // Use our computed or provided duration
         });
 
+        // If dateadded is provided, override the default
         if (req.body.dateadded) {
             article.dateadded = new Date(req.body.dateadded);
-          }
+        }
 
         await article.save();
 
-        // Call createTopicIfNotExist with the required fields
+        // Call createTopicIfNotExist
         const topicResult = await createTopicIfNotExist({
             name: req.body.topic,
             departmentName: req.body.department,
             contentId: article._id
         });
 
-        // Send topicResult status and message
+        // Console log for debugging (optional)
         if (topicResult.status === 201) {
             console.log(topicResult.message);
         } else if (topicResult.status === 200) {
