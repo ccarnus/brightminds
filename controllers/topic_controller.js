@@ -1,34 +1,59 @@
 const Topic = require('../models/topic_model.js');
 
-exports.createTopicIfNotExist = async ({ name, departmentName, contentId }) => {
+exports.createTopicIfNotExist = async ({
+    name, 
+    departmentName, 
+    contentId, 
+    contentType // 'article' or 'cast'
+  }) => {
     try {
-        // Search for an existing topic with the same name and departmentName
-        let topic = await Topic.findOne({ name, departmentName });
-
-        if (topic) {
-            // If topic exists, increment contentCount and add contentId to content_ids if not already present
-            if (!topic.content_ids.includes(contentId)) {
-                topic.content_ids.push(contentId);
-                topic.contentCount += 1;
-            }
-            await topic.save();
-            return { message: 'Topic updated successfully.', topic, status: 200 };
+      // 1) Search for an existing topic
+      let topic = await Topic.findOne({ name, departmentName });
+  
+      // 2) If topic doesn't exist, create a new one
+      if (!topic) {
+        const newTopicData = {
+          name,
+          departmentName
+        };
+  
+        // Depending on what contentType is, initialize
+        if (contentType === 'article') {
+          newTopicData.articleCount = 1;
+          newTopicData.articleIDs = [contentId];
         } else {
-            // If topic does not exist, create a new one
-            topic = new Topic({
-                name,
-                departmentName,
-                contentCount: 1,
-                content_ids: [contentId]
-            });
-            await topic.save();
-            return { message: 'Topic created successfully.', topic, status: 201 };
+          newTopicData.castCount = 1;
+          newTopicData.castIDs = [contentId];
         }
+  
+        topic = new Topic(newTopicData);
+        await topic.save();
+  
+        return { message: 'Topic created successfully.', topic, status: 201 };
+      }
+  
+      // 3) If topic DOES exist, update the correct array/counter
+      if (contentType === 'article') {
+        // Only add if not already present
+        if (!topic.articleIDs.some(id => id.equals(contentId))) {
+          topic.articleIDs.push(contentId);
+          topic.articleCount += 1;
+        }
+      } else {
+        // Cast
+        if (!topic.castIDs.some(id => id.equals(contentId))) {
+          topic.castIDs.push(contentId);
+          topic.castCount += 1;
+        }
+      }
+  
+      await topic.save();
+      return { message: 'Topic updated successfully.', topic, status: 200 };
     } catch (error) {
-        console.error('Error creating or updating topic:', error);
-        throw new Error('Error creating or updating topic.');
+      console.error('Error creating or updating topic:', error);
+      throw new Error('Error creating or updating topic.');
     }
-};
+  };
 
 exports.getTopicsByDepartment = async (req, res, next) => {
     try {
@@ -69,34 +94,57 @@ exports.updateTopic = async (req, res, next) => {
     }
 };
 
-exports.removeExistingTopic = async ({ name, departmentName, contentId }) => {
+exports.removeExistingTopic = async ({
+    name,
+    departmentName,
+    contentId,
+    contentType // 'article' or 'cast'
+  }) => {
     try {
-        // 1) Find the topic
-        const topic = await Topic.findOne({ name, departmentName });
-        if (!topic) {
-            return { status: 404, message: 'Topic not found.' };
-        }
-
-        // 2) Filter out the contentId
-        const originalLength = topic.content_ids.length;
-        topic.content_ids = topic.content_ids.filter(id => id !== contentId);
-        const newLength = topic.content_ids.length;
-
-        // 3) Only decrement if the ID was actually removed
+      // 1) Find the topic
+      const topic = await Topic.findOne({ name, departmentName });
+      if (!topic) {
+        return { status: 404, message: 'Topic not found.' };
+      }
+  
+      // 2) Remove ID from the correct array and decrement
+      if (contentType === 'article') {
+        const originalLength = topic.articleIDs.length;
+        topic.articleIDs = topic.articleIDs.filter(id => !id.equals(contentId));
+        const newLength = topic.articleIDs.length;
+  
+        // Only decrement if an ID was actually removed
         if (newLength < originalLength) {
-            topic.contentCount -= (originalLength - newLength);
+          topic.articleCount -= (originalLength - newLength);
+          if (topic.articleCount < 0) {
+            topic.articleCount = 0; // just a safeguard
+          }
         }
-
-        // 4) If no more content is associated, remove the topic
-        if (topic.contentCount <= 0) {
-            await Topic.deleteOne({ _id: topic._id });
-            return { status: 200, message: 'Topic removed as no more content is associated.' };
-        } else {
-            await topic.save();
-            return { status: 200, message: 'Content removed from topic successfully.', topic };
+      } else {
+        // It's a cast
+        const originalLength = topic.castIDs.length;
+        topic.castIDs = topic.castIDs.filter(id => !id.equals(contentId));
+        const newLength = topic.castIDs.length;
+  
+        // Only decrement if an ID was actually removed
+        if (newLength < originalLength) {
+          topic.castCount -= (originalLength - newLength);
+          if (topic.castCount < 0) {
+            topic.castCount = 0; // safeguard
+          }
         }
+      }
+  
+      // 3) If the topic has no articles AND no casts, remove it entirely
+      if (topic.articleCount <= 0 && topic.castCount <= 0) {
+        await Topic.deleteOne({ _id: topic._id });
+        return { status: 200, message: 'Topic removed as no more content is associated.' };
+      } else {
+        await topic.save();
+        return { status: 200, message: 'Content removed from topic successfully.', topic };
+      }
     } catch (error) {
-        console.error('Error removing content from topic:', error);
-        throw new Error('Error removing content from topic.');
+      console.error('Error removing content from topic:', error);
+      throw new Error('Error removing content from topic.');
     }
-};
+  };

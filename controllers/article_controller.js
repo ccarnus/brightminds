@@ -70,7 +70,8 @@ exports.createArticle = async (req, res, next) => {
         const topicResult = await createTopicIfNotExist({
             name: req.body.topic,
             departmentName: req.body.department,
-            contentId: article._id
+            contentId: article._id,
+            contentType: 'article',
         });
 
         // Console log for debugging (optional)
@@ -137,7 +138,8 @@ exports.updateOneArticle = async (req, res, next) => {
                 body: {
                     name: article.topic,
                     departmentName: article.department,
-                    contentId: article._id
+                    contentId: article._id,
+                    contentType: 'article',
                 }
             }, res, next);
         }
@@ -147,7 +149,8 @@ exports.updateOneArticle = async (req, res, next) => {
             body: {
                 name: req.body.topic,
                 departmentName: req.body.department,
-                contentId: article._id
+                contentId: article._id,
+                contentType: 'article',
             }
         }, res, next);
 
@@ -243,7 +246,8 @@ async function performArticleCleanup(article, imageDeleteError, req, res) {
     const topicResult = await removeExistingTopic({
         name: article.topic,
         departmentName: article.department,
-        contentId: article._id
+        contentId: article._id,
+        contentType: 'article',
     });
 
     // Construct a final response message
@@ -257,7 +261,6 @@ async function performArticleCleanup(article, imageDeleteError, req, res) {
 
     res.status(200).json({ response: responseMessage });
 }
-
 
 exports.getAllArticleByCategory = (req, res, next) => {
     Article.find({ category: { $exists: true, $eq: req.params.id } }).sort({ _id: 1 }).then(

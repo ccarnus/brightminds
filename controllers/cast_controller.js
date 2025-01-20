@@ -56,6 +56,7 @@ exports.createCast = async (req, res, next) => {
         name: req.body.cast.topic,
         departmentName: req.body.cast.department,
         contentId: cast._id,
+        contentType: 'cast',
         });
 
         // Send topicResult status and message
@@ -138,7 +139,8 @@ exports.updateOneCast = async (req, res, next) => {
             const topicRemovalResult = await removeExistingTopic({
                 name: oldTopic,
                 departmentName: cast.department,
-                contentId: cast._id
+                contentId: cast._id,
+                contentType: 'cast',
             });
 
             if (topicRemovalResult.status === 404) {
@@ -152,7 +154,8 @@ exports.updateOneCast = async (req, res, next) => {
         const topicCreationResult = await createTopicIfNotExist({
             name: req.body.cast.topic,
             departmentName,
-            contentId: cast._id
+            contentId: cast._id,
+            contentType: 'cast',
         });
 
         console.log(topicCreationResult.message);
@@ -275,7 +278,8 @@ exports.deleteOneCast = async (req, res, next) => {
         const topicResult = await removeExistingTopic({
             name: cast.topic,
             departmentName: cast.department,
-            contentId: cast._id
+            contentId: cast._id,
+            contentType: 'cast',
         });
     
         let responseMessage = 'Cast deleted successfully.';
