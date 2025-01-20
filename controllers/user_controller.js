@@ -6,6 +6,7 @@ const fs = require('fs');
 const Cast = require('../models/cast_model.js');
 const Article = require('../models/article_model.js');
 const departments = require('../lists/departments.js');
+const { deleteFile } = require('./fileHelper.js');
 const crypto = require('crypto');
 const nodemailer = require('nodemailer');
 
@@ -496,54 +497,98 @@ exports.getAllUser = async (req, res, next) => {
     }
 };
 
+// controllers/user_controller.js
 
-exports.updateOneUser = (req, res, next) => {
-    let user = new User({_id: req.params._id});
-    if (req.file) {
-        const url = req.protocol + "://" + req.get('host');
-        req.body.user = JSON.parse(req.body.user);
-        user = {
-            _id: req.params.id,
-            email: req.body.user.email,
-            username: req.body.user.username,
-            role: req.body.user.role,
-            profilePictureUrl: url + '/backend/media/profile_pictures/' + req.file.filename,
-            evaluation_list: req.body.user.evaluation_list,
-            preferences: req.body.user.preferences,
-            tracking: req.body.user.tracking,
-            castPublications: req.body.user.castPublications,
-            articlePublications: req.body.user.articlePublications,
-            university: req.body.user.university
-        };
-    } else {
-        user = {
-            _id: req.params.id,
-            email: req.body.email,
-            username: req.body.username,
-            role: req.body.role,
-            profilePictureUrl: req.body.profilePictureUrl,
-            evaluation_list: req.body.evaluation_list,
-            preferences: req.body.preferences,
-            tracking: req.body.tracking,
-            castPublications: req.body.castPublications,
-            articlePublications: req.body.articlePublications,
-            university: req.body.university
-        };
+const User = require('../models/user_model.js');
+const { deleteFile } = require('./fileHelper.js'); // Import the helper
+const departments = require('../lists/departments.js');
+
+/**
+ * Updates a user's information. If a new profile picture is provided,
+ * deletes the old one from the server.
+ */
+exports.updateOneUser = async (req, res, next) => {
+    try {
+        const userId = req.params.id;
+
+        // Find the user by ID
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found.' });
+        }
+
+        // Check if there's a new profile picture in the request
+        if (req.file) {
+            // Parse the user data from the request body
+            // Assuming the user data is sent as a JSON string under 'user' key
+            req.body.user = req.body.user ? JSON.parse(req.body.user) : {};
+
+            // Extract the old profile picture filename
+            const oldImageUrl = user.profilePictureUrl;
+            const oldImageFilename = oldImageUrl
+                ? oldImageUrl.split('/backend/media/profile_pictures/')[1]
+                : null;
+
+            // Define the path to the old image
+            const oldImagePath = oldImageFilename
+                ? `./backend/media/profile_pictures/${oldImageFilename}`
+                : null;
+
+            // Delete the old image if it exists
+            if (oldImagePath) {
+                try {
+                    await deleteFile(oldImagePath);
+                } catch (err) {
+                    // If deletion fails, respond with an error
+                    return res.status(500).json({ error: 'Failed to delete old profile picture.' });
+                }
+            }
+
+            // Update the profilePictureUrl with the new image
+            const url = `${req.protocol}://${req.get('host')}`;
+            user.profilePictureUrl = `${url}/backend/media/profile_pictures/${req.file.filename}`;
+        } else {
+            // If no new image, ensure req.body.user is parsed if provided
+            req.body.user = req.body.user ? JSON.parse(req.body.user) : {};
+        }
+
+        // Update other user fields
+        // You can choose to whitelist specific fields to prevent unwanted updates
+        const allowedFields = [
+            'email',
+            'username',
+            'role',
+            'evaluation_list',
+            'preferences',
+            'tracking',
+            'castPublications',
+            'articlePublications',
+            'university',
+        ];
+
+        allowedFields.forEach(field => {
+            if (req.body.user[field] !== undefined) {
+                user[field] = req.body.user[field];
+            }
+        });
+
+        // Optional: Validate department if it's being updated
+        if (req.body.user.department) {
+            if (!departments.includes(req.body.user.department)) {
+                return res.status(400).json({ error: 'Invalid department.' });
+            }
+            user.department = req.body.user.department;
+        }
+
+        // Save the updated user
+        await user.save();
+
+        res.status(200).json({ message: 'User updated successfully.', user });
+    } catch (error) {
+        console.error('Error updating user:', error);
+        res.status(500).json({ error: 'Internal server error.' });
     }
-    User.updateOne({_id:req.params.id}, user).then(
-        (user) => {
-            res.status(200).json({
-                response: 'User updated.'
-            });
-        }
-    ).catch(
-        (error) => {
-            res.status(400).json({
-                error : error
-            });
-        }
-    );
-}
+};
 
 exports.deleteOneUser = (req, res, next) => {
     User.findOne({_id:req.params.id}).then(
