@@ -497,16 +497,6 @@ exports.getAllUser = async (req, res, next) => {
     }
 };
 
-// controllers/user_controller.js
-
-const User = require('../models/user_model.js');
-const { deleteFile } = require('./fileHelper.js'); // Import the helper
-const departments = require('../lists/departments.js');
-
-/**
- * Updates a user's information. If a new profile picture is provided,
- * deletes the old one from the server.
- */
 exports.updateOneUser = async (req, res, next) => {
     try {
         const userId = req.params.id;
