@@ -3,7 +3,7 @@ const fs = require('fs');
 
 exports.createUniversity = (req, res, next) => {
 
-        const url = req.protocol + "://" + req.get('host');
+        const url = "https://api.brightmindsresearch.com";
         req.body.university = JSON.parse(req.body.university);
         const university = new University({
             name: req.body.university.name,
@@ -50,7 +50,7 @@ exports.getAllUniversity = async (req, res, next) => {
 exports.updateOneUniversity = (req, res, next) => {
     let university = new University({_id: req.params._id});
     if (req.file){
-        const url = req.protocol + "://" + req.get('host');
+        const url = "https://api.brightmindsresearch.com";
         req.body.university = JSON.parse(req.body.university);
         university = {
             _id:req.params.id,

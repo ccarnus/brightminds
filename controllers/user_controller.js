@@ -46,7 +46,7 @@ exports.signup = async (req, res, next) => {
 
         // Generate the verification token
         const token = crypto.randomBytes(16).toString('hex');
-        const url = req.protocol + "://" + req.get('host');
+        const url = "https://api.brightmindsresearch.com";
 
         // Prepare the user data
         const userData = {
@@ -535,7 +535,7 @@ exports.updateOneUser = async (req, res, next) => {
             }
 
             // Update the profilePictureUrl with the new image
-            const url = `${req.protocol}://${req.get('host')}`;
+            const url = "https://api.brightmindsresearch.com";
             user.profilePictureUrl = `${url}/backend/media/profile_pictures/${req.file.filename}`;
         } else {
             // If no new image, ensure req.body.user is parsed if provided
