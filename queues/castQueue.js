@@ -50,3 +50,5 @@ castQueue.process(async (job, done) => {
     done(error);
   }
 });
+
+module.exports = castQueue;
