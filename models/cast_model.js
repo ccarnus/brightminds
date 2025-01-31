@@ -23,6 +23,7 @@ const castSchema = mongoose.Schema({
         correct: { type: String, required: false }
     },
     topic: { type: String, required: true },
+    subtitleurl: { type: String, required: false },
 });
 
 module.exports = mongoose.model('Cast', castSchema);

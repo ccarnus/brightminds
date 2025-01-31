@@ -48,6 +48,7 @@ app.use('/backend/media/profile_pictures', express.static(path.join(__dirname,'/
 app.use('/backend/media/university_icon', express.static(path.join(__dirname,'/backend/media/university_icon')));
 app.use('/backend/media/virtuallab_icon', express.static(path.join(__dirname,'/backend/media/virtuallab_icon')));
 app.use('/backend/media/verification_email', express.static(path.join(__dirname,'/backend/media/verification_email')));
+app.use('/backend/media/cast_subtitles', express.static(path.join(__dirname, 'backend/media/cast_subtitles')));
 
 // Route definitions
 app.use('/cast', castRoutes);

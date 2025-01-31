@@ -222,43 +222,44 @@ exports.deleteOneCast = async (req, res, next) => {
             return res.status(404).json({ error: 'Cast not found.' });
         }
   
+        // 1) Remove cast references from users
         await removeCastFromUsers(req.params.id);
 
+        // 2) Remove this cast from the user's castPublications
         const user = await User.findById(cast.brightmindid);
         if (user) {
-            // Remove the cast ID from the user's castPublications
             user.castPublications = user.castPublications.filter(
-            (pubId) => pubId.toString() !== cast._id.toString()
+                (pubId) => pubId.toString() !== cast._id.toString()
             );
             await user.save();
         }
-  
-        // 2) Delete associated video file if it exists
+
+        // 3) Delete the associated video file if it exists
         let videoDeleteError = false;
         if (cast.casturl) {
             const videoFilename = cast.casturl.split('/media/cast_videos/')[1];
             if (videoFilename) {
                 try {
-                    await fs.access('./backend/media/cast_videos/' + videoFilename); 
+                    await fs.access('./backend/media/cast_videos/' + videoFilename);
                     await fs.unlink('./backend/media/cast_videos/' + videoFilename);
                 } catch (videoErr) {
                     if (videoErr.code !== 'ENOENT') {
-                    console.error('Error deleting video file:', videoErr);
-                    videoDeleteError = true;
+                        console.error('Error deleting video file:', videoErr);
+                        videoDeleteError = true;
                     } else {
-                    console.log('Video file not found, skipping deletion:', videoFilename);
+                        console.log('Video file not found, skipping deletion:', videoFilename);
                     }
                 }
             }
         }
-  
-        // 3) Delete associated image file if it exists
+
+        // 4) Delete the associated image file if it exists
         let imageDeleteError = false;
         if (cast.castimageurl) {
             const imageFilename = cast.castimageurl.split('/media/cast_images/')[1];
             if (imageFilename) {
                 try {
-                    await fs.access('./backend/media/cast_images/' + imageFilename); 
+                    await fs.access('./backend/media/cast_images/' + imageFilename);
                     await fs.unlink('./backend/media/cast_images/' + imageFilename);
                 } catch (imageErr) {
                     if (imageErr.code !== 'ENOENT') {
@@ -270,30 +271,50 @@ exports.deleteOneCast = async (req, res, next) => {
                 }
             }
         }
-  
-      // 4) Delete the Cast document
-    await Cast.deleteOne({ _id: cast._id });
-  
-      // 5) Remove topic association from DB
+
+        // 5) Delete the associated subtitle file if it exists
+        let subtitleDeleteError = false;
+        if (cast.subtitleurl) {
+            // e.g. "https://api.brightmindsresearch.com/backend/media/cast_subtitles/CAST_ID.srt"
+            const subtitleFilename = cast.subtitleurl.split('/media/cast_subtitles/')[1];
+            if (subtitleFilename) {
+                try {
+                    await fs.access('./backend/media/cast_subtitles/' + subtitleFilename);
+                    await fs.unlink('./backend/media/cast_subtitles/' + subtitleFilename);
+                } catch (subtitleErr) {
+                    if (subtitleErr.code !== 'ENOENT') {
+                        console.error('Error deleting subtitle file:', subtitleErr);
+                        subtitleDeleteError = true;
+                    } else {
+                        console.log('Subtitle file not found, skipping deletion:', subtitleFilename);
+                    }
+                }
+            }
+        }
+
+        // 6) Delete the Cast document from DB
+        await Cast.deleteOne({ _id: cast._id });
+
+        // 7) Remove topic association from DB
         const topicResult = await removeExistingTopic({
             name: cast.topic,
             departmentName: cast.department,
             contentId: cast._id,
             contentType: 'cast',
         });
-    
+
         let responseMessage = 'Cast deleted successfully.';
-        if (videoDeleteError || imageDeleteError) {
+        if (videoDeleteError || imageDeleteError || subtitleDeleteError) {
             responseMessage += ' However, there was an error removing media files.';
         }
         responseMessage += ` ${topicResult.message}`;
-    
+
         res.status(200).json({ message: responseMessage });
-        } catch (error) {
+    } catch (error) {
         console.error('Error deleting cast:', error);
         res.status(500).json({ error: 'Error deleting cast.' });
-        }
-  };  
+    }
+};  
 
 
 exports.getAllNewCast = (req, res, next) => {

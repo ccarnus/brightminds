@@ -1,40 +1,52 @@
 // queues/castQueue.js
-const Queue = require('bull');
-const generateEvaluation = require('../backend/generate_question');
-const generateCastImage = require('../backend/generate_cast_image');
-const Cast = require('../models/cast_model');
-const transcribeVideo = require('../backend/transcription');
-
-const castQueue = new Queue('castQueue');
+const fs = require('fs').promises;
+const path = require('path');
 
 castQueue.process(async (job, done) => {
-    const { castId, videoFilePath, url } = job.data;
+  const { castId, videoFilePath, url } = job.data;
+  try {
+    // 1. Transcribe the video (one call)
+    const { text: fullTranscript, srt: srtContent } = await transcribeVideo(videoFilePath);
 
-    try {
-        // 1. Transcribe the video
-        const transcript = await transcribeVideo(videoFilePath);
+    // 2. Save the SRT file to your server
+    const subtitlesDir = path.join(__dirname, '../backend/media/cast_subtitles');
+    await fs.mkdir(subtitlesDir, { recursive: true }); // ensure directory
+    const srtFilename = `${castId}.srt`;
+    const srtFilePath = path.join(subtitlesDir, srtFilename);
 
-        // 2. Update the cast description with the transcript
-        await Cast.findByIdAndUpdate(castId, {
-            description: transcript
-        }, { new: true });
+    await fs.writeFile(srtFilePath, srtContent, 'utf8');
 
-        // 3. Generate evaluation and image based on the transcript
-        const evaluation = await generateEvaluation(transcript);
-        const imagePath = await generateCastImage(transcript);
-        const castImageURL = url + imagePath.replace(/^.*\/backend/, '/backend');
+    // 3. Update the cast's "description" with the transcript text
+    //    and store the subtitle URL
+    const castSubtitleURL = url + '/backend/media/cast_subtitles/' + srtFilename;
 
-        // 4. Update the cast with evaluation and image
-        await Cast.findByIdAndUpdate(castId, {
-            evaluation: evaluation,
-            castimageurl: castImageURL
-        }, { new: true });
+    let cast = await Cast.findByIdAndUpdate(
+      castId,
+      {
+        description: fullTranscript,
+        subtitleurl: castSubtitleURL // <-- new field in your model
+      },
+      { new: true }
+    );
 
-        done();
-    } catch (error) {
-        console.error('Error processing cast in queue:', error);
-        done(error);
-    }
+    // 4. Generate evaluation and image using the same transcript
+    const evaluation = await generateEvaluation(fullTranscript);
+    const imagePath = await generateCastImage(fullTranscript);
+    const castImageURL = url + imagePath.replace(/^.*\/backend/, '/backend');
+
+    // 5. Update the cast with evaluation and image
+    cast = await Cast.findByIdAndUpdate(
+      castId,
+      {
+        evaluation,
+        castimageurl: castImageURL
+      },
+      { new: true }
+    );
+
+    done();
+  } catch (error) {
+    console.error('Error processing cast in queue:', error);
+    done(error);
+  }
 });
-
-module.exports = castQueue;
