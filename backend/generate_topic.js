@@ -1,16 +1,15 @@
 const axios = require('axios');
 const openai = require('openai');
 const departments_ids = require('../lists/departments_ids');
-
 const client = new openai({
   apiKey: process.env.OPENAI_API_KEY,
 });
-
+ 
 function getFieldId(departmentName) {
   const mapping = departments_ids.find(d => d.display_name === departmentName);
   return mapping ? mapping.id : null;
 }
-
+ 
 async function fetchAllOpenAlexTopics(fieldId) {
   let topics = [];
   let page = 1;
@@ -21,10 +20,7 @@ async function fetchAllOpenAlexTopics(fieldId) {
     const results = response.data.results;
     if (results && results.length > 0) {
       topics = topics.concat(results);
-      // If fewer than perPage topics were returned, we've reached the last page
-      if (results.length < perPage) {
-        break;
-      }
+      if (results.length < perPage) break;
       page++;
     } else {
       break;
@@ -32,18 +28,16 @@ async function fetchAllOpenAlexTopics(fieldId) {
   }
   return topics;
 }
-
+ 
 /**
- * Uses GPT-4 to choose the best matching topic from the provided list based on the cast description.
- * The prompt instructs GPT-4 to respond with only the topic name.
+ * Uses GPT-4 to choose the best matching topic from the provided list based on the description.
+ * The prompt is adapted based on the content type (cast or article).
  */
-async function determineBestTopic(description, topics) {
-  const topicsText = topics
-    .map((topic) => topic.display_name)
-    .join('\n');
-
-  const prompt = `I have a cast with the following description:\n\n"${description}"\n\nHere is a list of topics from the field (one per line). Based on the description, which one of these topics best matches the cast? Respond with only the topic name exactly as it appears in the list, without any numbering or extra characters.\n\nTopics:\n${topicsText}`;
-
+async function determineBestTopic(description, topics, contentType) {
+  const contentText = contentType === 'article' ? "article" : "cast";
+  const topicsText = topics.map(topic => topic.display_name).join('\n');
+  const prompt = `I have a ${contentText} with the following description:\n\n"${description}"\n\nHere is a list of topics from the field (one per line). Based on the description, which one of these topics best matches the ${contentText}? Respond with only the topic name exactly as it appears in the list, without any numbering or extra characters.\n\nTopics:\n${topicsText}`;
+ 
   const response = await client.chat.completions.create({
     model: 'gpt-4',
     messages: [
@@ -53,60 +47,60 @@ async function determineBestTopic(description, topics) {
     max_tokens: 50,
     temperature: 0.3,
   });
-
-  // Get and clean the GPT-4 answer: remove any leading numbering if present.
+ 
   const bestTopicNameRaw = response.choices[0].message.content.trim();
   const bestTopicName = bestTopicNameRaw.replace(/^\d+\.\s*/, '');
   return bestTopicName;
 }
-
+ 
 /**
- * Main function: Given a cast object (with description and department),
- * this function fetches topics from OpenAlex, uses GPT-4 to determine the best match,
- * updates the cast object's topic field, and ensures the topic document exists.
+ * A helper function that takes a content object (cast or article) and its type,
+ * then uses GPT-4 (and the OpenAlex API) to determine the best topic,
+ * updates the object’s topic field, and ensures a Topic document exists.
  */
-async function generateTopicForCast(cast) {
+async function generateTopicForContent(content, contentType) {
   try {
-    // 1. Get the field id for the cast's department.
-    const fieldId = getFieldId(cast.department);
+    // 1. Get the field id from the department.
+    const fieldId = getFieldId(content.department);
     if (!fieldId) {
-      throw new Error(`No field id found for department ${cast.department}`);
+      throw new Error(`No field id found for department ${content.department}`);
     }
-
+ 
     // 2. Fetch all topics from OpenAlex for this field.
     const openAlexTopics = await fetchAllOpenAlexTopics(fieldId);
     if (openAlexTopics.length === 0) {
       throw new Error('No topics returned from OpenAlex.');
     }
-
+ 
     // 3. Use GPT-4 to determine the best matching topic.
-    const bestTopicName = await determineBestTopic(cast.description, openAlexTopics);
-    console.log(`For cast "${cast.title}" the best matching topic is: ${bestTopicName}`);
-
-    // 4. Update the cast with the new topic.
-    cast.topic = bestTopicName;
-    await cast.save();
-    console.log(`Cast "${cast.title}" updated with topic: ${bestTopicName}`);
-
-    // 5. Ensure the topic document exists or is updated.
+    const bestTopicName = await determineBestTopic(content.description, openAlexTopics, contentType);
+    console.log(`For ${contentType} "${content.title}" the best matching topic is: ${bestTopicName}`);
+ 
+    // 4. Update the content object with the new topic.
+    content.topic = bestTopicName;
+    await content.save();
+    console.log(`${contentType} "${content.title}" updated with topic: ${bestTopicName}`);
+ 
+    // 5. Ensure the Topic document exists (or is updated) using your topic controller.
     const topicController = require('../controllers/topic_controller.js');
     const topicResult = await topicController.createTopicIfNotExist({
       name: bestTopicName,
-      departmentName: cast.department,
-      contentId: cast._id,
-      contentType: 'cast'
+      departmentName: content.department,
+      contentId: content._id,
+      contentType: contentType
     });
     console.log(topicResult.message);
-
+ 
     return bestTopicName;
   } catch (error) {
-    console.error('Error generating topic for cast:', error);
+    console.error(`Error generating topic for ${contentType}:`, error);
     return null;
   }
 }
-
+ 
 module.exports = {
-  generateTopicForCast,
+  generateTopicForCast: async (cast) => generateTopicForContent(cast, 'cast'),
+  generateTopicForArticle: async (article) => generateTopicForContent(article, 'article'),
   fetchAllOpenAlexTopics,
   determineBestTopic,
   getFieldId
