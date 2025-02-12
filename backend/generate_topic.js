@@ -68,6 +68,8 @@ async function generateTopicForContent(content, contentType) {
  
     // 2. Fetch all topics from OpenAlex for this field.
     const openAlexTopics = await fetchAllOpenAlexTopics(fieldId);
+    console.log(`Fetched ${openAlexTopics.length} topics from OpenAlex.`);
+    
     if (openAlexTopics.length === 0) {
       throw new Error('No topics returned from OpenAlex.');
     }

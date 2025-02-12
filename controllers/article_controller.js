@@ -44,7 +44,7 @@ exports.createArticle = async (req, res, next) => {
         }
         const articleImageURL = url + imagePath.replace(/^.*\/backend/, '/backend');
 
-        // Compute duration if it was NOT provided by client
+        // Compute duration if not provided
         let durationToUse;
         if (typeof req.body.duration === 'number') {
             durationToUse = req.body.duration;
@@ -52,43 +52,54 @@ exports.createArticle = async (req, res, next) => {
             durationToUse = computeDuration(req.body.articleDescription);
         }
 
+        // Determine if a topic was provided; if not, use a placeholder.
+        const topicProvided = req.body.topic && req.body.topic.trim().length > 0;
+        const topicValue = topicProvided ? req.body.topic : "Pending Topic";
+
         const article = new Article({
             ...req.body,
             articleimageurl: articleImageURL,
             evaluation,
-            duration: durationToUse  // Use our computed or provided duration
+            duration: durationToUse,
+            topic: topicValue
         });
 
-        // If dateadded is provided, override the default
         if (req.body.dateadded) {
             article.dateadded = new Date(req.body.dateadded);
         }
 
         await article.save();
 
-        // Call createTopicIfNotExist
-        const topicResult = await createTopicIfNotExist({
-            name: req.body.topic,
-            departmentName: req.body.department,
-            contentId: article._id,
-            contentType: 'article',
-        });
-
-        // Console log for debugging (optional)
-        if (topicResult.status === 201) {
+        // If a topic was provided, create/update the Topic document immediately.
+        if (topicProvided) {
+            const topicResult = await createTopicIfNotExist({
+                name: req.body.topic,
+                departmentName: req.body.department,
+                contentId: article._id,
+                contentType: 'article',
+            });
             console.log(topicResult.message);
-        } else if (topicResult.status === 200) {
-            console.log(topicResult.message);
+        } else {
+            console.log("No topic provided. Topic will be generated asynchronously.");
         }
 
-        // Add article ID to the user's articlePublications
+        // Add article ID to the user's articlePublications.
         const user = await User.findById(req.body.brightmindid);
         if (user) {
             user.articlePublications.push(article._id);
             await user.save();
         }
 
-        res.status(201).json({ response: 'Article created and topic updated.' });
+        // Enqueue a job for background processing to generate the topic if needed.
+        if (!topicProvided) {
+            const articleQueue = require('../queues/ArticleQueue');
+            articleQueue.add({
+                articleId: article._id,
+                generateTopic: true
+            });
+        }
+
+        res.status(201).json({ response: 'Article created and topic updated (or pending generation).' });
     } catch (error) {
         console.error('Error creating article:', error);
         res.status(500).json({ error: 'Internal server error' });
