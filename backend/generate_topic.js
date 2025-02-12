@@ -1,8 +1,6 @@
 const axios = require('axios');
 const openai = require('openai');
 const departments_ids = require('../lists/departments_ids');
-const Topic = require('../models/topic_model.js');
-const Cast = require('../models/cast_model.js');
 
 const client = new openai({
   apiKey: process.env.OPENAI_API_KEY,
@@ -37,14 +35,14 @@ async function fetchAllOpenAlexTopics(fieldId) {
 
 /**
  * Uses GPT-4 to choose the best matching topic from the provided list based on the cast description.
- * The prompt instructs GPT-4 to respond with exactly the topic name as it appears in the list.
+ * The prompt instructs GPT-4 to respond with only the topic name.
  */
 async function determineBestTopic(description, topics) {
   const topicsText = topics
-    .map((topic, index) => `${index + 1}. ${topic.display_name}`)
+    .map((topic) => topic.display_name)
     .join('\n');
 
-  const prompt = `I have a cast with the following description:\n\n"${description}"\n\nHere is a list of topics from the field. Based on the description, which one of these topics best matches the cast? Respond with only the topic name exactly as it appears in the list.\n\nTopics:\n${topicsText}`;
+  const prompt = `I have a cast with the following description:\n\n"${description}"\n\nHere is a list of topics from the field (one per line). Based on the description, which one of these topics best matches the cast? Respond with only the topic name exactly as it appears in the list, without any numbering or extra characters.\n\nTopics:\n${topicsText}`;
 
   const response = await client.chat.completions.create({
     model: 'gpt-4',
@@ -56,8 +54,9 @@ async function determineBestTopic(description, topics) {
     temperature: 0.3,
   });
 
-  // Expect the GPT-4 answer to be just the topic name.
-  const bestTopicName = response.choices[0].message.content.trim();
+  // Get and clean the GPT-4 answer: remove any leading numbering if present.
+  const bestTopicNameRaw = response.choices[0].message.content.trim();
+  const bestTopicName = bestTopicNameRaw.replace(/^\d+\.\s*/, '');
   return bestTopicName;
 }
 
