@@ -92,7 +92,7 @@ exports.createArticle = async (req, res, next) => {
 
         // Enqueue a job for background processing to generate the topic if needed.
         if (!topicProvided) {
-            const articleQueue = require('../queues/ArticleQueue');
+            const articleQueue = require('../queues/articleQueue.js');
             articleQueue.add({
                 articleId: article._id,
                 generateTopic: true
