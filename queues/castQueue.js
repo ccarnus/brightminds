@@ -4,6 +4,7 @@ const path = require('path');
 
 const generateEvaluation = require('../backend/generate_question');
 const generateCastImage = require('../backend/generate_cast_image');
+const { generateTopicForCast } = require('../backend/generate_topic');
 const Cast = require('../models/cast_model');
 const transcribeVideo = require('../backend/transcription');
 
@@ -12,7 +13,8 @@ const castQueue = new Queue('castQueue');
 
 // 2. Process jobs:
 castQueue.process(async (job, done) => {
-  const { castId, videoFilePath, url } = job.data;
+  // Extract job data including generateTopic flag.
+  const { castId, videoFilePath, url, generateTopic } = job.data;
 
   try {
     // A. Transcribe the video (one call returns text + srt)
@@ -20,10 +22,9 @@ castQueue.process(async (job, done) => {
 
     // B. Save the SRT file to your server
     const subtitlesDir = path.join(__dirname, '../backend/media/cast_subtitles');
-    await fs.mkdir(subtitlesDir, { recursive: true }); // ensure directory
+    await fs.mkdir(subtitlesDir, { recursive: true }); // ensure directory exists
     const srtFilename = `${castId}.srt`;
     const srtFilePath = path.join(subtitlesDir, srtFilename);
-
     await fs.writeFile(srtFilePath, srtContent, 'utf8');
 
     // C. Build the subtitle URL for serving
@@ -39,12 +40,17 @@ castQueue.process(async (job, done) => {
       { new: true }
     );
 
-    // E. Generate evaluation and image using the same transcript
+    // E. If the job indicates that a topic should be generated, call generateTopicForCast.
+    if (generateTopic) {
+      await generateTopicForCast(cast);
+    }
+
+    // F. Generate evaluation and image using the same transcript
     const evaluation = await generateEvaluation(fullTranscript);
     const imagePath = await generateCastImage(fullTranscript);
     const castImageURL = url + imagePath.replace(/^.*\/backend/, '/backend');
 
-    // F. Update the cast with evaluation and image
+    // G. Update the cast with evaluation and image information
     cast = await Cast.findByIdAndUpdate(
       castId,
       {

@@ -11,81 +11,88 @@ const isValidDepartment = (department) => departments.includes(department);
 
 exports.createCast = async (req, res, next) => {
     try {
-        const url = 'https://api.brightmindsresearch.com';
-        req.body.cast = JSON.parse(req.body.cast);
-
-        // Validate the department
-        if (!isValidDepartment(req.body.cast.department)) {
-            return res.status(400).json({ error: 'Invalid department' });
-        }
-
-        // Check if the title exceeds 65 characters
-        if (req.body.cast.title && req.body.cast.title.length > 65) {
-            return res.status(400).json({ error: 'Title must be 65 characters or less' });
-        }  
-
-        // Use the utility function to get the video duration
-        const videoFilePath = './backend/media/cast_videos/' + req.file.filename;
-        const duration = await getVideoDurationInSeconds(videoFilePath);
-
-        // Create the new cast
-        const cast = new Cast({
-            title: req.body.cast.title,
-            description: "", // Will be filled after transcription in the queue
-            department: req.body.cast.department,
-            brightmindid: req.body.cast.brightmindid,
-            casturl: url + '/backend/media/cast_videos/' + req.file.filename,
-            castimageurl: '', // Placeholder for now
-            category: req.body.cast.category,
-            university: req.body.cast.university,
-            visibility: req.body.cast.visibility,
-            link: req.body.cast.link,
-            evaluation: '', // Placeholder for now
-            duration: duration,
-            topic: req.body.cast.topic,
-        });
-
-        if (req.body.cast.dateadded) {
-            cast.dateadded = new Date(req.body.cast.dateadded);
-          }
-
-        await cast.save();
-
-        // Call createTopicIfNotExist with the required fields
+      const url = 'https://api.brightmindsresearch.com';
+      req.body.cast = JSON.parse(req.body.cast);
+  
+      // Validate the department
+      if (!isValidDepartment(req.body.cast.department)) {
+        return res.status(400).json({ error: 'Invalid department' });
+      }
+  
+      // Check if the title exceeds 65 characters
+      if (req.body.cast.title && req.body.cast.title.length > 65) {
+        return res.status(400).json({ error: 'Title must be 65 characters or less' });
+      }
+  
+      // Use the utility function to get the video duration
+      const videoFilePath = './backend/media/cast_videos/' + req.file.filename;
+      const duration = await getVideoDurationInSeconds(videoFilePath);
+  
+      // Check if a topic was provided. If not, use a placeholder.
+      const topicProvided =
+        req.body.cast.topic && req.body.cast.topic.trim().length > 0;
+      const topicValue = topicProvided ? req.body.cast.topic : "Pending Topic";
+  
+      // Create the new cast
+      const cast = new Cast({
+        title: req.body.cast.title,
+        description: "", // Will be filled after transcription in the queue
+        department: req.body.cast.department,
+        brightmindid: req.body.cast.brightmindid,
+        casturl: url + '/backend/media/cast_videos/' + req.file.filename,
+        castimageurl: '', // Placeholder for now
+        category: req.body.cast.category,
+        university: req.body.cast.university,
+        visibility: req.body.cast.visibility,
+        link: req.body.cast.link,
+        evaluation: '', // Placeholder for now
+        duration: duration,
+        topic: topicValue,
+      });
+  
+      if (req.body.cast.dateadded) {
+        cast.dateadded = new Date(req.body.cast.dateadded);
+      }
+  
+      await cast.save();
+  
+      // If a topic was provided, immediately create/update the topic document.
+      if (topicProvided) {
         const topicResult = await createTopicIfNotExist({
-        name: req.body.cast.topic,
-        departmentName: req.body.cast.department,
-        contentId: cast._id,
-        contentType: 'cast',
+          name: req.body.cast.topic,
+          departmentName: req.body.cast.department,
+          contentId: cast._id,
+          contentType: 'cast',
         });
-
-        // Send topicResult status and message
-        if (topicResult.status === 201) {
-            console.log(topicResult.message);
-        } else if (topicResult.status === 200) {
-            console.log(topicResult.message);
-        }
-
-        // Add cast ID to the user's castPublications
-        const user = await User.findById(req.body.cast.brightmindid);
-        if (user) {
-            user.castPublications.push(cast._id);
-            await user.save();
-        }
-
-        // Add job to the queue for background processing
-        castQueue.add({
-            castId: cast._id,
-            videoFilePath: videoFilePath,
-            url: url
-        });
-
-        res.status(201).json({ response: 'Cast created and topic updated.' });
+        console.log(topicResult.message);
+      } else {
+        console.log("No topic provided. Will generate topic asynchronously.");
+      }
+  
+      // Add cast ID to the user's castPublications
+      const user = await User.findById(req.body.cast.brightmindid);
+      if (user) {
+        user.castPublications.push(cast._id);
+        await user.save();
+      }
+  
+      // Add a job to the queue for background processing.
+      // Pass along a flag indicating whether a topic needs to be generated.
+      castQueue.add({
+        castId: cast._id,
+        videoFilePath: videoFilePath,
+        url: url,
+        generateTopic: !topicProvided, // true if topic was not provided
+      });
+  
+      res.status(201).json({
+        response: 'Cast created successfully. Background processing initiated.',
+      });
     } catch (error) {
-        console.error('Error creating cast:', error);
-        res.status(500).json({ error: 'Internal server error' });
+      console.error('Error creating cast:', error);
+      res.status(500).json({ error: 'Internal server error' });
     }
-};
+  };
 
 
 exports.getAllCast = (req, res, next) => {
