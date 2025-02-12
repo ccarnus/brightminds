@@ -4,7 +4,7 @@ const articleSchema = mongoose.Schema({
     title: { type: String, required: true },
     department: { type: String, required: true },
     brightmindid: { type: String, required: true},
-    articleDescription: { type: String, required: true },
+    description: { type: String, required: true },
     articleimageurl: { type: String, required: true },
     university: { type: String, required: true },
     category: { type: String, required: true },

@@ -28,7 +28,7 @@ exports.createArticle = async (req, res, next) => {
         }
 
         // Generate the evaluation
-        const evaluation = await generateEvaluation(req.body.articleDescription);
+        const evaluation = await generateEvaluation(req.body.description);
         if (!evaluation) {
             return res.status(400).json({
                 error: 'Failed to generate evaluation'
@@ -36,7 +36,7 @@ exports.createArticle = async (req, res, next) => {
         }
 
         // Generate the article image
-        const imagePath = await generateArticleImage(req.body.articleDescription);
+        const imagePath = await generateArticleImage(req.body.description);
         if (!imagePath) {
             return res.status(400).json({
                 error: 'Failed to generate article image'
@@ -49,7 +49,7 @@ exports.createArticle = async (req, res, next) => {
         if (typeof req.body.duration === 'number') {
             durationToUse = req.body.duration;
         } else {
-            durationToUse = computeDuration(req.body.articleDescription);
+            durationToUse = computeDuration(req.body.description);
         }
 
         // Determine if a topic was provided; if not, use a placeholder.
