@@ -3,6 +3,7 @@ const Topic = require('../models/topic_model.js');
 exports.createTopicIfNotExist = async ({
     name, 
     departmentName, 
+    openalexID, 
     contentId, 
     contentType // 'article' or 'cast'
   }) => {
@@ -14,7 +15,8 @@ exports.createTopicIfNotExist = async ({
       if (!topic) {
         const newTopicData = {
           name,
-          departmentName
+          departmentName,
+          openalexID  // Save the OpenAlex ID (may be null if not available)
         };
   
         // Depending on what contentType is, initialize
@@ -32,7 +34,12 @@ exports.createTopicIfNotExist = async ({
         return { message: 'Topic created successfully.', topic, status: 201 };
       }
   
-      // 3) If topic DOES exist, update the correct array/counter
+      // 3) If topic DOES exist, update the openalexID if not already set
+      if (!topic.openalexID && openalexID) {
+        topic.openalexID = openalexID;
+      }
+  
+      // 4) Update the correct content array/counter
       if (contentType === 'article') {
         // Only add if not already present
         if (!topic.articleIDs.some(id => id.equals(contentId))) {
@@ -40,7 +47,7 @@ exports.createTopicIfNotExist = async ({
           topic.articleCount += 1;
         }
       } else {
-        // Cast
+        // For cast content
         if (!topic.castIDs.some(id => id.equals(contentId))) {
           topic.castIDs.push(contentId);
           topic.castCount += 1;
@@ -117,11 +124,11 @@ exports.removeExistingTopic = async ({
         if (newLength < originalLength) {
           topic.articleCount -= (originalLength - newLength);
           if (topic.articleCount < 0) {
-            topic.articleCount = 0; // just a safeguard
+            topic.articleCount = 0; // safeguard
           }
         }
       } else {
-        // It's a cast
+        // For cast content
         const originalLength = topic.castIDs.length;
         topic.castIDs = topic.castIDs.filter(id => !id.equals(contentId));
         const newLength = topic.castIDs.length;

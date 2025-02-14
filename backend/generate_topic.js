@@ -78,16 +78,28 @@ async function generateTopicForContent(content, contentType) {
     const bestTopicName = await determineBestTopic(content.description, openAlexTopics, contentType);
     console.log(`For ${contentType} "${content.title}" the best matching topic is: ${bestTopicName}`);
  
-    // 4. Update the content object with the new topic.
+    // 4. Find the matching topic object from OpenAlex topics to extract openalexID.
+    const matchedTopic = openAlexTopics.find(topic => topic.display_name === bestTopicName);
+    let openalexID = null;
+    if (matchedTopic && matchedTopic.id) {
+      // Remove the OpenAlex URL prefix to obtain just the ID (e.g., "T13275").
+      openalexID = matchedTopic.id.replace('https://openalex.org/', '');
+      console.log(`Extracted openalexID: ${openalexID}`);
+    } else {
+      console.warn(`No matching OpenAlex topic found for ${bestTopicName}`);
+    }
+ 
+    // 5. Update the content object with the new topic.
     content.topic = bestTopicName;
     await content.save();
     console.log(`${contentType} "${content.title}" updated with topic: ${bestTopicName}`);
  
-    // 5. Ensure the Topic document exists (or is updated) using your topic controller.
+    // 6. Ensure the Topic document exists (or is updated) using your topic controller.
     const topicController = require('../controllers/topic_controller.js');
     const topicResult = await topicController.createTopicIfNotExist({
       name: bestTopicName,
       departmentName: content.department,
+      openalexID,
       contentId: content._id,
       contentType: contentType
     });
