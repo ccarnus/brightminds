@@ -1,4 +1,5 @@
 const Topic = require('../models/topic_model.js');
+const topicIndicatorComputor = require('../backend/topic_indicator_computor.js');
 
 exports.createTopicIfNotExist = async ({
     name, 
@@ -30,6 +31,7 @@ exports.createTopicIfNotExist = async ({
   
         topic = new Topic(newTopicData);
         await topic.save();
+        topicIndicatorComputor.computeImpactForTopic(topic);
   
         return { message: 'Topic created successfully.', topic, status: 201 };
       }
