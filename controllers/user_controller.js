@@ -32,6 +32,9 @@ const getTargetValue = (objective) => {
 
 exports.signup = async (req, res, next) => {
     req.body.user = JSON.parse(req.body.user);
+
+    // Normalize the email to lowercase
+    req.body.user.email = req.body.user.email.toLowerCase();
     
     // Validate email domain
     if (!emailVerificator(req.body.user.email)) {
