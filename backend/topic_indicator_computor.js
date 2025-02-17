@@ -22,33 +22,63 @@ const SERP_API_KEY = 'e907eabcbaaa6d56cc12ebc3b9d1551dc0f900c1d2370d407c4a74757f
 const SERP_BASE_URL = 'https://serpapi.com/search';
 
 /**
- * Computes and updates the impact value for a single topic.
- * It makes a GET request to the SERP API using the topic name as the query.
- * The returned total_results value is then saved to the topic's impact field.
+ * Computes and updates the impact and activity for a single topic.
+ * It makes a GET request to the SERP API using the topic name as the query to obtain total_results.
+ * If topic.openalexID is available, it makes a GET request to OpenAlex to get cited_by_count and works_count.
+ * Then it computes:
+ *   impact = (cited_by_count * 0.0001) + (total_results * 0.000001)
+ *   activity = cited_by_count * 0.001
  *
  * @param {Object} topic - A Mongoose Topic document.
  * @returns {Promise<Object>} The updated topic document.
  */
 async function computeImpactForTopic(topic) {
   try {
+    // 1. SERP API call to get total_results
     const query = encodeURIComponent(topic.name);
-    const url = `${SERP_BASE_URL}?q=${query}&api_key=${SERP_API_KEY}`;
+    const serpUrl = `${SERP_BASE_URL}?q=${query}&api_key=${SERP_API_KEY}`;
+    const serpResponse = await axios.get(serpUrl);
 
-    const response = await axios.get(url);
+    let totalResults = 0;
     if (
-      response.data &&
-      response.data.search_information &&
-      typeof response.data.search_information.total_results !== 'undefined'
+      serpResponse.data &&
+      serpResponse.data.search_information &&
+      typeof serpResponse.data.search_information.total_results !== 'undefined'
     ) {
-      // Update the topic impact using the total_results number
-      topic.impact = response.data.search_information.total_results;
-      await topic.save();
-      console.log(`Updated impact for topic "${topic.name}" to ${topic.impact}`);
-      return topic;
+      totalResults = serpResponse.data.search_information.total_results;
     } else {
-      console.error(`Invalid response structure for topic "${topic.name}".`);
-      return null;
+      console.error(`Invalid SERP API response structure for topic "${topic.name}".`);
     }
+
+    // 2. OpenAlex API call (if openalexID is present) to get cited_by_count and works_count
+    let citedByCount = 0;
+    if (topic.openalexID) {
+      const openAlexUrl = `https://api.openalex.org/topics/${topic.openalexID}`;
+      try {
+        const openAlexResponse = await axios.get(openAlexUrl);
+        if (openAlexResponse.data) {
+          citedByCount = openAlexResponse.data.cited_by_count || 0;
+          // works_count is returned but not directly used for computation, aside from activity if needed.
+          // For activity, we use cited_by_count * 0.001 per your specification.
+        }
+      } catch (error) {
+        console.error(`Error fetching OpenAlex data for topic "${topic.name}" with ID ${topic.openalexID}:`, error.message);
+      }
+    } else {
+      console.warn(`No openalexID for topic "${topic.name}". Only using SERP total_results for impact calculation.`);
+    }
+
+    // 3. Compute impact and activity
+    const impact = (citedByCount * 0.0001) + (totalResults * 0.000001);
+    const activity = citedByCount * 0.001;
+
+    // 4. Update the topic document
+    topic.impact = impact;
+    topic.activity = activity;
+    await topic.save();
+
+    console.log(`Updated topic "${topic.name}": impact = ${topic.impact}, activity = ${topic.activity}`);
+    return topic;
   } catch (error) {
     console.error(`Error computing impact for topic "${topic.name}":`, error.message);
     return null;
@@ -85,11 +115,8 @@ function scheduleWeeklyImpactUpdate() {
   console.log("Weekly impact update scheduled for every Monday at midnight.");
 }
 
-// Export the functions so they can be triggered elsewhere (for example, during topic creation)
 module.exports = {
   computeImpactForTopic,
   computeImpactForAllTopics,
   scheduleWeeklyImpactUpdate,
 };
-
-// If this file is executed directly, the mongoose connection above will trigger the scheduling and immediate update.
