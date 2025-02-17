@@ -1,14 +1,30 @@
+// topic_indicator_computor.js
+
 const axios = require('axios');
 const cron = require('node-cron');
+const mongoose = require('mongoose');
 const Topic = require('../models/topic_model.js');
+
+// MongoDB connection
+mongoose.connect('mongodb+srv://ccarnus:totodu30@cast.xwxgb0o.mongodb.net/?retryWrites=true&w=majority')
+  .then(() => {
+    console.log('Successfully connected to MongoDB Atlas for topic indicator computor!');
+    // Once connected, schedule the job and/or run an immediate update.
+    scheduleWeeklyImpactUpdate();
+    computeImpactForAllTopics();
+  })
+  .catch((error) => {
+    console.error('Unable to connect to MongoDB Atlas', error);
+  });
+
+// Your SERP API key and base URL
 const SERP_API_KEY = 'e907eabcbaaa6d56cc12ebc3b9d1551dc0f900c1d2370d407c4a74757f682641';
 const SERP_BASE_URL = 'https://serpapi.com/search';
 
 /**
  * Computes and updates the impact value for a single topic.
  * It makes a GET request to the SERP API using the topic name as the query.
- * The returned total_results value (from response.data.search_information.total_results)
- * is then saved to the topic's impact field.
+ * The returned total_results value is then saved to the topic's impact field.
  *
  * @param {Object} topic - A Mongoose Topic document.
  * @returns {Promise<Object>} The updated topic document.
@@ -76,8 +92,4 @@ module.exports = {
   scheduleWeeklyImpactUpdate,
 };
 
-// If this file is executed directly, schedule the weekly update and run an immediate update for all topics.
-if (require.main === module) {
-  scheduleWeeklyImpactUpdate();
-  computeImpactForAllTopics();
-}
+// If this file is executed directly, the mongoose connection above will trigger the scheduling and immediate update.
