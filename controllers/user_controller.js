@@ -610,16 +610,6 @@ exports.updateUserAddContentToList = async (req, res, next) => {
     const type = req.body.type;
 
     try {
-        const user = await User.findById(userId);
-        if (!user) {
-            return res.status(404).json({ message: 'User not found.' });
-        }
-
-        const existingEvaluation = user.evaluation_list.find(evaluation => evaluation.contentid === contentId);
-        if (existingEvaluation) {
-            return res.status(200).json({ message: 'Content already in the evaluation list.' });
-        }
-
         // Determine the category of the content
         let category;
         if (type === 'cast') {
@@ -638,27 +628,53 @@ exports.updateUserAddContentToList = async (req, res, next) => {
             return res.status(400).json({ message: 'Invalid content type.' });
         }
 
-        user.evaluation_list.push({
+        // Build the evaluation object you want to add.
+        const newEvaluation = {
             contentid: contentId,
             type: type,
             watched: true,
             answered: false
-        });
+        };
 
-        // Update the history field
-        const historyItem = user.tracking.history.find(item => item.category === category);
-        if (historyItem) {
-            historyItem.count += 1;
-        } else {
-            user.tracking.history.push({ category: category, count: 1 });
+        // Use $addToSet to avoid duplicate evaluation items.
+        // For history, use an update that increments the count if an entry already exists.
+        // We use arrayFilters to update the correct history element.
+        const update = {
+            $addToSet: { evaluation_list: newEvaluation },
+            $inc: { "tracking.history.$[elem].count": 1 }
+        };
+
+        const options = {
+            new: true,
+            arrayFilters: [{ "elem.category": category }]
+        };
+
+        let user = await User.findOneAndUpdate({ _id: userId, "tracking.history.category": category }, update, options);
+
+        // If no history entry exists for that category, add it.
+        if (!user) {
+            // First, add the evaluation item if not already there
+            await User.updateOne(
+                { _id: userId },
+                { $addToSet: { evaluation_list: newEvaluation } }
+            );
+
+            // Then push a new history object
+            await User.updateOne(
+                { _id: userId },
+                { $push: { "tracking.history": { category: category, count: 1 } } }
+            );
+
+            user = await User.findById(userId);
         }
 
-        await user.save();
-        res.status(200).json({ message: 'Content added to evaluation list and history updated.' });
+        return res.status(200).json({ message: 'Content added to evaluation list and history updated.' });
     } catch (error) {
-        res.status(500).json({ error: 'An error occurred.' });
+        console.error(error);
+        return res.status(500).json({ error: 'An error occurred.' });
     }
 };
+
 
 exports.updateUserRemoveContentFromList = (req, res, next) => {
     const userId = req.params.id;
