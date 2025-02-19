@@ -18,8 +18,8 @@ mongoose.connect('mongodb+srv://ccarnus:totodu30@cast.xwxgb0o.mongodb.net/?retry
   });
 
 // Your SERP API key and base URL
-const SERP_API_KEY = 'e907eabcbaaa6d56cc12ebc3b9d1551dc0f900c1d2370d407c4a74757f682641';
-const SERP_BASE_URL = 'https://serpapi.com/search';
+const SERP_API_KEY = 'V8H3EVfy67HV5XijhqPRwaFy';
+const SERP_BASE_URL = 'https://www.searchapi.io/api/v1/search';
 
 /**
  * Computes and updates the impact and activity for a single topic.
@@ -36,7 +36,7 @@ async function computeImpactForTopic(topic) {
   try {
     // 1. SERP API call to get total_results
     const query = encodeURIComponent(topic.name);
-    const serpUrl = `${SERP_BASE_URL}?q=${query}&api_key=${SERP_API_KEY}`;
+    const serpUrl = `${SERP_BASE_URL}?engine=google&q=${query}&api_key=${SERP_API_KEY}`;
     const serpResponse = await axios.get(serpUrl);
 
     let totalResults = 0;
