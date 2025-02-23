@@ -489,3 +489,14 @@ exports.getPopularDepartment = async (req, res, next) => {
         res.status(500).json({ error: 'Internal server error' });
     }
 };
+
+exports.getSimplifiedCast = (req, res, next) => {
+    Cast.find({}, '_id title')
+      .then((casts) => {
+        res.status(200).json(casts);
+      })
+      .catch((error) => {
+        res.status(400).json({ error });
+      });
+  };
+  
