@@ -13,7 +13,7 @@ router.get('/category/:id', cast_controller.getAllCastByCategory);
 router.get('/department/:id', cast_controller.getAllCastByDepartment);
 router.get("/brightmindid/:id", cast_controller.getAllCastByBrightmindid);
 router.get("/evaluation/:id",cast_controller.getEvaluationForCast);
-router.get('/simplified', cast_controller.getSimplifiedCast);
+router.get('/all/simplified', cast_controller.getSimplifiedCast);
 
 //rating
 router.get('/:id/rating', cast_controller.getCastRating);
