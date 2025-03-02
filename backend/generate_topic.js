@@ -60,41 +60,47 @@ async function determineBestTopic(description, topics, contentType) {
  */
 async function generateTopicForContent(content, contentType) {
   try {
-    // 1. Get the field id from the department.
+    // If the department is pending, determine it via AI:
+    if (!content.department || content.department === "Pending Department") {
+      const bestDepartment = await determineDepartmentForContent(content.description);
+      content.department = bestDepartment;
+      await content.save();
+      console.log(`Department for ${contentType} "${content.title}" updated to: ${bestDepartment}`);
+    }
+
+    // Now use the updated department to get the field id.
     const fieldId = getFieldId(content.department);
     if (!fieldId) {
       throw new Error(`No field id found for department ${content.department}`);
     }
- 
-    // 2. Fetch all topics from OpenAlex for this field.
+
+    // ... Continue with fetching topics and generating the best topic ...
     const openAlexTopics = await fetchAllOpenAlexTopics(fieldId);
     console.log(`Fetched ${openAlexTopics.length} topics from OpenAlex.`);
-    
+
     if (openAlexTopics.length === 0) {
       throw new Error('No topics returned from OpenAlex.');
     }
- 
-    // 3. Use GPT-4 to determine the best matching topic.
+
     const bestTopicName = await determineBestTopic(content.description, openAlexTopics, contentType);
     console.log(`For ${contentType} "${content.title}" the best matching topic is: ${bestTopicName}`);
- 
-    // 4. Find the matching topic object from OpenAlex topics to extract openalexID.
+
+    // Find matching topic to extract openalexID, etc.
     const matchedTopic = openAlexTopics.find(topic => topic.display_name === bestTopicName);
     let openalexID = null;
     if (matchedTopic && matchedTopic.id) {
-      // Remove the OpenAlex URL prefix to obtain just the ID (e.g., "T13275").
       openalexID = matchedTopic.id.replace('https://openalex.org/', '');
       console.log(`Extracted openalexID: ${openalexID}`);
     } else {
       console.warn(`No matching OpenAlex topic found for ${bestTopicName}`);
     }
- 
-    // 5. Update the content object with the new topic.
+
+    // Update the content object with the new topic.
     content.topic = bestTopicName;
     await content.save();
     console.log(`${contentType} "${content.title}" updated with topic: ${bestTopicName}`);
- 
-    // 6. Ensure the Topic document exists (or is updated) using your topic controller.
+
+    // Ensure the Topic document exists.
     const topicController = require('../controllers/topic_controller.js');
     const topicResult = await topicController.createTopicIfNotExist({
       name: bestTopicName,
@@ -104,12 +110,66 @@ async function generateTopicForContent(content, contentType) {
       contentType: contentType
     });
     console.log(topicResult.message);
- 
+
     return bestTopicName;
   } catch (error) {
     console.error(`Error generating topic for ${contentType}:`, error);
     return null;
   }
+}
+
+async function determineDepartmentForContent(description) {
+  const departments = [
+    'Medicine',
+    'SocialSciences',
+    'Engineering',
+    'ArtsandHumanities',
+    'ComputerScience',
+    'BiochemistryGeneticsandMolecularBiology',
+    'AgriculturalandBiologicalSciences',
+    'EnvironmentalScience',
+    'MaterialsScience',
+    'PhysicsandAstronomy',
+    'BusinessManagementandAccounting',
+    'HealthProfessions',
+    'EconomicsEconometricsandFinance',
+    'Psychology',
+    'Chemistry',
+    'EarthandPlanetarySciences',
+    'Neuroscience',
+    'Mathematics',
+    'ImmunologyandMicrobiology',
+    'DecisionSciences',
+    'Energy',
+    'Nursing',
+    'PharmacologyToxicologyandPharmaceutics',
+    'Dentistry',
+    'ChemicalEngineering',
+    'Veterinary'
+  ];
+
+  const prompt = `I have a cast video with the following transcript:
+  
+"${description}"
+
+Based on the content, please choose the best matching department from the list below. Respond with only the department name exactly as it appears, without any numbering or extra text.
+
+Departments:
+${departments.join('\n')}
+`;
+
+  const response = await client.chat.completions.create({
+    model: 'gpt-4',
+    messages: [
+      { role: 'system', content: 'You are an expert in categorizing academic content by department.' },
+      { role: 'user', content: prompt }
+    ],
+    max_tokens: 50,
+    temperature: 0.3,
+  });
+
+  const bestDepartment = response.choices[0].message.content.trim();
+  return bestDepartment;
 }
  
 module.exports = {

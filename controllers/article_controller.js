@@ -13,98 +13,100 @@ const isValidDepartment = (department) => departments.includes(department);
 exports.createArticle = async (req, res, next) => {
     try {
         const url = "https://api.brightmindsresearch.com";
-
-        if (!isValidDepartment(req.body.department)) {
-            return res.status(400).json({
-                error: 'Invalid department'
-            });
+  
+        // Determine if department was provided; if not, use a placeholder.
+        const departmentProvided = req.body.department && req.body.department.trim().length > 0;
+        let departmentValue;
+        if (departmentProvided) {
+            if (!isValidDepartment(req.body.department)) {
+            return res.status(400).json({ error: 'Invalid department' });
+            }
+            departmentValue = req.body.department;
+        } else {
+            departmentValue = "Pending Department";
         }
-
-        // Check if the title exceeds 65 characters
+  
+        // Check if the title exceeds 65 characters.
         if (req.body.title && req.body.title.length > 65) {
-            return res.status(400).json({
-                error: 'Title must be 65 characters or less'
-            });
+            return res.status(400).json({ error: 'Title must be 65 characters or less' });
         }
-
-        // Generate the evaluation
+  
+        // Generate the evaluation.
         const evaluation = await generateEvaluation(req.body.description);
         if (!evaluation) {
-            return res.status(400).json({
-                error: 'Failed to generate evaluation'
-            });
+            return res.status(400).json({ error: 'Failed to generate evaluation' });
         }
-
-        // Generate the article image
+  
+        // Generate the article image.
         const imagePath = await generateArticleImage(req.body.description);
         if (!imagePath) {
-            return res.status(400).json({
-                error: 'Failed to generate article image'
-            });
+            return res.status(400).json({ error: 'Failed to generate article image' });
         }
         const articleImageURL = url + imagePath.replace(/^.*\/backend/, '/backend');
-
-        // Compute duration if not provided
+    
+        // Compute duration if not provided.
         let durationToUse;
         if (typeof req.body.duration === 'number') {
             durationToUse = req.body.duration;
         } else {
             durationToUse = computeDuration(req.body.description);
         }
-
+    
         // Determine if a topic was provided; if not, use a placeholder.
         const topicProvided = req.body.topic && req.body.topic.trim().length > 0;
         const topicValue = topicProvided ? req.body.topic : "Pending Topic";
-
+    
+        // Create the new Article document with the resolved department.
         const article = new Article({
             ...req.body,
+            department: departmentValue,
             articleimageurl: articleImageURL,
             evaluation,
             duration: durationToUse,
             topic: topicValue
         });
-
+    
         if (req.body.dateadded) {
             article.dateadded = new Date(req.body.dateadded);
         }
-
+    
         await article.save();
-
-        // If a topic was provided, create/update the Topic document immediately.
+    
+        // If a topic was provided, immediately create/update the Topic document.
         if (topicProvided) {
             const topicResult = await createTopicIfNotExist({
-                name: req.body.topic,
-                departmentName: req.body.department,
-                contentId: article._id,
-                contentType: 'article',
+            name: req.body.topic,
+            departmentName: departmentValue,
+            contentId: article._id,
+            contentType: 'article',
             });
             console.log(topicResult.message);
         } else {
             console.log("No topic provided. Topic will be generated asynchronously.");
         }
-
+    
         // Add article ID to the user's articlePublications.
         const user = await User.findById(req.body.brightmindid);
         if (user) {
             user.articlePublications.push(article._id);
             await user.save();
         }
-
-        // Enqueue a job for background processing to generate the topic if needed.
+    
+        // Enqueue a job for background processing to generate the topic (and department if needed).
         if (!topicProvided) {
             const articleQueue = require('../queues/articleQueue.js');
             articleQueue.add({
-                articleId: article._id,
-                generateTopic: true
+            articleId: article._id,
+            generateTopic: true
             });
         }
-
+    
         res.status(201).json({ response: 'Article created and topic updated (or pending generation).' });
-    } catch (error) {
+        } catch (error) {
         console.error('Error creating article:', error);
         res.status(500).json({ error: 'Internal server error' });
-    }
-};
+        }
+  };  
 
 exports.getAllArticle = (req, res, next) => {
     Article.find().sort({ _id: 1 }).then(

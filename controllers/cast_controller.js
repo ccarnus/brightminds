@@ -14,38 +14,44 @@ exports.createCast = async (req, res, next) => {
       const url = 'https://api.brightmindsresearch.com';
       req.body.cast = JSON.parse(req.body.cast);
   
-      // Validate the department
-      if (!isValidDepartment(req.body.cast.department)) {
-        return res.status(400).json({ error: 'Invalid department' });
+      // Determine if department was provided. If not, assign a placeholder.
+      const departmentProvided = req.body.cast.department && req.body.cast.department.trim().length > 0;
+      let departmentValue;
+      if (departmentProvided) {
+        if (!isValidDepartment(req.body.cast.department)) {
+          return res.status(400).json({ error: 'Invalid department' });
+        }
+        departmentValue = req.body.cast.department;
+      } else {
+        departmentValue = "Pending Department";
       }
   
-      // Check if the title exceeds 65 characters
+      // Check if the title exceeds 65 characters.
       if (req.body.cast.title && req.body.cast.title.length > 65) {
         return res.status(400).json({ error: 'Title must be 65 characters or less' });
       }
   
-      // Use the utility function to get the video duration
+      // Get the video duration using your utility function.
       const videoFilePath = './backend/media/cast_videos/' + req.file.filename;
       const duration = await getVideoDurationInSeconds(videoFilePath);
   
       // Check if a topic was provided. If not, use a placeholder.
-      const topicProvided =
-        req.body.cast.topic && req.body.cast.topic.trim().length > 0;
+      const topicProvided = req.body.cast.topic && req.body.cast.topic.trim().length > 0;
       const topicValue = topicProvided ? req.body.cast.topic : "Pending Topic";
   
-      // Create the new cast
+      // Create the new cast document.
       const cast = new Cast({
         title: req.body.cast.title,
-        description: "", // Will be filled after transcription in the queue
-        department: req.body.cast.department,
+        description: "", // To be filled after transcription in the background.
+        department: departmentValue,
         brightmindid: req.body.cast.brightmindid,
         casturl: url + '/backend/media/cast_videos/' + req.file.filename,
-        castimageurl: '', // Placeholder for now
+        castimageurl: "", // Placeholder for now.
         category: req.body.cast.category,
         university: req.body.cast.university,
         visibility: req.body.cast.visibility,
         link: req.body.cast.link,
-        evaluation: '', // Placeholder for now
+        evaluation: "", // Placeholder for now.
         duration: duration,
         topic: topicValue,
       });
@@ -60,7 +66,7 @@ exports.createCast = async (req, res, next) => {
       if (topicProvided) {
         const topicResult = await createTopicIfNotExist({
           name: req.body.cast.topic,
-          departmentName: req.body.cast.department,
+          departmentName: departmentValue,
           contentId: cast._id,
           contentType: 'cast',
         });
@@ -69,7 +75,7 @@ exports.createCast = async (req, res, next) => {
         console.log("No topic provided. Will generate topic asynchronously.");
       }
   
-      // Add cast ID to the user's castPublications
+      // Add cast ID to the user's castPublications.
       const user = await User.findById(req.body.cast.brightmindid);
       if (user) {
         user.castPublications.push(cast._id);
@@ -77,12 +83,12 @@ exports.createCast = async (req, res, next) => {
       }
   
       // Add a job to the queue for background processing.
-      // Pass along a flag indicating whether a topic needs to be generated.
+      // The flag generateTopic is set to true if no topic was provided.
       castQueue.add({
         castId: cast._id,
         videoFilePath: videoFilePath,
         url: url,
-        generateTopic: !topicProvided, // true if topic was not provided
+        generateTopic: !topicProvided,
       });
   
       res.status(201).json({
@@ -92,7 +98,7 @@ exports.createCast = async (req, res, next) => {
       console.error('Error creating cast:', error);
       res.status(500).json({ error: 'Internal server error' });
     }
-  };
+  };  
 
 
 exports.getAllCast = (req, res, next) => {
