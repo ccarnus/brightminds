@@ -352,20 +352,6 @@ exports.getAllCastByCategory = (req, res, next) => {
     );
 }
 
-exports.getAllCastByDepartment = (req, res, next) => {
-    Cast.find({department:{$exists:true, $eq: req.params.id}}).sort({ _id: 1 }).then(
-        (casts) => {
-            res.status(200).json(casts);
-        }
-    ).catch(
-        (error) => {
-            res.status(400).json({
-                error: error
-            });
-        }
-    );
-}
-
 exports.getAllCastByBrightmindid = (req, res, next) => {
     Cast.find({brightmindid:{$exists:true, $eq: req.params.id}}).sort({ _id: 1 }).then(
         (casts) => {
@@ -463,8 +449,15 @@ exports.getCastTrending = (req, res, next) => {
 
 exports.getAllCastByDepartment = (req, res, next) => {
     const departmentId = req.params.id;
+    const topic = req.query.topic; // Read topic from query parameter
 
-    Cast.find({ department: departmentId })
+    // Build the query filter. Always filter by department, then add topic if provided.
+    let filter = { department: departmentId };
+    if (topic) {
+        filter.topic = topic;
+    }
+
+    Cast.find(filter)
         .sort({ _id: 1 })
         .then((casts) => {
             res.status(200).json(casts);
