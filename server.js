@@ -5,8 +5,8 @@ const app = require('./app');
 // HTTPS configuration
 const PORT = process.env.PORT || 443;
 const options = {
-  key: fs.readFileSync('/home/ubuntu/server.key'),
-  cert: fs.readFileSync('/home/ubuntu/server.crt'),
+  key: fs.readFileSync('/etc/letsencrypt/live/api.brightmindsresearch.com/privkey.pem'),
+  cert: fs.readFileSync('/etc/letsencrypt/live/api.brightmindsresearch.com/fullchain.pem'),
 };
 
 // Create HTTPS server
