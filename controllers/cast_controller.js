@@ -26,9 +26,9 @@ exports.createCast = async (req, res, next) => {
         departmentValue = "Pending Department";
       }
   
-      // Check if the title exceeds 65 characters.
-      if (req.body.cast.title && req.body.cast.title.length > 65) {
-        return res.status(400).json({ error: 'Title must be 65 characters or less' });
+      // Check if the title exceeds 85 characters.
+      if (req.body.cast.title && req.body.cast.title.length > 85) {
+        return res.status(400).json({ error: 'Title must be 85 characters or less' });
       }
   
       // Get the video duration using your utility function.
