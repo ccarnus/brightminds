@@ -489,13 +489,24 @@ exports.getPopularDepartment = async (req, res, next) => {
     }
 };
 
-exports.getSimplifiedCast = (req, res, next) => {
-    Cast.find({}, '_id title')
-      .then((casts) => {
-        res.status(200).json(casts);
-      })
-      .catch((error) => {
-        res.status(400).json({ error });
+exports.getSimplifiedCast = async (req, res, next) => {
+    try {
+      // 1️⃣ get total
+      const total = await Cast.countDocuments();
+  
+      // 2️⃣ get list of { _id, title }
+      const casts = await Cast
+        .find({}, '_id title')
+        .sort({ _id: 1 });
+  
+      // 3️⃣ return both
+      res.status(200).json({
+        count: total,
+        casts
       });
+    } catch (error) {
+      console.error('Error fetching simplified casts:', error);
+      res.status(400).json({ error });
+    }
   };
   

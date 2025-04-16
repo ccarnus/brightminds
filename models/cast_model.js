@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const castSchema = mongoose.Schema({
-    title: { type: String, required: true },
+    title: { type: String, required: true, unique: true, trim: true },
     description: { type: String, required: false },
     department: { type: String, required: true },
     brightmindid: { type: String, required: true },
@@ -25,5 +25,7 @@ const castSchema = mongoose.Schema({
     topic: { type: String, required: true },
     subtitleurl: { type: String, required: false },
 });
+
+castSchema.index({ title: 1 }, { unique: true });
 
 module.exports = mongoose.model('Cast', castSchema);
