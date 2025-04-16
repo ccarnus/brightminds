@@ -13,6 +13,14 @@ exports.createCast = async (req, res, next) => {
     try {
       const url = 'https://api.brightmindsresearch.com';
       req.body.cast = JSON.parse(req.body.cast);
+
+      //Check duplicate title
+      const existing = await Cast.findOne({ title: req.body.cast.title });
+        if (existing) {
+        return res
+            .status(409)
+            .json({ error: 'A cast with this title already exists.' });
+        }
   
       // Determine if department was provided. If not, assign a placeholder.
       const departmentProvided = req.body.cast.department && req.body.cast.department.trim().length > 0;
